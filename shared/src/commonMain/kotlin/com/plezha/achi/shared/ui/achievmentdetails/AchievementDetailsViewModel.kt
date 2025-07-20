@@ -2,8 +2,9 @@ package com.plezha.achi.shared.ui.achievmentdetails
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.plezha.achi.shared.data.Achievement
+import com.plezha.achi.shared.data.model.Achievement
 import com.plezha.achi.shared.data.AchievementRepository
+import com.plezha.achi.shared.data.model.AchievementStep
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,37 +23,18 @@ class AchievementDetailsViewModel(
         }
     }
 
-    fun incrementAchievementProgress() {
+    fun setStepCompleted(completedStep: AchievementStep, completed: Boolean) {
         _uiState.update {
             try {
                 val achievement = it.achievement!!
                 it.copy(
                     achievement = achievement.copy(
-                        stepsDone = achievement.stepsDone + 1
-                    )
-                )
-            } catch (e: Exception) {
-                it.copy(errorMessage = e.message ?: "Unknown error")
-            }
-        }
-    }
-
-    fun incrementStepProgress() {
-        val achievement = _uiState.value.achievement!!
-        val currentStep = achievement.steps[achievement.stepsDone]
-        _uiState.update {
-            try {
-                currentStep.progress!!
-                it.copy(
-                    achievement = achievement.copy(
-                        steps = achievement.steps.toMutableList().apply {
-                            set(
-                                achievement.stepsDone, currentStep.copy(
-                                    progress = currentStep.progress.copy(
-                                        stepsDone = currentStep.progress.stepsDone + 1
-                                    )
-                                )
-                            )
+                        steps = achievement.steps.map { step ->
+                            if (completedStep == step) {
+                                if (completed) step.asCompleted() else step.asNotStarted()
+                            } else {
+                                step
+                            }
                         }
                     )
                 )
@@ -60,12 +42,49 @@ class AchievementDetailsViewModel(
                 it.copy(errorMessage = e.message ?: "Unknown error")
             }
         }
-        if (currentStep.progress?.totalSteps?.dec() == currentStep.progress?.stepsDone) {
-            incrementAchievementProgress()
+    }
+
+    fun increaseStepProgress(updatedStep: AchievementStep) {
+        _uiState.update {
+            try {
+                val achievement = it.achievement!!
+                it.copy(
+                    achievement = achievement.copy(
+                        steps = achievement.steps.map { step ->
+                            if (updatedStep == step) step.withProgressIncreased() else step
+                        }
+                    )
+                )
+            } catch (e: Exception) {
+                it.copy(errorMessage = e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun decreaseStepProgress(updatedStep: AchievementStep) {
+        _uiState.update {
+            try {
+                val achievement = it.achievement!!
+                it.copy(
+                    achievement = achievement.copy(
+                        steps = achievement.steps.map { step ->
+                            if (updatedStep == step) step.withProgressDecreased() else step
+                        }
+                    )
+                )
+            } catch (e: Exception) {
+                it.copy(errorMessage = e.message ?: "Unknown error")
+            }
         }
     }
 
 }
+
+fun AchievementStep.withProgressIncreased() =
+    copy(progress = progress.copy(substepsDone = progress.substepsDone + 1))
+
+fun AchievementStep.withProgressDecreased() =
+    copy(progress = progress.copy(substepsDone = progress.substepsDone - 1))
 
 data class AchievementDetailsUiState(
     val loading: Boolean = false,

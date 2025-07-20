@@ -1,12 +1,12 @@
 package com.plezha.achi.shared
 
 import achi.shared.generated.resources.Res
-import achi.shared.generated.resources.ic_plus_filled_outside
-import achi.shared.generated.resources.ic_plus
-import achi.shared.generated.resources.ic_profile_filled
-import achi.shared.generated.resources.ic_profile
 import achi.shared.generated.resources.ic_cup_filled
 import achi.shared.generated.resources.ic_list
+import achi.shared.generated.resources.ic_plus
+import achi.shared.generated.resources.ic_plus_filled_outside
+import achi.shared.generated.resources.ic_profile
+import achi.shared.generated.resources.ic_profile_filled
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.fillMaxSize
@@ -82,8 +82,7 @@ private fun AchiAppNav() {
             navController = navController,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 12.dp),
+                .padding(padding),
             startDestination = topLevelRoutes[1].route,
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
@@ -175,7 +174,6 @@ private fun BottomNavigationBar(navController: NavHostController) {
 
 
         topLevelRoutes.forEach { item ->
-            println("$selectedRoute, ${item.route}")
             val isSelected =
                     selectedRoute == item.route::class.qualifiedName
             NavigationBarItem(

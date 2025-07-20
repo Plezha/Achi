@@ -2,7 +2,7 @@ package com.plezha.achi.shared.ui.achievmentlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.plezha.achi.shared.data.Achievement
+import com.plezha.achi.shared.data.model.Achievement
 import com.plezha.achi.shared.data.AchievementRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

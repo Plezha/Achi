@@ -2,6 +2,7 @@ package com.plezha.achi.shared.ui.achievmentdetails
 
 import achi.shared.generated.resources.Res
 import achi.shared.generated.resources.img
+import androidx.annotation.FloatRange
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -11,39 +12,43 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.plezha.achi.shared.data.Achievement
-import com.plezha.achi.shared.data.AchievementStep
-import com.plezha.achi.shared.data.achievementExample
+import com.plezha.achi.shared.data.model.Achievement
+import com.plezha.achi.shared.data.model.AchievementStep
+import com.plezha.achi.shared.data.model.achievementExample
+import com.plezha.achi.shared.ui.common.PreviewWrapper
 import com.plezha.achi.shared.ui.common.TitleBar
-import kotlinx.coroutines.SupervisorJob
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.math.roundToInt
 
 
 @Composable
@@ -59,174 +64,213 @@ fun AchievementDetailsScreen(
     } else if (uiState.value.achievement != null) {
         AchievementDetailsScreen(
             achievement = uiState.value.achievement!!,
-            onStepCompleted = { viewModel.incrementAchievementProgress() },
-            onStepPartlyCompleted = { viewModel.incrementStepProgress() },
-            onBackClicked = onBackClicked
+            onStepProgressIncreased = viewModel::increaseStepProgress,
+            onStepCompleted = {
+                viewModel.setStepCompleted(it, true)
+            },
+            onStepProgressReset = {
+                viewModel.setStepCompleted(it, false)
+            },
+            onBackClicked = onBackClicked,
         )
-        SupervisorJob()
     }
 }
 
 @Composable
 private fun AchievementDetailsScreen(
     achievement: Achievement,
-    onStepCompleted: () -> Unit,
-    onStepPartlyCompleted: () -> Unit,
+    onStepCompleted: (AchievementStep) -> Unit,
+    onStepProgressReset: (AchievementStep) -> Unit,
+    onStepProgressIncreased: (AchievementStep) -> Unit,
     onBackClicked: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Column(modifier = Modifier.fillMaxSize()) {
         TitleBar(
             modifier = Modifier.fillMaxWidth(),
-            text = achievement.title,
+            text = "Achievement Details",
             onBackClicked = onBackClicked
         )
-        Image(
-            painter = painterResource(Res.drawable.img),
-            contentScale = ContentScale.Crop,
-            contentDescription = null,
-            modifier = Modifier
-                .padding(top = 8.dp, start = 32.dp, end = 32.dp, bottom = 8.dp)
-                .aspectRatio(1.2f)
-                .clip(shape = RoundedCornerShape(8.dp))
-        )
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Top,
+        ) {
+            item {
+                Image(
+                    painter = painterResource(Res.drawable.img),
+                    contentScale = ContentScale.Crop,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .aspectRatio(1.7f)
+                )
+            }
+            item {
+                Progress(
+                    progress = achievement.progress.toFloat()
+                )
+            }
+            item {
+                AchievementDetails(achievement)
+                Text(
+                    text = "Steps",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+            items(
+                items = achievement.steps,
+            ) { step ->
+                val stepModifier = remember {
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                }
+                if (step.progress.substepsAmount == 1) {
+                    SimpleStep(
+                        step = step,
+                        modifier = stepModifier.padding(vertical = 12.dp),
+                        onStepCompleted = onStepCompleted,
+                        onStepProgressReset = onStepProgressReset
+                    )
+                } else {
+                    IncrementalStep(
+                        step = step,
+                        onStepProgressIncreased = onStepProgressIncreased,
+                        modifier = stepModifier.padding(vertical = 4.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun IncrementalStep(
+    step: AchievementStep,
+    onStepProgressIncreased: (AchievementStep) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Text(
+                text = step.description,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                text = "Current: ${step.progress.substepsDone}/${step.progress.substepsAmount}",
+                style = MaterialTheme.typography.bodySmall.let {
+                    it.copy(color = it.color.copy(alpha = 0.75f))
+                }
+            )
+        }
+        FilledTonalButton(
+            onClick = { onStepProgressIncreased(step) },
+            enabled = step.progress.substepsDone < step.progress.substepsAmount,
+        ) {
+            Text("+1", maxLines = 1)
+        }
+    }
+}
+
+@Composable
+private fun SimpleStep(
+    step: AchievementStep,
+    onStepCompleted: (AchievementStep) -> Unit,
+    onStepProgressReset: (AchievementStep) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
         Text(
-            text = "\t" + (achievement.longDescription ?: achievement.shortDescription),
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth(),
-            style = MaterialTheme.typography.bodyLarge
+            text = step.description,
         )
-        if (achievement.isDone) {
-            Text("Achievement Done")
-        } else {
-            val currentStep = achievement.currentStep!!
-            StepDetails(
-                achievement = achievement,
-                step = currentStep,
-                onStepPartlyCompleted = onStepPartlyCompleted,
-                onStepCompleted = onStepCompleted
+        CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+            Checkbox(
+                checked = step.isDone,
+                onCheckedChange = {
+                    if (it) {
+                        onStepCompleted(step)
+                    } else {
+                        onStepProgressReset(step)
+                    }
+                }
             )
         }
     }
 }
 
 @Composable
-private fun StepDetails(
-    achievement: Achievement,
-    step: AchievementStep,
-    onStepPartlyCompleted: () -> Unit,
-    onStepCompleted: () -> Unit
-) {
-    val stepDescription =
-        if (step.progress != null)
-            step.description +
-                    " (${step.progress.stepsDone}/${step.progress.totalSteps})"
-        else
-            step.description
-    StepProgressIndicator(
+private fun AchievementDetails(achievement: Achievement) {
+    Column(
         modifier = Modifier
-            .fillMaxWidth(0.75f)
-            .padding(8.dp),
-        stepsDone = achievement.stepsDone,
-        totalSteps = achievement.steps.size,
-        currentStepProgress =
-        if (step.progress != null)
-            step.progress.stepsDone.toFloat() / step.progress.totalSteps
-        else
-            0f
-    )
-    Text(
-        text = stepDescription,
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .fillMaxWidth(),
-        style = MaterialTheme.typography.bodyLarge,
-        textAlign = TextAlign.Center
-    )
-    Row(
-        modifier = Modifier.fillMaxWidth()
+            .fillMaxWidth()
+            .padding(16.dp),
     ) {
-        if (step.progress != null) {
-            Button(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(8.dp),
-                colors = ButtonDefaults.buttonColors().copy(
-                    containerColor = MaterialTheme.colorScheme.secondary
-                ),
-                onClick = onStepPartlyCompleted
-            ) {
-                Text("Next step part")
-            }
-        }
-        Button(
-            modifier = Modifier
-                .weight(1f)
-                .padding(8.dp),
-            onClick = onStepCompleted
-        ) {
-            Text("Next step")
-        }
+        Text(
+            text = achievement.title,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Medium
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = achievement.longDescription ?: achievement.shortDescription,
+            style = MaterialTheme.typography.bodyLarge
+        )
     }
 }
 
-//@Composable
-//fun StepProgressIndicator(
-//    stepsDone: Int,
-//    totalSteps: Int,
-//    modifier: Modifier = Modifier,
-//    currentStepProgress: Float = 0f,
-//    activeColor: Color = MaterialTheme.colorScheme.primary,
-//    inactiveColor: Color = MaterialTheme.colorScheme.surfaceVariant,
-//    circleSize: Dp = 8.dp,
-//    lineHeight: Dp = 4.dp
-//) {
-//    require(totalSteps > 0)
-//    val coercedStepsDone = stepsDone.coerceIn(0..totalSteps)
-//    val coercedCurrentStepProgress = currentStepProgress.coerceIn(0f..1f)
-//
-//    Box(modifier = modifier.height(circleSize)) {
-//        LinearProgressIndicator(
-//            progress = {
-//                (coercedStepsDone.toFloat() + coercedCurrentStepProgress) / totalSteps
-//            },
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .align(Alignment.CenterStart)
-//                .height(lineHeight),
-//            color = activeColor,
-//            strokeCap = StrokeCap.Round
-//        )
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.SpaceBetween
-//        ) {
-//            repeat(totalSteps + 1) { index ->
-//                val color =
-//                    if (index == 0 || index == totalSteps)
-//                        Color.Transparent
-//                    else if (index <= coercedStepsDone)
-//                        activeColor
-//                    else
-//                        inactiveColor
-//                Box(
-//                    modifier = Modifier
-//                        .size(circleSize)
-//                        .background(color, CircleShape)
-//                )
-//            }
-//        }
-//    }
-//}
+@Composable
+private fun Progress(
+    @FloatRange(0.0, 1.0) progress: Float
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Progress"
+            )
+            Text(
+                text = "${(progress*100f).roundToInt()}%",
+                style = MaterialTheme.typography.bodyMedium.let {
+                    it.copy(color = it.color.copy(alpha = 0.75f))
+                }
+            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        val animatedProgress by animateFloatAsState(
+            targetValue = progress,
+            animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+            finishedListener = {  }
+        )
+
+        LinearProgressIndicator(
+            modifier = Modifier
+                .height(8.dp)
+                .fillMaxWidth(),
+            progress = { animatedProgress },
+            drawStopIndicator = { },
+            gapSize = 0.dp
+        )
+    }
+}
 
 @Composable
-fun StepProgressIndicator(
+private fun StepProgressIndicator(
     stepsDone: Int,
     totalSteps: Int,
     modifier: Modifier = Modifier,
@@ -297,19 +341,37 @@ fun StepProgressIndicator(
     }
 }
 
+
+@Preview
+@Composable
+private fun AchievementDetailsScreenPreview() {
+    PreviewWrapper {
+        AchievementDetailsScreen(
+            achievement = achievementExample,
+            onStepCompleted = { },
+            onStepProgressReset = { },
+            onStepProgressIncreased = { },
+        ) { }
+    }
+}
+
+@Preview
+@Composable
+private fun ProgressPreview() {
+    PreviewWrapper {
+        Progress(0.6f)
+    }
+}
+
 @Preview
 @Composable
 private fun StepsProgressIndicatorPreview() {
-    StepProgressIndicator(
-        stepsDone = 2,
-        totalSteps = 5,
-        currentStepProgress = 0.4f,
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
-@Preview()
-@Composable
-private fun AchievementDetailsScreenPreview() {
-    AchievementDetailsScreen(achievementExample, { }, { }) { }
+    PreviewWrapper {
+        StepProgressIndicator(
+            stepsDone = 2,
+            totalSteps = 5,
+            currentStepProgress = 0.4f,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }

@@ -11,11 +11,16 @@ import achi.shared.generated.resources.OpenSans_Medium
 import achi.shared.generated.resources.OpenSans_Regular
 import achi.shared.generated.resources.OpenSans_SemiBold
 import achi.shared.generated.resources.Res
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material3.Text
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import com.plezha.achi.shared.ui.common.PreviewWrapper
 import org.jetbrains.compose.resources.Font
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 val bodyFontFamily
     @Composable
@@ -41,50 +46,100 @@ val baseline = Typography()
 
 @Composable
 fun achiTypography() = Typography(
-        displayLarge = baseline.displayLarge.copy(fontFamily = displayFontFamily),
-        displayMedium = baseline.displayMedium.copy(fontFamily = displayFontFamily),
-        displaySmall = baseline.displaySmall.copy(fontFamily = displayFontFamily),
-        headlineLarge = baseline.headlineLarge.copy(fontFamily = displayFontFamily),
-        headlineMedium = baseline.headlineMedium.copy(fontFamily = displayFontFamily),
-        headlineSmall = baseline.headlineSmall.copy(fontFamily = displayFontFamily),
-        titleLarge = baseline.titleLarge.copy(fontFamily = displayFontFamily),
-        titleMedium = baseline.titleMedium.copy(fontFamily = displayFontFamily),
-        titleSmall = baseline.titleSmall.copy(fontFamily = displayFontFamily),
-        bodyLarge = baseline.bodyLarge.copy(fontFamily = bodyFontFamily),
-        bodyMedium = baseline.bodyMedium.copy(fontFamily = bodyFontFamily),
-        bodySmall = baseline.bodySmall.copy(fontFamily = bodyFontFamily),
-        labelLarge = baseline.labelLarge.copy(fontFamily = bodyFontFamily),
-        labelMedium = baseline.labelMedium.copy(fontFamily = bodyFontFamily),
-        labelSmall = baseline.labelSmall.copy(fontFamily = bodyFontFamily),
-    )
+    displayLarge = baseline.displayLarge.copy(
+        fontFamily = displayFontFamily,
+        fontWeight = FontWeight.Bold
+    ),
+    displayMedium = baseline.displayMedium.copy(
+        fontFamily = displayFontFamily,
+        fontWeight = FontWeight.Bold
+    ),
+    displaySmall = baseline.displaySmall.copy(
+        fontFamily = displayFontFamily,
+        fontWeight = FontWeight.Bold
+    ),
+    headlineLarge = baseline.headlineLarge.copy(
+        fontFamily = displayFontFamily,
+        fontWeight = FontWeight.SemiBold
+    ),
+    headlineMedium = baseline.headlineMedium.copy(
+        fontFamily = displayFontFamily,
+        fontWeight = FontWeight.SemiBold
+    ),
+    headlineSmall = baseline.headlineSmall.copy(
+        fontFamily = displayFontFamily,
+        fontWeight = FontWeight.SemiBold
+    ),
+    titleLarge = baseline.titleLarge.copy(
+        fontFamily = displayFontFamily,
+        fontWeight = FontWeight.Medium
+    ),
+    titleMedium = baseline.titleMedium.copy(
+        fontFamily = displayFontFamily,
+        fontWeight = FontWeight.Medium
+    ),
+    titleSmall = baseline.titleSmall.copy(
+        fontFamily = displayFontFamily,
+        fontWeight = FontWeight.Medium
+    ),
+    bodyLarge = baseline.bodyLarge.copy(
+        fontFamily = bodyFontFamily,
+        fontWeight = FontWeight.Normal
+    ),
+    bodyMedium = baseline.bodyMedium.copy(
+        fontFamily = bodyFontFamily,
+        fontWeight = FontWeight.Normal
+    ),
+    bodySmall = baseline.bodySmall.copy(
+        fontFamily = bodyFontFamily,
+        fontWeight = FontWeight.Normal
+    ),
+    labelLarge = baseline.labelLarge.copy(
+        fontFamily = bodyFontFamily,
+        fontWeight = FontWeight.Normal,
+        color = baseline.labelLarge.color.copy(alpha = 0.75f)
+    ),
+    labelMedium = baseline.labelMedium.copy(
+        fontFamily = bodyFontFamily,
+        fontWeight = FontWeight.Normal,
+        color = baseline.labelMedium.color.copy(alpha = 0.75f)
+    ),
+    labelSmall = baseline.labelSmall.copy(
+        fontFamily = bodyFontFamily,
+        fontWeight = FontWeight.Normal,
+        color = baseline.labelSmall.color.copy(alpha = 0.75f)
+    ),
+)
 
-//@Preview()
-//@Composable
-//private fun TypographyPreview() {
-//    LazyVerticalGrid(
-//        columns = GridCells.Fixed(1)
-//    ) {
-//        listOf(
-//            "displayLarge" to achiTypography.displayLarge,
-//            "displayMedium" to achiTypography.displayMedium,
-//            "displaySmall" to achiTypography.displaySmall,
-//            "headlineLarge" to achiTypography.headlineLarge,
-//            "headlineMedium" to achiTypography.headlineMedium,
-//            "headlineSmall" to achiTypography.headlineSmall,
-//            "titleLarge" to achiTypography.titleLarge,
-//            "titleMedium" to achiTypography.titleMedium,
-//            "titleSmall" to achiTypography.titleSmall,
-//            "bodyLarge" to achiTypography.bodyLarge,
-//            "bodyMedium" to achiTypography.bodyMedium,
-//            "bodySmall" to achiTypography.bodySmall,
-//            "labelLarge" to achiTypography.labelLarge,
-//            "labelMedium" to achiTypography.labelMedium,
-//            "labelSmall" to achiTypography.labelSmall,
-//        ).forEach { (text, style) ->
-//            item {
-//                Text(text, style = style)
-//            }
-//        }
-//    }
-//}
-//
+@Preview
+@Composable
+private fun TypographyPreview() {
+    PreviewWrapper {
+        val achiTypography = achiTypography()
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(1)
+        ) {
+            listOf(
+                "displayLarge" to achiTypography.displayLarge,
+                "displayMedium" to achiTypography.displayMedium,
+                "displaySmall" to achiTypography.displaySmall,
+                "headlineLarge" to achiTypography.headlineLarge,
+                "headlineMedium" to achiTypography.headlineMedium,
+                "headlineSmall" to achiTypography.headlineSmall,
+                "titleLarge" to achiTypography.titleLarge,
+                "titleMedium" to achiTypography.titleMedium,
+                "titleSmall" to achiTypography.titleSmall,
+                "bodyLarge" to achiTypography.bodyLarge,
+                "bodyMedium" to achiTypography.bodyMedium,
+                "bodySmall" to achiTypography.bodySmall,
+                "labelLarge" to achiTypography.labelLarge,
+                "labelMedium" to achiTypography.labelMedium,
+                "labelSmall" to achiTypography.labelSmall,
+            ).forEach { (text, style) ->
+                item {
+                    Text(text, style = style)
+                }
+            }
+        }
+    }
+}

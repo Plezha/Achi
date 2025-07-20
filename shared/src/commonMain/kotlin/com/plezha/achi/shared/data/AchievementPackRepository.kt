@@ -1,5 +1,7 @@
 package com.plezha.achi.shared.data
 
+import com.plezha.achi.shared.data.model.AchievementPack
+
 interface AchievementPackRepository {
     suspend fun getAchievementPacks(): List<AchievementPack>
 }

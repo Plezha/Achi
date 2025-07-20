@@ -21,9 +21,9 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun TitleBar(
-    modifier: Modifier,
     text: String,
     onBackClicked: (() -> Unit)? = null,
+    modifier: Modifier,
 ) {
     Box(
         modifier = modifier
@@ -45,7 +45,7 @@ fun TitleBar(
         Text(
             text = text,
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.SemiBold,
             modifier = Modifier
                 .align(Alignment.Center)
                 .basicMarquee()
@@ -56,5 +56,5 @@ fun TitleBar(
 @Preview()
 @Composable
 private fun TitleBarPreview() {
-    TitleBar(modifier = Modifier.fillMaxWidth(), "Title") { }
+    TitleBar(modifier = Modifier.fillMaxWidth(), text = "Title", onBackClicked = { })
 }

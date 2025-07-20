@@ -1,5 +1,9 @@
 package com.plezha.achi.shared.data
 
+import com.plezha.achi.shared.data.model.Achievement
+import com.plezha.achi.shared.data.model.AchievementStep
+import com.plezha.achi.shared.data.model.StepProgress
+
 interface AchievementRepository {
     suspend fun getAchievements(packId: String): List<Achievement>
     suspend fun getAchievementById(id: String): Achievement
@@ -33,7 +37,6 @@ private val achievements = listOf(
             ),
             AchievementStep(description = "В зачётке зачёт"),
         ),
-        stepsDone = 0
     ),
     Achievement(
         title = "Тарасов",
@@ -47,7 +50,6 @@ private val achievements = listOf(
             ),
             AchievementStep(description = "дед не отправил на комсу"),
         ),
-        stepsDone = 0
     ),
     Achievement(
         title = "Цыган",
@@ -58,7 +60,6 @@ private val achievements = listOf(
             AchievementStep(description = "Индивидуальное задание принято"),
             AchievementStep(description = "В зачётке есть зачёт"),
         ),
-        stepsDone = 0
     ),
     Achievement(
         title = "Схемач",
@@ -66,6 +67,5 @@ private val achievements = listOf(
         steps = listOf(
             AchievementStep(description = "В зачётке есть зачёт"),
         ),
-        stepsDone = 0
     ),
 )

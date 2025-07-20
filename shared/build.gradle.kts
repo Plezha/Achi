@@ -71,10 +71,10 @@ kotlin {
                 implementation(compose.runtime)
                 implementation(compose.foundation)
                 implementation(compose.material3)
-                implementation(libs.androidx.navigation.compose)
-
                 implementation(compose.components.resources)
                 implementation(compose.components.uiToolingPreview)
+
+                implementation(libs.androidx.navigation.compose)
                 implementation(libs.kotlinx.serialization.json)
             }
         }
@@ -87,7 +87,7 @@ kotlin {
         }
 
         wasmJs {
-            moduleName = "achi"
+            outputModuleName = "achi"
             browser {
                 val rootDirPath = project.rootDir.path
                 val projectDirPath = project.projectDir.path
