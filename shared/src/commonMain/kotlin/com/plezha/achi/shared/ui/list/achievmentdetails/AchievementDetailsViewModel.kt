@@ -1,9 +1,9 @@
-package com.plezha.achi.shared.ui.achievmentdetails
+package com.plezha.achi.shared.ui.list.achievmentdetails
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.plezha.achi.shared.data.model.Achievement
 import com.plezha.achi.shared.data.AchievementRepository
+import com.plezha.achi.shared.data.model.Achievement
 import com.plezha.achi.shared.data.model.AchievementStep
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +19,7 @@ class AchievementDetailsViewModel(
 
     fun loadAchievementById(id: String) {
         viewModelScope.launch(Dispatchers.Default) { // TODO IO
-            _uiState.value = AchievementDetailsUiState(achievement = repository.getAchievementById(id))
+            _uiState.value = AchievementDetailsUiState(achievement = repository.getAchievement(id))
         }
     }
 

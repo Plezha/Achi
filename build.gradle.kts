@@ -6,3 +6,14 @@ plugins {
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
 }
+
+//abstract class CreateFileTask : DefaultTask() {
+//    @TaskAction
+//    fun action() {
+//        val file = File("myfile.txt")
+//        file.createNewFile()
+//        file.writeText("HELLO FROM MY TASK")
+//    }
+//}
+//
+//tasks.register<CreateFileTask>("createFileTask")

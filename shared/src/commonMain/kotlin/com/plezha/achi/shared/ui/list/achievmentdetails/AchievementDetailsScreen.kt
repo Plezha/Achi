@@ -1,4 +1,4 @@
-package com.plezha.achi.shared.ui.achievmentdetails
+package com.plezha.achi.shared.ui.list.achievmentdetails
 
 import achi.shared.generated.resources.Res
 import achi.shared.generated.resources.img
@@ -41,9 +41,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.plezha.achi.shared.data.achievementExample
 import com.plezha.achi.shared.data.model.Achievement
 import com.plezha.achi.shared.data.model.AchievementStep
-import com.plezha.achi.shared.data.model.achievementExample
 import com.plezha.achi.shared.ui.common.PreviewWrapper
 import com.plezha.achi.shared.ui.common.TitleBar
 import org.jetbrains.compose.resources.painterResource

@@ -1,4 +1,4 @@
-package com.plezha.achi.shared.ui.achievmentlist
+package com.plezha.achi.shared.ui.list.achievmentlist
 
 import achi.shared.generated.resources.Res
 import achi.shared.generated.resources.img
@@ -32,7 +32,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.plezha.achi.shared.data.model.achievementExample
+import com.plezha.achi.shared.data.achievementExample
+import com.plezha.achi.shared.data.model.Achievement
 import com.plezha.achi.shared.ui.common.PreviewWrapper
 import com.plezha.achi.shared.ui.common.TitleBar
 import org.jetbrains.compose.resources.painterResource
@@ -42,7 +43,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun AchievementsScreen(
     achievementListViewModel: AchievementListViewModel,
-    onAchievementClick: (String) -> Unit,
+    onAchievementClick: (Achievement) -> Unit,
     onBackClicked: () -> Unit
 ) {
     val achievements by achievementListViewModel.achievements.collectAsState()
@@ -65,7 +66,7 @@ fun AchievementsScreen(
                 AchievementCard(
                     title = achievement.title,
                     subtitle = achievement.shortDescription,
-                    onClick = { onAchievementClick(achievement.title) },
+                    onClick = { onAchievementClick(achievement) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -130,6 +131,9 @@ fun AchievementCard(
 private fun AchievementCardPreview() {
     PreviewWrapper {
         AchievementCard(
-            achievementExample.title, achievementExample.shortDescription, {})
+            achievementExample.title,
+            achievementExample.shortDescription,
+            {}
+        )
     }
 }

@@ -9,17 +9,24 @@ import achi.shared.generated.resources.ic_profile
 import achi.shared.generated.resources.ic_profile_filled
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraphBuilder
@@ -30,15 +37,31 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.plezha.achi.shared.data.MockAchievementPackRepository
+import com.plezha.achi.shared.data.AchievementPackRepository
+import com.plezha.achi.shared.data.AchievementPackRepositoryImpl
+import com.plezha.achi.shared.data.AchievementRepository
 import com.plezha.achi.shared.data.MockAchievementRepository
-import com.plezha.achi.shared.ui.achievmentdetails.AchievementDetailsScreen
-import com.plezha.achi.shared.ui.achievmentdetails.AchievementDetailsViewModel
-import com.plezha.achi.shared.ui.achievmentlist.AchievementListViewModel
-import com.plezha.achi.shared.ui.achievmentlist.AchievementsScreen
-import com.plezha.achi.shared.ui.packlist.AchievementPackList
-import com.plezha.achi.shared.ui.packlist.AchievementPackListViewModel
+import com.plezha.achi.shared.data.network.apis.AchievementsApi
+import com.plezha.achi.shared.data.network.apis.PacksApi
+import com.plezha.achi.shared.data.network.apis.UploadApi
+import com.plezha.achi.shared.data.network.apis.UsersApi
+import com.plezha.achi.shared.ui.add.AddAchievementScreen
+import com.plezha.achi.shared.ui.add.AddAchievementsViewModel
+import com.plezha.achi.shared.ui.add.CreateAchievementPackScreen
+import com.plezha.achi.shared.ui.add.CreateAchievementPackViewModel
+import com.plezha.achi.shared.ui.add.NavigationEvent
+import com.plezha.achi.shared.ui.list.achievmentdetails.AchievementDetailsScreen
+import com.plezha.achi.shared.ui.list.achievmentdetails.AchievementDetailsViewModel
+import com.plezha.achi.shared.ui.list.achievmentlist.AchievementListViewModel
+import com.plezha.achi.shared.ui.list.achievmentlist.AchievementsScreen
+import com.plezha.achi.shared.ui.list.packlist.AchievementPackList
+import com.plezha.achi.shared.ui.list.packlist.AchievementPackListViewModel
 import com.plezha.achi.shared.ui.theme.AchiTheme
+import io.ktor.client.engine.HttpClientEngine
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.vectorResource
@@ -48,6 +71,8 @@ import org.jetbrains.compose.resources.vectorResource
 @Serializable private object ProfileTopRoute
 @Serializable private object AchievementPackListRoute
 @Serializable private object AddRoute
+@Serializable private object CreateAchievementPackRoute
+@Serializable private object CreateAchievementRoute
 @Serializable private object ProfileRoute
 @Serializable private data class AchievementRoute(val id: String)
 @Serializable private data class AchievementListRoute(val id: String)
@@ -69,13 +94,28 @@ fun AchiApp() {
 
 @Composable
 private fun AchiAppNav() {
+    val usersApi = remember { UsersApi(httpClientEngine = httpClientEngine) }
+    val achievementsApi = remember { AchievementsApi(httpClientEngine = httpClientEngine) }
+    val packsApi = remember { PacksApi(httpClientEngine = httpClientEngine) }
+    val uploadApi = remember { UploadApi(httpClientEngine = httpClientEngine) }
+
     val navController = rememberNavController()
-    val achievementRepository = remember { MockAchievementRepository() }
-    val achievementPackRepository = remember { MockAchievementPackRepository() }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val achievementRepository = remember { MockAchievementRepository(
+        achievementsApi = achievementsApi
+    ) }
+    val achievementPackRepository = remember { AchievementPackRepositoryImpl(
+        achievementsApi = achievementsApi,
+        packsApi = packsApi,
+        uploadApi = uploadApi
+    ) }
 
     Scaffold(
         bottomBar = {
             BottomNavigationBar(navController)
+        },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState)
         }
     ) { padding ->
         NavHost(
@@ -87,37 +127,157 @@ private fun AchiAppNav() {
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
         ) {
-            addAchievementsNav()
-            achievementListNav(navController, achievementPackRepository, achievementRepository)
-            profileNav()
+            addAchievementsNav(
+                navController = navController,
+                showMessage = {
+                    snackbarHostState.showSnackbar(it)
+                },
+                achievementPackRepository = achievementPackRepository
+            )
+            achievementListNav(
+                navController = navController,
+                achievementPackRepository = achievementPackRepository,
+                achievementRepository = achievementRepository
+            )
+            profileNav(
+                packsRepository = achievementPackRepository,
+                achievementRepository = achievementRepository
+            )
         }
     }
 }
 
-private fun NavGraphBuilder.addAchievementsNav() {
+private fun NavGraphBuilder.addAchievementsNav(
+    navController: NavHostController,
+    showMessage: suspend CoroutineScope.(String) -> Unit,
+    achievementPackRepository: AchievementPackRepository,
+) {
     navigation<AddTopRoute>(
         startDestination = AddRoute,
     ) {
+        val addAchievementsViewModel = AddAchievementsViewModel(
+            achievementPackRepository
+        )
         composable<AddRoute> {
-            Text("WIP")
+            LaunchedEffect(Unit) {
+                addAchievementsViewModel.navigationFlow.collectLatest { event ->
+                    when (event) {
+                        is NavigationEvent.NavigateToCreatePack -> {
+                            navController.navigate(CreateAchievementPackRoute)
+                        }
+                        is NavigationEvent.NavigateToCreateAchievement -> {
+                            navController.navigate(CreateAchievementRoute)
+                        }
+                    }
+                }
+            }
+
+            AddAchievementScreen(
+                addAchievementViewModel = addAchievementsViewModel,
+                showMessage = showMessage
+            )
+        }
+
+        composable<CreateAchievementPackRoute> {
+            val createAchievementPackViewModel = CreateAchievementPackViewModel()
+            CreateAchievementPackScreen(createAchievementPackViewModel)
+        }
+
+        composable<CreateAchievementRoute> {
+
         }
     }
 }
 
-private fun NavGraphBuilder.profileNav() {
+private fun NavGraphBuilder.profileNav(
+    packsRepository: AchievementPackRepositoryImpl,
+    achievementRepository: AchievementRepository
+) {
     navigation<ProfileTopRoute>(
         startDestination = ProfileRoute,
     ) {
         composable<ProfileRoute> {
-            Text("WIP")
+            val scope = rememberCoroutineScope()
+            Box(
+                contentAlignment = Alignment.Center
+            ) {
+                Button(
+                    onClick = {
+                        scope.launch(Dispatchers.Default) {
+//                            val usersApi = UsersApi(
+//                                httpClientEngine = httpClientEngine
+//                            )
+//                            val pack = AchievementPack(
+//                                id = "1",
+//                                name = "Pack 1",
+//                                count = 5,
+//                                achievementIds = achievements.map { it.id },
+//                                code = "ABC"
+//                            )
+//                            val res2 = usersApi.loginTokenPost("user1", "password1")
+//                            val token = res2.body().accessToken
+//
+//                            packsRepository.packsApi.setAccessToken(token)
+//                            packsRepository.achievementsApi.setAccessToken(token)
+//
+//                            val id = packsRepository.createAchievementPack(
+//                                name = pack.name,
+//                                achievements = achievements.map { achievement ->
+//                                    AchievementCreate(
+//                                        title = achievement.title,
+//                                        shortDescription = achievement.shortDescription,
+//                                        steps = achievement.steps.map { step ->
+//                                            AchievementStepCreate(
+//                                                description = step.description,
+//                                                substepsAmount = step.progress.substepsAmount
+//                                            )
+//                                        },
+//                                        longDescription = achievement.longDescription,
+//                                        previewImageUrl = achievement.previewImageUrl,
+//                                        imageUrl = achievement.imageUrl
+//                                    )
+//                                },
+//                                previewImageUrl = pack.previewImageUrl
+//                            )
+//                            println(id)
+//
+//                        val req2 = UserCreate("user1", "password1")
+//                        val res2 = api2.loginTokenPost(req2.username, req2.password)
+//                        val token = res2.body().accessToken
+//
+//                        val api = AchievementsApi(
+//                            baseUrl = ApiClient.BASE_URL,
+//                            httpClientEngine
+//                        ).apply {
+//                            setAccessToken(token)
+//                        }
+//                        val req = AchievementCreate(
+//                            title = "Test Achievement",
+//                            shortDescription = "Test Achievement Short Description",
+//                            steps = listOf(AchievementStepCreate("Test Achievement Step 1 Description")),
+//                        )
+//                        val res: HttpResponse<AchievementSchema> =
+//                            api.createAchievementAchievementsPost(req)
+//                        println(res.response)
+//                        if (res.success) {
+//                            println(
+//                                api.getAchievementAchievementsAchievementIdGet(res.body().id).response
+//                            )
+//                        }
+                        }
+                    }
+                ) {
+                    Text("Button!")
+                }
+            }
         }
     }
 }
 
 private fun NavGraphBuilder.achievementListNav(
     navController: NavHostController,
-    achievementPackRepository: MockAchievementPackRepository,
-    achievementRepository: MockAchievementRepository
+    achievementPackRepository: AchievementPackRepository,
+    achievementRepository: AchievementRepository
 ) {
     navigation<AchievementPackListTopRoute>(
         startDestination = AchievementPackListRoute,
@@ -129,36 +289,36 @@ private fun NavGraphBuilder.achievementListNav(
             AchievementPackList(
                 achievementPackListViewModel = achievementPackListViewModel,
                 onPackClick = { pack ->
-                    navController.navigate(AchievementListRoute(pack))
+                    navController.navigate(AchievementListRoute(pack.id))
                 }
             )
         }
         composable<AchievementListRoute> { backStackEntry ->
-            val pack = backStackEntry.destination
-            val achievementListViewModel =
-                AchievementListViewModel(achievementRepository)
+            val route: AchievementListRoute = backStackEntry.toRoute()
+            val achievementListViewModel = AchievementListViewModel(
+                achievementRepository = achievementRepository,
+                achievementPackRepository = achievementPackRepository
+            ).apply {
+                loadAchievementsByPackId(route.id)
+            }
 
             AchievementsScreen(
                 achievementListViewModel = achievementListViewModel,
-                onAchievementClick = { id ->
-                    navController.navigate(AchievementRoute(id))
+                onAchievementClick = { achievement ->
+                    navController.navigate(AchievementRoute(achievement.id))
                 },
-                onBackClicked = {
-                    navController.navigateUp()
-                }
+                onBackClicked = navController::navigateUp
             )
         }
         composable<AchievementRoute> { backStackEntry ->
-            val achievementId: AchievementRoute = backStackEntry.toRoute()
+            val route: AchievementRoute = backStackEntry.toRoute()
             val viewModel = AchievementDetailsViewModel(achievementRepository).apply {
-                loadAchievementById(achievementId.id)
+                loadAchievementById(route.id)
             }
 
             AchievementDetailsScreen(
                 viewModel = viewModel,
-                onBackClicked = {
-                    navController.navigateUp()
-                }
+                onBackClicked = navController::navigateUp
             )
         }
     }
@@ -211,3 +371,5 @@ private fun BottomNavigationBar(navController: NavHostController) {
         }
     }
 }
+
+expect val httpClientEngine: HttpClientEngine

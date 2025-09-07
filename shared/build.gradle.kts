@@ -11,7 +11,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.android.application)
-
+    id("org.openapi.generator") version "7.14.0"
     kotlin("plugin.serialization") version "2.1.0"
 }
 
@@ -22,24 +22,6 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    // Target declarations - add or remove as needed below. These define
-    // which platforms this KMP module supports.
-    // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
-//    androidLibrary {
-//        namespace = "com.plezha.achi.shared"
-//        compileSdk = 35
-//        minSdk = 24
-//
-//        withHostTestBuilder {
-//        }
-//
-//        withDeviceTestBuilder {
-//            sourceSetTreeName = "test"
-//        }.configure {
-//            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-//        }
-//    }
-
     // For iOS targets, this is also where you should
     // configure native binary output. For more information, see:
     // https://kotlinlang.org/docs/multiplatform-build-native-binaries.html#build-xcframeworks
@@ -73,10 +55,21 @@ kotlin {
                 implementation(compose.material3)
                 implementation(compose.components.resources)
                 implementation(compose.components.uiToolingPreview)
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.content.negotiation)
+                implementation(libs.ktor.serialization.kotlinx.json)
+                implementation(libs.ktor.client.logging)
 
                 implementation(libs.androidx.navigation.compose)
                 implementation(libs.kotlinx.serialization.json)
+                implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
+                val filekitversion = "0.10.0"
+                implementation("io.github.vinceglb:filekit-core:${filekitversion}")
+                implementation("io.github.vinceglb:filekit-dialogs:${filekitversion}")
+                implementation("io.github.vinceglb:filekit-dialogs-compose:${filekitversion}")
+                implementation("io.github.vinceglb:filekit-coil:${filekitversion}")
             }
+            kotlin.srcDir("${buildDir}/generated/openapi/src/commonMain/kotlin")
         }
 
         commonTest {
@@ -105,11 +98,15 @@ kotlin {
             binaries.executable()
         }
 
+        wasmJsMain {
+            dependencies {
+                implementation(libs.ktor.client.cio)
+            }
+        }
+
         androidMain {
             dependencies {
-                implementation(libs.androidx.lifecycle.runtime.ktx)
-                implementation(libs.androidx.lifecycle.viewmodel.compose)
-
+                implementation(libs.ktor.client.okhttp)
 
                 implementation(libs.androidx.activity.compose)
                 implementation(libs.androidx.ui.tooling)
@@ -123,10 +120,11 @@ kotlin {
 
         androidNativeTest {
             dependencies {
+                implementation(libs.androidx.ui.test.manifest)
                 implementation(libs.androidx.junit)
                 implementation(libs.androidx.espresso.core)
-                implementation(project.dependencies.platform(libs.androidx.compose.bom))
                 implementation(libs.androidx.ui.test.junit4)
+
             }
         }
 
@@ -176,4 +174,23 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+}
+
+openApiGenerate {
+    generatorName.set("kotlin")
+    inputSpec.set(rootProject.file("Achi_openapi.json").toURI().toString())
+    outputDir.set("${buildDir}/generated/openapi")
+    packageName.set("com.plezha.achi.shared.data.network")
+
+    configOptions.set(mapOf(
+        "library" to "multiplatform",
+        "useCoroutines" to "true",
+        "dateLibrary" to "kotlinx-datetime",
+        "sourceFolder" to "src/commonMain/kotlin"
+    ))
+}
+
+// This openapigenerator version is poorly compatible with Ktor 3+, some errors might need to be fixed manually
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    dependsOn("openApiGenerate")
 }

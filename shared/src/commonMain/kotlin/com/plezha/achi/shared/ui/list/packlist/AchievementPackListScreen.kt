@@ -1,4 +1,4 @@
-package com.plezha.achi.shared.ui.packlist
+package com.plezha.achi.shared.ui.list.packlist
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,15 +9,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.plezha.achi.shared.data.model.AchievementPack
-import com.plezha.achi.shared.ui.achievmentlist.AchievementCard
 import com.plezha.achi.shared.ui.common.TitleBar
+import com.plezha.achi.shared.ui.list.achievmentlist.AchievementCard
 
 
 @Composable
 fun AchievementPackList(
     achievementPackListViewModel: AchievementPackListViewModel,
     modifier: Modifier = Modifier,
-    onPackClick: (String) -> Unit
+    onPackClick: (AchievementPack) -> Unit
 ) {
     val achievementPacks by achievementPackListViewModel.achievementPacks.collectAsState()
 
@@ -35,7 +35,7 @@ fun AchievementPackList(
             ) { achievementPack ->
                 AchievementPackCard(
                     achievementPack = achievementPack,
-                    onPackClick = onPackClick
+                    onPackClick = { onPackClick(achievementPack) }
                 )
             }
         }
@@ -47,12 +47,12 @@ fun AchievementPackList(
 @Composable
 private fun AchievementPackCard(
     achievementPack: AchievementPack,
-    onPackClick: (String) -> Unit
+    onPackClick: () -> Unit
 ) {
     AchievementCard(
         title = achievementPack.name,
         subtitle = "${achievementPack.count} achievements",
-        onClick = { onPackClick(achievementPack.name) },
+        onClick = onPackClick,
         modifier = Modifier.fillMaxWidth()
     )
 }

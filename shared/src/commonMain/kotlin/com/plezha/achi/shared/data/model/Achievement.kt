@@ -2,10 +2,13 @@ package com.plezha.achi.shared.data.model
 
 
 data class Achievement(
+    val id: String,
     val title: String,
     val shortDescription: String,
     val longDescription: String? = null,
     val steps: List<AchievementStep>,
+    val previewImageUrl: String? = null,
+    val imageUrl: String? = null
 ) {
     val progress
         get() = steps.sumOf { it.progress.progressFloat.toDouble() } / steps.size
@@ -38,14 +41,3 @@ data class StepProgress(
 }
 
 
-val achievementExample = Achievement(
-    title = "Achievement title",
-    shortDescription = "This is an achievement description text which is not really short but also is not too long",
-    steps = listOf(
-        AchievementStep("Step 1", progress = StepProgress(1, 1)),
-        AchievementStep("Step 2", progress = StepProgress(1, 1)),
-        AchievementStep("Step 3", progress = StepProgress(3, 7)),
-        AchievementStep("Step 4"),
-        AchievementStep("Step 5"),
-    ),
-)
