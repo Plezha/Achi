@@ -18,11 +18,12 @@
 
 ### 2.2. Обзор литературы
 
-**Zeng (2024)** в статье *"Exploring the impact of gamification on students' academic performance"*, опубликованной в British Journal of Educational Technology, исследует влияние геймифицированных систем на академическую успеваемость студентов. Результаты исследования свидетельствуют о положительной корреляции между применением игровых элементов и образовательными результатами, что подтверждает эффективность геймификации как инструмента повышения мотивации в контексте достижения целей [1].
 
-Исследование *"Goal-setting And Achievement In Activity Tracking Apps: A Case Study Of MyFitnessPal"* рассматривает механизмы целеполагания в приложениях для отслеживания активности. Авторы анализируют, каким образом визуализация прогресса и система достижений влияют на формирование устойчивых поведенческих паттернов. Выводы работы указывают на критическую важность грамотного дизайна системы целей для долгосрочной вовлечённости пользователей [2].
+**Zeng (2024)** в статье [*"Exploring the impact of gamification on students' academic performance"*](https://github.com/Plezha/Achi/blob/2f6be7d7db7422501fa5fabf0c110a29f33bad3c/thesis-validity-defense/papers-proving-validity/Brit%20J%20Educational%20Tech%20-%202024%20-%20Zeng%20-%20Exploring%20the%20impact%20of%20gamification%20on%20students%20%20academic%20performance%20%20A.pdf), опубликованной в British Journal of Educational Technology, исследует влияние геймифицированных систем на академическую успеваемость студентов. Результаты исследования свидетельствуют о положительной корреляции между применением игровых элементов и образовательными результатами, что подтверждает эффективность геймификации как инструмента повышения мотивации в контексте достижения целей [1].
 
-В работе *"How gamification motivates: An experimental study of the effects of specific game design elements on psychological need satisfaction"* представлены результаты экспериментального исследования влияния конкретных игровых элементов на удовлетворение базовых психологических потребностей (автономии, компетентности, связанности с другими). Исследование обосновывает выбор конкретных игровых механик — в частности, систем достижений и прогресс-баров — как наиболее эффективных для поддержания внутренней мотивации [3].
+Исследование [*"Goal-setting And Achievement In Activity Tracking Apps: A Case Study Of MyFitnessPal"*](https://github.com/Plezha/Achi/blob/2f6be7d7db7422501fa5fabf0c110a29f33bad3c/thesis-validity-defense/papers-proving-validity/Goal-setting%20And%20Achievement%20In%20Activity%20Tracking%20Apps-%20A%20Case%20Study%20Of%20MyFitnessPal%20.pdf) рассматривает механизмы целеполагания в приложениях для отслеживания активности. Авторы анализируют, каким образом визуализация прогресса и система достижений влияют на формирование устойчивых поведенческих паттернов. Выводы работы указывают на критическую важность грамотного дизайна системы целей для долгосрочной вовлечённости пользователей [2].
+
+В работе [*"How gamification motivates: An experimental study of the effects of specific game design elements on psychological need satisfaction"*](https://github.com/Plezha/Achi/blob/2f6be7d7db7422501fa5fabf0c110a29f33bad3c/thesis-validity-defense/papers-proving-validity/How%20gamification%20motivates-%20An%20experimental%20study%20of%20the%20effects%20of%20specific%20game%20design%20elements%20on%20psychological%20need%20satisfaction%20.pdf) представлены результаты экспериментального исследования влияния конкретных игровых элементов на удовлетворение базовых психологических потребностей (автономии, компетентности, связанности с другими). Исследование обосновывает выбор конкретных игровых механик — в частности, систем достижений и прогресс-баров — как наиболее эффективных для поддержания внутренней мотивации [3].
 
 ### 2.3. Практическая актуальность
 
@@ -180,14 +181,3 @@
 | Android | Активно (Stable) | Android 7.0 (API 24) |
 | Web (WasmJS) | Активно (Beta) | Современные браузеры с поддержкой WebAssembly |
 | iOS | Подготовлено (Stable) | iOS 14+ (реализация отложена) |
-
----
-
-## Список литературы
-
-1. Zeng, Y. (2024). Exploring the impact of gamification on students' academic performance. *British Journal of Educational Technology*. URL: [TODO]
-
-2. Goal-setting And Achievement In Activity Tracking Apps: A Case Study Of MyFitnessPal. URL: [TODO]
-
-3. How gamification motivates: An experimental study of the effects of specific game design elements on psychological need satisfaction. URL: [TODO]
-
