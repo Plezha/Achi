@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlin.jvm.JvmInline
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -70,4 +71,5 @@ class CreateAchievementPackViewModel() : ViewModel() {
     }
 }
 
+@JvmInline
 value class AchievementId(val value: String)

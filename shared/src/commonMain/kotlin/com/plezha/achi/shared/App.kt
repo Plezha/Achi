@@ -44,7 +44,6 @@ import com.plezha.achi.shared.data.MockAchievementRepository
 import com.plezha.achi.shared.data.network.apis.AchievementsApi
 import com.plezha.achi.shared.data.network.apis.PacksApi
 import com.plezha.achi.shared.data.network.apis.UploadApi
-import com.plezha.achi.shared.data.network.apis.UsersApi
 import com.plezha.achi.shared.ui.add.AddAchievementScreen
 import com.plezha.achi.shared.ui.add.AddAchievementsViewModel
 import com.plezha.achi.shared.ui.add.CreateAchievementPackScreen
@@ -94,7 +93,7 @@ fun AchiApp() {
 
 @Composable
 private fun AchiAppNav() {
-    val usersApi = remember { UsersApi(httpClientEngine = httpClientEngine) }
+//    val usersApi = remember { UsersApi(httpClientEngine = httpClientEngine) }
     val achievementsApi = remember { AchievementsApi(httpClientEngine = httpClientEngine) }
     val packsApi = remember { PacksApi(httpClientEngine = httpClientEngine) }
     val uploadApi = remember { UploadApi(httpClientEngine = httpClientEngine) }
