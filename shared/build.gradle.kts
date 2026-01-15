@@ -60,7 +60,7 @@ kotlin {
                 implementation(libs.ktor.serialization.kotlinx.json)
                 implementation(libs.ktor.client.logging)
 
-                implementation(libs.androidx.navigation.compose)
+                implementation(libs.jetbrains.navigation3.ui)
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.datetime)
                 implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
@@ -152,12 +152,12 @@ kotlin {
 
 android {
     namespace = "com.plezha.achi"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.plezha.achi"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
     }
