@@ -11,8 +11,8 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.android.application)
-    id("org.openapi.generator") version "7.14.0"
-    kotlin("plugin.serialization") version "2.1.0"
+    id("org.openapi.generator") version "7.18.0"
+    kotlin("plugin.serialization") version "2.3.0"
 }
 
 kotlin {
@@ -62,6 +62,7 @@ kotlin {
 
                 implementation(libs.androidx.navigation.compose)
                 implementation(libs.kotlinx.serialization.json)
+                implementation(libs.kotlinx.datetime)
                 implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
                 val filekitversion = "0.10.0"
                 implementation("io.github.vinceglb:filekit-core:${filekitversion}")

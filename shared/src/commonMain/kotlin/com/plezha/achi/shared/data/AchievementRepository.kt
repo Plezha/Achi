@@ -68,7 +68,7 @@ fun AchievementSchema.toAchievement() = Achievement(
 
 fun AchievementStepSchema.toAchievementStep() = AchievementStep(
     description = description,
-    progress = progress?.toDomainStepProgress() ?: StepProgress(0, 1)
+    progress = /* stepProgress?.toDomainStepProgress() ?: */ StepProgress(0, 1)
 )
 
 fun com.plezha.achi.shared.data.network.models.StepProgress.toDomainStepProgress() = StepProgress(
