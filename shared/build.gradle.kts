@@ -63,6 +63,8 @@ kotlin {
                 implementation(libs.jetbrains.navigation3.ui)
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.datetime)
+                implementation(libs.multiplatform.settings)
+                implementation(libs.multiplatform.settings.no.arg)
                 implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
                 val filekitversion = "0.12.0"
                 implementation("io.github.vinceglb:filekit-core:${filekitversion}")

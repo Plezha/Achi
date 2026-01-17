@@ -4,21 +4,16 @@ import com.plezha.achi.shared.data.model.AchievementPack
 import com.plezha.achi.shared.data.network.apis.AchievementsApi
 import com.plezha.achi.shared.data.network.apis.PacksApi
 import com.plezha.achi.shared.data.network.apis.UploadApi
-import com.plezha.achi.shared.data.network.infrastructure.HttpResponse
 import com.plezha.achi.shared.data.network.models.AchievementCreateBody
 import com.plezha.achi.shared.data.network.models.AchievementPackCreateBody
-import com.plezha.achi.shared.data.network.models.AchievementPackSchema
-import io.ktor.client.request.forms.FormPart
-import io.ktor.client.request.forms.InputProvider
-import io.ktor.http.Headers
-import io.ktor.http.HttpHeaders
+import com.plezha.achi.shared.data.network.toAchievementPack
+import com.plezha.achi.shared.data.network.check
+import com.plezha.achi.shared.data.network.createFormPart
 import io.ktor.util.collections.ConcurrentSet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.io.Buffer
-import kotlinx.io.buffered
 
 interface AchievementPackRepository {
     val achievementPacks: StateFlow<List<AchievementPack>>
@@ -142,34 +137,3 @@ class AchievementPackRepositoryImpl(
         TODO("Not yet implemented")
     }
 }
-
-
-// TODO() transfer to utils
-fun createFormPart(
-    imageBytes: ByteArray,
-    imageFileName: String,
-): FormPart<InputProvider> =
-    FormPart(
-        key = "image",
-        value = InputProvider { 
-            Buffer().apply { write(imageBytes) }
-        },
-        headers = Headers.build {
-            append(HttpHeaders.ContentDisposition, "filename=$imageFileName")
-        }
-    )
-
-fun <T : Any> HttpResponse<T>.check() {
-    if (!success) {
-        throw Exception("Network error $response")
-    }
-}
-
-private fun AchievementPackSchema.toAchievementPack() = AchievementPack(
-    id = id,
-    name = name,
-    count = count,
-    achievementIds = achievementIds,
-    previewImageUrl = previewImageUrl,
-    code = code
-)
