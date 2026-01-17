@@ -12,6 +12,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
+import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.plezha.achi.shared.di.AppModule
 import com.plezha.achi.shared.navigation.AchievementPackListRoute
 import com.plezha.achi.shared.navigation.BottomNavigationBar
@@ -25,11 +26,12 @@ import io.ktor.client.engine.HttpClientEngine
 
 @Composable
 fun AchiApp() {
-    // Configure Coil to support PlatformFile from FileKit
+    // Configure Coil for image loading
     setSingletonImageLoaderFactory { context ->
         ImageLoader.Builder(context)
             .components {
-                addPlatformFileSupport()
+                addPlatformFileSupport() // Support for local PlatformFile from FileKit
+                add(KtorNetworkFetcherFactory()) // Support for network images via Ktor
             }
             .build()
     }

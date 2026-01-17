@@ -41,11 +41,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.plezha.achi.shared.ui.common.achievementExample
+import coil3.compose.AsyncImage
 import com.plezha.achi.shared.data.model.Achievement
 import com.plezha.achi.shared.data.model.AchievementStep
 import com.plezha.achi.shared.ui.common.PreviewWrapper
 import com.plezha.achi.shared.ui.common.TitleBar
+import com.plezha.achi.shared.ui.common.achievementExample
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.roundToInt
@@ -67,6 +68,9 @@ fun AchievementDetailsScreen(
             onStepProgressIncreased = { step, index -> 
                 viewModel.increaseStepProgress(step, index) 
             },
+            onStepProgressDecreased = { step, index ->
+                viewModel.decreaseStepProgress(step, index)
+            },
             onStepCompleted = { step, index ->
                 viewModel.setStepCompleted(step, true, index)
             },
@@ -84,6 +88,7 @@ private fun AchievementDetailsScreen(
     onStepCompleted: (AchievementStep, Int) -> Unit,
     onStepProgressReset: (AchievementStep, Int) -> Unit,
     onStepProgressIncreased: (AchievementStep, Int) -> Unit,
+    onStepProgressDecreased: (AchievementStep, Int) -> Unit,
     onBackClicked: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -97,13 +102,27 @@ private fun AchievementDetailsScreen(
             verticalArrangement = Arrangement.Top,
         ) {
             item {
-                Image(
-                    painter = painterResource(Res.drawable.img),
-                    contentScale = ContentScale.Crop,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .aspectRatio(1.7f)
-                )
+                // Achievement image
+                val imageUrl = achievement.imageUrl ?: achievement.previewImageUrl
+                if (imageUrl != null) {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = achievement.title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1.7f)
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(Res.drawable.img),
+                        contentScale = ContentScale.Crop,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1.7f)
+                    )
+                }
             }
             item {
                 Progress(
@@ -141,6 +160,7 @@ private fun AchievementDetailsScreen(
                         step = step,
                         stepIndex = index,
                         onStepProgressIncreased = onStepProgressIncreased,
+                        onStepProgressDecreased = onStepProgressDecreased,
                         modifier = stepModifier.padding(vertical = 4.dp)
                     )
                 }
@@ -154,16 +174,19 @@ private fun IncrementalStep(
     step: AchievementStep,
     stepIndex: Int,
     onStepProgressIncreased: (AchievementStep, Int) -> Unit,
+    onStepProgressDecreased: (AchievementStep, Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val displayDescription = step.description.ifBlank { "Step ${stepIndex + 1}" }
+    
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = step.description,
+                text = displayDescription,
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
@@ -173,11 +196,19 @@ private fun IncrementalStep(
                 }
             )
         }
-        FilledTonalButton(
-            onClick = { onStepProgressIncreased(step, stepIndex) },
-            enabled = step.progress.substepsDone < step.progress.substepsAmount,
-        ) {
-            Text("+1", maxLines = 1)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilledTonalButton(
+                onClick = { onStepProgressDecreased(step, stepIndex) },
+                enabled = step.progress.substepsDone > 0,
+            ) {
+                Text("-1", maxLines = 1)
+            }
+            FilledTonalButton(
+                onClick = { onStepProgressIncreased(step, stepIndex) },
+                enabled = step.progress.substepsDone < step.progress.substepsAmount,
+            ) {
+                Text("+1", maxLines = 1)
+            }
         }
     }
 }
@@ -190,13 +221,15 @@ private fun SimpleStep(
     onStepProgressReset: (AchievementStep, Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val displayDescription = step.description.ifBlank { "Step ${stepIndex + 1}" }
+    
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = step.description,
+            text = displayDescription,
         )
         CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
             Checkbox(
@@ -357,6 +390,7 @@ private fun AchievementDetailsScreenPreview() {
             onStepCompleted = { _, _ -> },
             onStepProgressReset = { _, _ -> },
             onStepProgressIncreased = { _, _ -> },
+            onStepProgressDecreased = { _, _ -> },
         ) { }
     }
 }
