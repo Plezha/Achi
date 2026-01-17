@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
@@ -64,12 +64,14 @@ fun AchievementDetailsScreen(
     } else if (uiState.value.achievement != null) {
         AchievementDetailsScreen(
             achievement = uiState.value.achievement!!,
-            onStepProgressIncreased = viewModel::increaseStepProgress,
-            onStepCompleted = {
-                viewModel.setStepCompleted(it, true)
+            onStepProgressIncreased = { step, index -> 
+                viewModel.increaseStepProgress(step, index) 
             },
-            onStepProgressReset = {
-                viewModel.setStepCompleted(it, false)
+            onStepCompleted = { step, index ->
+                viewModel.setStepCompleted(step, true, index)
+            },
+            onStepProgressReset = { step, index ->
+                viewModel.setStepCompleted(step, false, index)
             },
             onBackClicked = onBackClicked,
         )
@@ -79,9 +81,9 @@ fun AchievementDetailsScreen(
 @Composable
 private fun AchievementDetailsScreen(
     achievement: Achievement,
-    onStepCompleted: (AchievementStep) -> Unit,
-    onStepProgressReset: (AchievementStep) -> Unit,
-    onStepProgressIncreased: (AchievementStep) -> Unit,
+    onStepCompleted: (AchievementStep, Int) -> Unit,
+    onStepProgressReset: (AchievementStep, Int) -> Unit,
+    onStepProgressIncreased: (AchievementStep, Int) -> Unit,
     onBackClicked: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -118,9 +120,9 @@ private fun AchievementDetailsScreen(
                 )
                 Spacer(Modifier.height(8.dp))
             }
-            items(
+            itemsIndexed(
                 items = achievement.steps,
-            ) { step ->
+            ) { index, step ->
                 val stepModifier = remember {
                     Modifier
                         .fillMaxWidth()
@@ -129,6 +131,7 @@ private fun AchievementDetailsScreen(
                 if (step.progress.substepsAmount == 1) {
                     SimpleStep(
                         step = step,
+                        stepIndex = index,
                         modifier = stepModifier.padding(vertical = 12.dp),
                         onStepCompleted = onStepCompleted,
                         onStepProgressReset = onStepProgressReset
@@ -136,6 +139,7 @@ private fun AchievementDetailsScreen(
                 } else {
                     IncrementalStep(
                         step = step,
+                        stepIndex = index,
                         onStepProgressIncreased = onStepProgressIncreased,
                         modifier = stepModifier.padding(vertical = 4.dp)
                     )
@@ -148,7 +152,8 @@ private fun AchievementDetailsScreen(
 @Composable
 private fun IncrementalStep(
     step: AchievementStep,
-    onStepProgressIncreased: (AchievementStep) -> Unit,
+    stepIndex: Int,
+    onStepProgressIncreased: (AchievementStep, Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -169,7 +174,7 @@ private fun IncrementalStep(
             )
         }
         FilledTonalButton(
-            onClick = { onStepProgressIncreased(step) },
+            onClick = { onStepProgressIncreased(step, stepIndex) },
             enabled = step.progress.substepsDone < step.progress.substepsAmount,
         ) {
             Text("+1", maxLines = 1)
@@ -180,8 +185,9 @@ private fun IncrementalStep(
 @Composable
 private fun SimpleStep(
     step: AchievementStep,
-    onStepCompleted: (AchievementStep) -> Unit,
-    onStepProgressReset: (AchievementStep) -> Unit,
+    stepIndex: Int,
+    onStepCompleted: (AchievementStep, Int) -> Unit,
+    onStepProgressReset: (AchievementStep, Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -197,9 +203,9 @@ private fun SimpleStep(
                 checked = step.isDone,
                 onCheckedChange = {
                     if (it) {
-                        onStepCompleted(step)
+                        onStepCompleted(step, stepIndex)
                     } else {
-                        onStepProgressReset(step)
+                        onStepProgressReset(step, stepIndex)
                     }
                 }
             )
@@ -348,9 +354,9 @@ private fun AchievementDetailsScreenPreview() {
     PreviewWrapper {
         AchievementDetailsScreen(
             achievement = achievementExample,
-            onStepCompleted = { },
-            onStepProgressReset = { },
-            onStepProgressIncreased = { },
+            onStepCompleted = { _, _ -> },
+            onStepProgressReset = { _, _ -> },
+            onStepProgressIncreased = { _, _ -> },
         ) { }
     }
 }

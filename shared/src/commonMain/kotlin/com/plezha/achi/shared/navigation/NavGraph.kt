@@ -131,7 +131,10 @@ fun createNavEntryProvider(
     // Achievement Pack List screen
     entry<AchievementPackListRoute> {
         val achievementPackListViewModel = remember {
-            AchievementPackListViewModel(appModule.achievementPackRepository)
+            AchievementPackListViewModel(
+                userRepository = appModule.userRepository,
+                authRepository = appModule.authRepository
+            )
         }
 
         AchievementPackList(
@@ -165,7 +168,11 @@ fun createNavEntryProvider(
     // Achievement Details screen
     entry<AchievementRoute> { route ->
         val viewModel = remember(route.id) {
-            AchievementDetailsViewModel(appModule.achievementRepository).apply {
+            AchievementDetailsViewModel(
+                repository = appModule.achievementRepository,
+                userRepository = appModule.userRepository,
+                authRepository = appModule.authRepository
+            ).apply {
                 loadAchievementById(route.id)
             }
         }

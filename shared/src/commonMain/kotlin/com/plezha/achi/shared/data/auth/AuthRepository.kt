@@ -4,6 +4,8 @@ import com.plezha.achi.shared.data.network.apis.AchievementsApi
 import com.plezha.achi.shared.data.network.apis.AuthenticationApi
 import com.plezha.achi.shared.data.network.apis.PacksApi
 import com.plezha.achi.shared.data.network.apis.UploadApi
+import com.plezha.achi.shared.data.network.apis.UserCollectionApi
+import com.plezha.achi.shared.data.network.apis.UserProgressApi
 import com.plezha.achi.shared.data.network.apis.UsersApi
 import com.plezha.achi.shared.data.network.models.UserCreateBody
 import com.russhwolf.settings.Settings
@@ -29,7 +31,9 @@ class AuthRepository(
     private val usersApi: UsersApi,
     private val achievementsApi: AchievementsApi,
     private val packsApi: PacksApi,
-    private val uploadApi: UploadApi
+    private val uploadApi: UploadApi,
+    private val userCollectionApi: UserCollectionApi,
+    private val userProgressApi: UserProgressApi
 ) {
     private val settings: Settings = Settings()
     
@@ -65,12 +69,16 @@ class AuthRepository(
         achievementsApi.setAccessToken(token)
         packsApi.setAccessToken(token)
         uploadApi.setAccessToken(token)
+        userCollectionApi.setAccessToken(token)
+        userProgressApi.setAccessToken(token)
     }
     
     private fun clearTokenOnApis() {
         achievementsApi.setAccessToken("")
         packsApi.setAccessToken("")
         uploadApi.setAccessToken("")
+        userCollectionApi.setAccessToken("")
+        userProgressApi.setAccessToken("")
     }
     
     suspend fun login(username: String, password: String): AuthResult {

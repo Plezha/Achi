@@ -4,11 +4,15 @@ import com.plezha.achi.shared.data.AchievementPackRepository
 import com.plezha.achi.shared.data.AchievementPackRepositoryImpl
 import com.plezha.achi.shared.data.AchievementRepository
 import com.plezha.achi.shared.data.AchievementRepositoryImpl
+import com.plezha.achi.shared.data.UserRepository
+import com.plezha.achi.shared.data.UserRepositoryImpl
 import com.plezha.achi.shared.data.auth.AuthRepository
 import com.plezha.achi.shared.data.network.apis.AchievementsApi
 import com.plezha.achi.shared.data.network.apis.AuthenticationApi
 import com.plezha.achi.shared.data.network.apis.PacksApi
 import com.plezha.achi.shared.data.network.apis.UploadApi
+import com.plezha.achi.shared.data.network.apis.UserCollectionApi
+import com.plezha.achi.shared.data.network.apis.UserProgressApi
 import com.plezha.achi.shared.data.network.apis.UsersApi
 import io.ktor.client.engine.HttpClientEngine
 
@@ -27,6 +31,8 @@ class AppModule(httpClientEngine: HttpClientEngine) {
     val achievementsApi = AchievementsApi(baseUrl = API_BASE_URL, httpClientEngine = httpClientEngine)
     val packsApi = PacksApi(baseUrl = API_BASE_URL, httpClientEngine = httpClientEngine)
     val uploadApi = UploadApi(baseUrl = API_BASE_URL, httpClientEngine = httpClientEngine)
+    val userCollectionApi = UserCollectionApi(baseUrl = API_BASE_URL, httpClientEngine = httpClientEngine)
+    val userProgressApi = UserProgressApi(baseUrl = API_BASE_URL, httpClientEngine = httpClientEngine)
     
     // Repositories
     val authRepository: AuthRepository by lazy {
@@ -35,7 +41,16 @@ class AppModule(httpClientEngine: HttpClientEngine) {
             usersApi = usersApi,
             achievementsApi = achievementsApi,
             packsApi = packsApi,
-            uploadApi = uploadApi
+            uploadApi = uploadApi,
+            userCollectionApi = userCollectionApi,
+            userProgressApi = userProgressApi
+        )
+    }
+    
+    val userRepository: UserRepository by lazy {
+        UserRepositoryImpl(
+            userCollectionApi = userCollectionApi,
+            userProgressApi = userProgressApi
         )
     }
     

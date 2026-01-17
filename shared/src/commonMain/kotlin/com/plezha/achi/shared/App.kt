@@ -51,10 +51,17 @@ private fun AchiAppNav() {
 
     // Shared ViewModels for pack creation flow
     val addAchievementsViewModel = remember { 
-        AddAchievementsViewModel(appModule.achievementPackRepository) 
+        AddAchievementsViewModel(
+            achievementPackRepository = appModule.achievementPackRepository,
+            userRepository = appModule.userRepository,
+            authRepository = appModule.authRepository
+        ) 
     }
     val createAchievementPackViewModel = remember { 
-        CreateAchievementPackViewModel(appModule.achievementPackRepository) 
+        CreateAchievementPackViewModel(
+            repository = appModule.achievementPackRepository,
+            userRepository = appModule.userRepository
+        ) 
     }
 
     Scaffold(
