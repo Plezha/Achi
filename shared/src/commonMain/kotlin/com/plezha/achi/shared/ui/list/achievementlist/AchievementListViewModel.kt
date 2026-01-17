@@ -4,8 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.plezha.achi.shared.data.AchievementPackRepository
 import com.plezha.achi.shared.data.AchievementRepository
+import com.plezha.achi.shared.data.UserRepository
+import com.plezha.achi.shared.data.auth.AuthRepository
 import com.plezha.achi.shared.data.model.Achievement
 import com.plezha.achi.shared.data.model.AchievementPack
+import com.plezha.achi.shared.data.toStepProgressList
+import com.plezha.achi.shared.ui.list.achievementdetails.withProgress
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,11 +20,22 @@ data class AchievementListUiState(
     val pack: AchievementPack? = null,
     val achievements: List<Achievement> = emptyList(),
     val isLoading: Boolean = false
-)
+) {
+    /** Overall progress across all achievements (0.0 to 1.0) */
+    val overallProgress: Float
+        get() = if (achievements.isEmpty()) 0f 
+                else achievements.sumOf { it.progress }.toFloat() / achievements.size
+    
+    /** Number of fully completed achievements */
+    val completedCount: Int
+        get() = achievements.count { it.isDone }
+}
 
 class AchievementListViewModel(
     private val achievementRepository: AchievementRepository,
-    private val achievementPackRepository: AchievementPackRepository
+    private val achievementPackRepository: AchievementPackRepository,
+    private val userRepository: UserRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AchievementListUiState())
     val uiState: StateFlow<AchievementListUiState> = _uiState.asStateFlow()
@@ -30,7 +45,7 @@ class AchievementListViewModel(
     val achievements: StateFlow<List<Achievement>> = _achievements
 
     fun loadAchievementsByPackId(id: String) {
-        viewModelScope.launch(Dispatchers.Default) { // TODO IO
+        viewModelScope.launch(Dispatchers.Default) {
             _uiState.value = _uiState.value.copy(isLoading = true)
             
             val pack = achievementPackRepository.getAchievementPackById(id)
@@ -38,10 +53,29 @@ class AchievementListViewModel(
                 achievementRepository.getAchievement(it)
             }
             
-            _achievements.value = achievementsList
+            // Merge with user progress if logged in
+            val isLoggedIn = authRepository.authState.value.isLoggedIn
+            val achievementsWithProgress = if (isLoggedIn) {
+                achievementsList.map { achievement ->
+                    try {
+                        val progress = userRepository.getProgress(achievement.id)
+                        if (progress != null) {
+                            achievement.withProgress(progress.toStepProgressList())
+                        } else {
+                            achievement
+                        }
+                    } catch (e: Exception) {
+                        achievement
+                    }
+                }
+            } else {
+                achievementsList
+            }
+            
+            _achievements.value = achievementsWithProgress
             _uiState.value = AchievementListUiState(
                 pack = pack,
-                achievements = achievementsList,
+                achievements = achievementsWithProgress,
                 isLoading = false
             )
         }

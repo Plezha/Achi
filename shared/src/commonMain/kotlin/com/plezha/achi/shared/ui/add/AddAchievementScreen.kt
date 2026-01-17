@@ -58,12 +58,12 @@ fun AddAchievementScreen(
                     .padding(horizontal = 16.dp)
             ) {
                 Text(
-                    text = "Add Manually",
+                    text = "Create Achievement Pack",
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Add an achievement pack by filling out a form",
+                    text = "Create an achievement pack by filling out a form",
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -73,7 +73,7 @@ fun AddAchievementScreen(
                     shape = MaterialTheme.shapes.medium
                 ) {
                     Text(
-                        text = "Add Achievement Pack",
+                        text = "Create Achievement Pack",
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 }

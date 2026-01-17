@@ -95,7 +95,7 @@ class AchievementPackRepositoryImpl(
                 val formPart = createFormPart(imgBytes, imgFileName)
                 val uploadResponse = uploadApi.uploadImageUploadImagePost(formPart, "achievement-images")
                 uploadResponse.check()
-                val imageUrl = uploadResponse.body().toString()
+                val imageUrl = uploadResponse.body().url
                 achievement.copy(
                     imageUrl = imageUrl,
                     previewImageUrl = imageUrl
@@ -118,7 +118,7 @@ class AchievementPackRepositoryImpl(
 
         val uploadResponse = uploadApi.uploadImageUploadImagePost(formPart, "pack-previews")
         uploadResponse.check()
-        val packPreviewImageUrl = uploadResponse.body().toString()
+        val packPreviewImageUrl = uploadResponse.body().url
 
         val response = packsApi.createPackPacksPost(
             AchievementPackCreateBody(
