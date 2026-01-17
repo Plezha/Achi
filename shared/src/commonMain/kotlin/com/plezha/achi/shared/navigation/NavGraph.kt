@@ -18,15 +18,24 @@ import com.plezha.achi.shared.ui.add.EditAchievementNavigationEvent
 import com.plezha.achi.shared.ui.add.EditAchievementScreen
 import com.plezha.achi.shared.ui.add.EditAchievementViewModel
 import com.plezha.achi.shared.ui.add.NavigationEvent
-import com.plezha.achi.shared.ui.list.achievmentdetails.AchievementDetailsScreen
-import com.plezha.achi.shared.ui.list.achievmentdetails.AchievementDetailsViewModel
-import com.plezha.achi.shared.ui.list.achievmentlist.AchievementListViewModel
-import com.plezha.achi.shared.ui.list.achievmentlist.AchievementsScreen
+import com.plezha.achi.shared.ui.list.achievementdetails.AchievementDetailsScreen
+import com.plezha.achi.shared.ui.list.achievementdetails.AchievementDetailsViewModel
+import com.plezha.achi.shared.ui.list.achievementlist.AchievementListViewModel
+import com.plezha.achi.shared.ui.list.achievementlist.AchievementsScreen
 import com.plezha.achi.shared.ui.list.packlist.AchievementPackList
 import com.plezha.achi.shared.ui.list.packlist.AchievementPackListViewModel
 import com.plezha.achi.shared.ui.profile.ProfileScreen
 import com.plezha.achi.shared.ui.profile.ProfileViewModel
 import kotlinx.coroutines.flow.collectLatest
+
+/**
+ * Pops the back stack if there is more than one entry.
+ */
+private fun NavBackStack<NavKey>.popBack() {
+    if (size > 1) {
+        removeAt(size - 1)
+    }
+}
 
 /**
  * Creates the navigation entry provider with all screen entries.
@@ -47,9 +56,6 @@ fun createNavEntryProvider(
                     is NavigationEvent.NavigateToCreatePack -> {
                         backStack.add(CreateAchievementPackRoute)
                     }
-                    is NavigationEvent.NavigateToCreateAchievement -> {
-                        // No longer used - achievement creation is now part of pack creation flow
-                    }
                 }
             }
         }
@@ -68,9 +74,7 @@ fun createNavEntryProvider(
             createAchievementPackViewModel.navigationFlow.collectLatest { event ->
                 when (event) {
                     is CreatePackNavigationEvent.NavigateBack -> {
-                        if (backStack.size > 1) {
-                            backStack.removeAt(backStack.size - 1)
-                        }
+                        backStack.popBack()
                     }
                 }
             }
@@ -84,11 +88,7 @@ fun createNavEntryProvider(
         
         CreateAchievementPackScreen(
             createAchievementPackViewModel = createAchievementPackViewModel,
-            onBackClicked = {
-                if (backStack.size > 1) {
-                    backStack.removeAt(backStack.size - 1)
-                }
-            },
+            onBackClicked = backStack::popBack,
             onAchievementClick = { index ->
                 backStack.add(EditAchievementRoute(index))
             }
@@ -113,14 +113,10 @@ fun createNavEntryProvider(
                             route.achievementIndex,
                             event.achievement
                         )
-                        if (backStack.size > 1) {
-                            backStack.removeAt(backStack.size - 1)
-                        }
+                        backStack.popBack()
                     }
                     is EditAchievementNavigationEvent.Cancel -> {
-                        if (backStack.size > 1) {
-                            backStack.removeAt(backStack.size - 1)
-                        }
+                        backStack.popBack()
                     }
                 }
             }
@@ -128,11 +124,7 @@ fun createNavEntryProvider(
         
         EditAchievementScreen(
             viewModel = editViewModel,
-            onBackClicked = {
-                if (backStack.size > 1) {
-                    backStack.removeAt(backStack.size - 1)
-                }
-            }
+            onBackClicked = backStack::popBack
         )
     }
 
@@ -166,11 +158,7 @@ fun createNavEntryProvider(
             onAchievementClick = { achievement ->
                 backStack.add(AchievementRoute(achievement.id))
             },
-            onBackClicked = {
-                if (backStack.size > 1) {
-                    backStack.removeAt(backStack.size - 1)
-                }
-            }
+            onBackClicked = backStack::popBack
         )
     }
 
@@ -184,11 +172,7 @@ fun createNavEntryProvider(
 
         AchievementDetailsScreen(
             viewModel = viewModel,
-            onBackClicked = {
-                if (backStack.size > 1) {
-                    backStack.removeAt(backStack.size - 1)
-                }
-            }
+            onBackClicked = backStack::popBack
         )
     }
 

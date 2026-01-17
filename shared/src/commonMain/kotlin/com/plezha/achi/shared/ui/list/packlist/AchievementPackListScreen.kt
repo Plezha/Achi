@@ -10,7 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.plezha.achi.shared.data.model.AchievementPack
 import com.plezha.achi.shared.ui.common.TitleBar
-import com.plezha.achi.shared.ui.list.achievmentlist.AchievementCard
+import com.plezha.achi.shared.ui.list.achievementlist.AchievementCard
 
 
 @Composable
