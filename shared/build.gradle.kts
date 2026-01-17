@@ -64,7 +64,7 @@ kotlin {
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.datetime)
                 implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
-                val filekitversion = "0.10.0"
+                val filekitversion = "0.12.0"
                 implementation("io.github.vinceglb:filekit-core:${filekitversion}")
                 implementation("io.github.vinceglb:filekit-dialogs:${filekitversion}")
                 implementation("io.github.vinceglb:filekit-dialogs-compose:${filekitversion}")
