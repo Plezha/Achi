@@ -19,7 +19,6 @@ data class AddAchievementUiState(
 
 sealed class NavigationEvent {
     object NavigateToCreatePack : NavigationEvent()
-    object NavigateToCreateAchievement : NavigationEvent()
 }
 
 class AddAchievementsViewModel(

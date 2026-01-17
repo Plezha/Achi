@@ -1,4 +1,4 @@
-package com.plezha.achi.shared.ui.list.achievmentlist
+package com.plezha.achi.shared.ui.list.achievementlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -103,7 +103,6 @@ class AchievementPackRepositoryImpl(
         }
         
         for (achievement in achievementsWithImages) {
-            // TODO UseCases
             val response =
                 achievementsApi.createAchievementAchievementsPost(
                     achievement

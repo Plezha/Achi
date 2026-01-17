@@ -1,4 +1,4 @@
-package com.plezha.achi.shared.ui.list.achievmentdetails
+package com.plezha.achi.shared.ui.list.achievementdetails
 
 import achi.shared.generated.resources.Res
 import achi.shared.generated.resources.img
