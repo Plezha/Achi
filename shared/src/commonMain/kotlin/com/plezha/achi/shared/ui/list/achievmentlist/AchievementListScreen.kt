@@ -32,7 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.plezha.achi.shared.data.achievementExample
+import com.plezha.achi.shared.ui.common.achievementExample
 import com.plezha.achi.shared.data.model.Achievement
 import com.plezha.achi.shared.ui.common.PreviewWrapper
 import com.plezha.achi.shared.ui.common.TitleBar
