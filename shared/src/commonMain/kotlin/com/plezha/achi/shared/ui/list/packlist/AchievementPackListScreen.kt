@@ -31,7 +31,7 @@ fun AchievementPackList(
         LazyColumn {
             items(
                 items = achievementPacks,
-                key = { it.name }
+                key = { it.id }
             ) { achievementPack ->
                 AchievementPackCard(
                     achievementPack = achievementPack,

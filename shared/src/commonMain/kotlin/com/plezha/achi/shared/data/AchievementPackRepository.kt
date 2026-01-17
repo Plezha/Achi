@@ -17,9 +17,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.io.Buffer
 import kotlinx.io.buffered
-import kotlinx.io.files.Path
-import kotlinx.io.files.SystemFileSystem
 
 interface AchievementPackRepository {
     val achievementPacks: StateFlow<List<AchievementPack>>
@@ -31,8 +30,9 @@ interface AchievementPackRepository {
     suspend fun createAchievementPack(
         name: String,
         achievements: List<AchievementCreateBody>,
-        packPreviewImagePath: Path,
+        imageBytes: ByteArray,
         imageFileName: String,
+        achievementImages: Map<Int, Pair<ByteArray, String>> = emptyMap()
     ): String
 
     suspend fun editAchievementPack(pack: AchievementPack)
@@ -84,11 +84,30 @@ class AchievementPackRepositoryImpl(
     override suspend fun createAchievementPack(
         name: String,
         achievements: List<AchievementCreateBody>,
-        packPreviewImagePath: Path,
+        imageBytes: ByteArray,
         imageFileName: String,
+        achievementImages: Map<Int, Pair<ByteArray, String>>
     ): String {
         val ids = ConcurrentSet<String>()
-        for (achievement in achievements) {
+        
+        val achievementsWithImages = achievements.mapIndexed { index, achievement ->
+            val imageData = achievementImages[index]
+            if (imageData != null) {
+                val (imgBytes, imgFileName) = imageData
+                val formPart = createFormPart(imgBytes, imgFileName)
+                val uploadResponse = uploadApi.uploadImageUploadImagePost(formPart, "achievement-images")
+                uploadResponse.check()
+                val imageUrl = uploadResponse.body().toString()
+                achievement.copy(
+                    imageUrl = imageUrl,
+                    previewImageUrl = imageUrl
+                )
+            } else {
+                achievement
+            }
+        }
+        
+        for (achievement in achievementsWithImages) {
             // TODO UseCases
             val response =
                 achievementsApi.createAchievementAchievementsPost(
@@ -98,7 +117,7 @@ class AchievementPackRepositoryImpl(
             ids.add(response.body().id)
         }
 
-        val formPart = createFormPart(packPreviewImagePath, imageFileName)
+        val formPart = createFormPart(imageBytes, imageFileName)
 
         val uploadResponse = uploadApi.uploadImageUploadImagePost(formPart, "pack-previews")
         uploadResponse.check()
@@ -112,7 +131,11 @@ class AchievementPackRepositoryImpl(
             )
         )
         response.check()
-        return response.body().id
+        
+        val createdPack = response.body().toAchievementPack()
+        _packs.update { currentPacks -> currentPacks + createdPack }
+        
+        return createdPack.id
     }
 
     override suspend fun editAchievementPack(pack: AchievementPack) {
@@ -123,12 +146,14 @@ class AchievementPackRepositoryImpl(
 
 // TODO() transfer to utils
 fun createFormPart(
-    packPreviewImagePath: Path,
+    imageBytes: ByteArray,
     imageFileName: String,
 ): FormPart<InputProvider> =
     FormPart(
         key = "image",
-        value = InputProvider { SystemFileSystem.source(packPreviewImagePath).buffered() },
+        value = InputProvider { 
+            Buffer().apply { write(imageBytes) }
+        },
         headers = Headers.build {
             append(HttpHeaders.ContentDisposition, "filename=$imageFileName")
         }
