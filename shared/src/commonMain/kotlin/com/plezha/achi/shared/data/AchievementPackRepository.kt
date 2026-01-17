@@ -22,13 +22,17 @@ interface AchievementPackRepository {
 
     suspend fun getAchievementPackById(id: String): AchievementPack
 
+    /**
+     * Creates a new achievement pack on the server.
+     * @return The created pack (including its code for sharing)
+     */
     suspend fun createAchievementPack(
         name: String,
         achievements: List<AchievementCreateBody>,
         imageBytes: ByteArray,
         imageFileName: String,
         achievementImages: Map<Int, Pair<ByteArray, String>> = emptyMap()
-    ): String
+    ): AchievementPack
 
     suspend fun editAchievementPack(pack: AchievementPack)
 }
@@ -75,14 +79,13 @@ class AchievementPackRepositoryImpl(
         }
     }
 
-    // Returns id
     override suspend fun createAchievementPack(
         name: String,
         achievements: List<AchievementCreateBody>,
         imageBytes: ByteArray,
         imageFileName: String,
         achievementImages: Map<Int, Pair<ByteArray, String>>
-    ): String {
+    ): AchievementPack {
         val ids = ConcurrentSet<String>()
         
         val achievementsWithImages = achievements.mapIndexed { index, achievement ->
@@ -129,7 +132,7 @@ class AchievementPackRepositoryImpl(
         val createdPack = response.body().toAchievementPack()
         _packs.update { currentPacks -> currentPacks + createdPack }
         
-        return createdPack.id
+        return createdPack
     }
 
     override suspend fun editAchievementPack(pack: AchievementPack) {

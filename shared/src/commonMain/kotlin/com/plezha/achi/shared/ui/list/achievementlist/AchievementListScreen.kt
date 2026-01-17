@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -30,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.plezha.achi.shared.ui.common.achievementExample
@@ -46,21 +48,26 @@ fun AchievementsScreen(
     onAchievementClick: (Achievement) -> Unit,
     onBackClicked: () -> Unit
 ) {
-    val achievements by achievementListViewModel.achievements.collectAsState()
+    val uiState by achievementListViewModel.uiState.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
         TitleBar(
-            text = "Achievements",
+            text = uiState.pack?.name ?: "Achievements",
             onBackClicked = onBackClicked,
             modifier = Modifier.fillMaxWidth(),
         )
+        
+        // Show pack code for sharing
+        uiState.pack?.code?.let { code ->
+            PackCodeBanner(code = code)
+        }
 
         LazyColumn {
             items(
-                items = achievements,
+                items = uiState.achievements,
                 key = { it.title + it.shortDescription }
             ) { achievement ->
                 AchievementCard(
@@ -72,6 +79,37 @@ fun AchievementsScreen(
             }
         }
 
+    }
+}
+
+@Composable
+private fun PackCodeBanner(code: String) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(8.dp),
+        color = MaterialTheme.colorScheme.secondaryContainer
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Share code:",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = code,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = FontFamily.Monospace
+                ),
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        }
     }
 }
 

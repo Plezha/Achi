@@ -3,6 +3,7 @@ package com.plezha.achi.shared.ui.add
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.plezha.achi.shared.data.AchievementPackRepository
+import com.plezha.achi.shared.data.UserRepository
 import com.plezha.achi.shared.data.network.models.AchievementCreateBody
 import com.plezha.achi.shared.data.network.models.AchievementStepCreate
 import io.github.vinceglb.filekit.PlatformFile
@@ -56,7 +57,8 @@ sealed class CreatePackNavigationEvent {
 }
 
 class CreateAchievementPackViewModel(
-    private val repository: AchievementPackRepository
+    private val repository: AchievementPackRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreateAchievementPackUiState())
@@ -194,17 +196,25 @@ class CreateAchievementPackViewModel(
                 }
 
                 // Create the pack
-                repository.createAchievementPack(
+                val createdPack = repository.createAchievementPack(
                     name = currentState.packName,
                     achievements = achievementBodies,
                     imageBytes = imageBytes,
                     imageFileName = fileName,
                     achievementImages = achievementImages
                 )
+                
+                // Add the created pack to user's collection
+                try {
+                    userRepository.addPackByCode(createdPack.code)
+                } catch (e: Exception) {
+                    // Pack created but failed to add to collection - log but don't fail
+                    println("Warning: Pack created but failed to add to collection: ${e.message}")
+                }
 
                 // Reset the form after successful creation
                 _uiState.value = CreateAchievementPackUiState()
-                _messageChannel.send("Pack \"${currentState.packName}\" created successfully!")
+                _messageChannel.send("Pack \"${currentState.packName}\" created successfully! Code: ${createdPack.code}")
                 _navigationChannel.send(CreatePackNavigationEvent.NavigateBack)
 
             } catch (e: Exception) {
