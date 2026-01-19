@@ -32,9 +32,9 @@ kotlin {
     val xcfName = "sharedKit"
 
     listOf<KotlinNativeTarget>(
-//        iosX64(),
-//        iosArm64(),
-//        iosSimulatorArm64()
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = xcfName
