@@ -18,14 +18,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -184,30 +187,55 @@ private fun IncrementalStep(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = displayDescription,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                text = "Current: ${step.progress.substepsDone}/${step.progress.substepsAmount}",
-                style = MaterialTheme.typography.bodySmall.let {
-                    it.copy(color = it.color.copy(alpha = 0.75f))
+        Text(
+            text = displayDescription,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f)
+        )
+        
+        // Compact stepper control
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            tonalElevation = 1.dp
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(0.dp)
+            ) {
+                // Minus button
+                FilledTonalIconButton(
+                    onClick = { onStepProgressDecreased(step, stepIndex) },
+                    enabled = step.progress.substepsDone > 0,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Text(
+                        text = "−",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
-            )
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilledTonalButton(
-                onClick = { onStepProgressDecreased(step, stepIndex) },
-                enabled = step.progress.substepsDone > 0,
-            ) {
-                Text("-1", maxLines = 1)
-            }
-            FilledTonalButton(
-                onClick = { onStepProgressIncreased(step, stepIndex) },
-                enabled = step.progress.substepsDone < step.progress.substepsAmount,
-            ) {
-                Text("+1", maxLines = 1)
+                
+                // Count display
+                Text(
+                    text = "${step.progress.substepsDone}/${step.progress.substepsAmount}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+                
+                // Plus button
+                FilledTonalIconButton(
+                    onClick = { onStepProgressIncreased(step, stepIndex) },
+                    enabled = step.progress.substepsDone < step.progress.substepsAmount,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Text(
+                        text = "+",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
