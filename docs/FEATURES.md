@@ -2,13 +2,13 @@
 
 ## Overview
 
-Achi is an achievement tracking application that allows users to manage collections of achievements (called "packs") and track their progress through various steps. The app is organized around three main sections accessible via bottom navigation.
+Achi is an achievement tracking application that allows users to manage collections of achievements (called "packs") and track their progress through various steps. The app features user authentication with server-synced progress. The app is organized around three main sections accessible via bottom navigation.
 
 ## Core Features
 
 ### 1. Achievement Pack List
 
-**Purpose**: Browse and view all achievement packs that have been added by the user.
+**Purpose**: Browse and view all achievement packs in the user's collection.
 
 **Location**: Main "Achievements" tab (center bottom navigation)
 
@@ -17,35 +17,38 @@ Achi is an achievement tracking application that allows users to manage collecti
 **ViewModel**: `AchievementPackListViewModel.kt`
 
 **Functionality**:
-- Displays all achievement packs in a scrollable list
+- Displays all achievement packs in user's collection (requires login)
 - Shows pack name and achievement count for each pack
 - Card-based UI with preview images
 - Tap a pack to view its achievements
+- Loading state while fetching from server
+- Empty state when logged out or no packs
 
 **UI Components**:
 - Title bar: "Achievement Packs"
 - LazyColumn of pack cards
 - Each card shows:
-  - Pack preview image (or placeholder)
+  - Pack preview image (via Coil AsyncImage)
   - Pack name
   - Achievement count (e.g., "5 achievements")
 
 **User Flow**:
-1. User opens the app (starts on this screen)
-2. Views list of added packs
-3. Taps a pack card
-4. Navigates to Achievement List for that pack
+1. User logs in
+2. App fetches user's pack collection from server
+3. Views list of added packs
+4. Taps a pack card
+5. Navigates to Achievement List for that pack
 
-**Current State**:
-- Packs are stored in memory (StateFlow)
-- List updates reactively when packs are added
-- No persistence (packs lost on app restart)
+**Auth Integration**:
+- Observes auth state from AuthRepository
+- Loads packs when user logs in
+- Clears packs when user logs out
 
 ### 2. Achievement List
 
 **Purpose**: View all achievements within a specific achievement pack.
 
-**Screen**: `AchievementListScreen.kt` (AchievementsScreen composable)
+**Screen**: `AchievementListScreen.kt`
 
 **ViewModel**: `AchievementListViewModel.kt`
 
@@ -59,16 +62,9 @@ Achi is an achievement tracking application that allows users to manage collecti
 - Title bar with "Achievements" title and back button
 - LazyColumn of achievement cards
 - Each card shows:
-  - Achievement preview image (or placeholder)
+  - Achievement preview image (via Coil AsyncImage)
   - Achievement title
   - Short description
-
-**User Flow**:
-1. User taps pack from Achievement Pack List
-2. ViewModel loads achievements by pack ID
-3. Achievements displayed in list
-4. User taps achievement to view details
-5. Back button returns to pack list
 
 **Data Loading**:
 ```kotlin
@@ -89,8 +85,9 @@ achievementListViewModel.loadAchievementsByPackId(packId)
 - List all steps with individual tracking
 - Two types of step interaction:
   - **Simple steps**: Checkbox to mark complete/incomplete
-  - **Incremental steps**: "+1" button to increment progress
-- Animated progress updates
+  - **Incremental steps**: +/- buttons to adjust progress
+- Optimistic UI updates (immediate visual feedback)
+- Server sync when logged in
 - Back button to return to achievement list
 
 **UI Components**:
@@ -113,44 +110,23 @@ achievementListViewModel.loadAchievementsByPackId(packId)
 [Description]                    [Checkbox]
 ```
 - User checks/unchecks to mark done/undone
-- Example: "Первая лаба принята"
 
 **Incremental Step** (substepsAmount > 1):
 ```
-[Description]                    [+1 Button]
-Current: X/Y
+[Description]                    [-] [X/Y] [+]
 ```
-- User taps +1 to increment progress
+- User taps +/- to adjust progress
 - Shows current substeps completed
-- Button disabled when fully completed
-- Example: "Подготовиться хоть чуть чуть к экзу" (0/10)
+- Buttons disabled at min/max
 
-**Progress Calculation**:
-- Overall progress = average of all step progress
-- Step progress = substepsDone / substepsAmount
-- Animated progress bar smoothly transitions
-
-**User Flow**:
-1. User taps achievement from list
-2. ViewModel loads achievement by ID
-3. Shows loading indicator while loading
-4. Displays achievement details and steps
-5. User interacts with steps:
-   - Check/uncheck simple steps
-   - Increment progress on incremental steps
-6. Progress bar updates in real-time
-7. Back button returns to achievement list
-
-**State Management**:
-```kotlin
-viewModel.increaseStepProgress(step)  // +1 button
-viewModel.setStepCompleted(step, true)  // Check
-viewModel.setStepCompleted(step, false)  // Uncheck
-```
+**Progress Sync**:
+- If logged in: Progress synced to server via UserProgressApi
+- If not logged in: Progress is local-only (lost on restart)
+- Optimistic updates: UI updates immediately, server sync in background
 
 ### 4. Add Achievements
 
-**Purpose**: Add new achievement packs to the collection.
+**Purpose**: Add new achievement packs to the user's collection.
 
 **Location**: "Add" tab (left bottom navigation)
 
@@ -161,61 +137,30 @@ viewModel.setStepCompleted(step, false)  // Uncheck
 **Functionality**:
 Two methods to add achievement packs:
 
-#### Method 1: Add with Code
-
-- User enters a shareable code
-- Fetches pack from server
-- Adds to local collection
-- Shows success/error message via Snackbar
-
-**UI Components**:
-- Section header: "Add with a Code"
-- Description text
-- Text field for code entry
-- Submit on keyboard "Done" action
-- Loading indicator overlay
-
-**User Flow**:
-1. User taps Add tab
-2. Enters achievement pack code in text field
-3. Presses keyboard "Done" or navigates away
-4. ViewModel calls `onCodeSubmit()`
-5. Loading state shown
-6. API fetches pack by code
-7. Success: 
-   - Pack added to repository
-   - Snackbar: "{Pack Name} pack successfully added"
-   - Input field cleared
-8. Error scenarios:
-   - Pack already added: "Pack already in the list"
-   - Pack not found: "No achievement pack with code X exists"
-
-**Code Flow**:
-```kotlin
-fun onCodeSubmit() {
-    val pack = achievementPackRepository.getAchievementPackByCode(code)
-    // Success or error handling
-}
-```
-
-#### Method 2: Add Manually
-
+#### Method 1: Create Achievement Pack
 - Button to create custom achievement pack
 - Navigates to pack creation form
 
-**UI Components**:
-- Section header: "Add Manually"
-- Description text
-- "Add Achievement Pack" button
+#### Method 2: Add with Code
+- User enters a shareable code
+- Adds pack to user's collection (requires login)
+- Shows success/error message via Snackbar
 
-**User Flow**:
-1. User taps "Add Achievement Pack" button
-2. ViewModel sends navigation event
-3. Navigates to Create Achievement Pack screen
+**UI Components**:
+- Title bar: "Add Achievements"
+- "Create Achievement Pack" section with button
+- "Add with a Code" section:
+  - Text field for code entry
+  - Submit on keyboard "Done" action
+- Loading indicator overlay
+
+**Auth Check**:
+- Adding by code requires login
+- Shows "Please log in" message if not authenticated
 
 ### 5. Create Achievement Pack
 
-**Purpose**: Manually create a custom achievement pack with achievements.
+**Purpose**: Create a custom achievement pack with achievements.
 
 **Screen**: `CreateAchievementPackScreen.kt`
 
@@ -224,260 +169,236 @@ fun onCodeSubmit() {
 **Functionality**:
 - Create a named achievement pack
 - Add multiple achievements to the pack
-- Set pack description
-- Upload pack preview image
-- Save to server
+- Select pack preview image (via FileKit picker)
+- Add/edit/remove achievements
+- Save to server with image upload
 
 **UI Components**:
-- Title bar: "Create Achievement Pack"
+- Title bar: "Create Achievement Pack" with back button
 - Scrollable form with:
   - Pack name text field
   - Pack description text field
-  - "Add Achievement" button
-  - Dynamic list of achievement forms (one per added achievement):
-    - Achievement title field
-    - Achievement description field
-  - "Save Achievement Pack" button at bottom
+  - Image picker (shows preview when selected)
+  - "Achievements" section with count and Add button
+  - List of achievement preview cards (clickable to edit)
+  - "Save Achievement Pack" button
 
-**Current Implementation Status**:
-- ✅ UI fully implemented
-- ✅ Form state management
-- ✅ Dynamic achievement list
-- ⚠️ File picker integrated but handler incomplete
-- ⏳ Save functionality in ViewModel (not fully wired)
+**Achievement Cards**:
+- Show image, title, description, step count
+- Clickable to navigate to EditAchievementScreen
+- Remove button to delete from pack
 
-**ViewModel State**:
-```kotlin
-data class CreateAchievementPackUiState(
-    val packName: String = "",
-    val packDescription: String = "",
-    val achievements: List<AchievementFormData> = emptyList()
-)
-```
+**Validation**:
+- Pack name required
+- At least one achievement required
+- All achievements must have titles
+- Preview image required
 
-**User Flow**:
-1. User navigates from Add screen
-2. Enters pack name and description
-3. Taps "Add Achievement" to add achievement forms
-4. Fills in each achievement's title and description
-5. (Future) Selects pack preview image
-6. Taps "Save Achievement Pack"
-7. (Future) Uploads to server and returns to main screen
+**Save Flow**:
+1. Validate all inputs
+2. Upload pack preview image
+3. Upload achievement images
+4. Create each achievement via API
+5. Create pack with achievement IDs
+6. Add pack to user's collection
+7. Navigate back with success message
 
-**Repository Method**:
-```kotlin
-suspend fun createAchievementPack(
-    name: String,
-    achievements: List<AchievementCreateBody>,
-    packPreviewImagePath: Path,
-    imageFileName: String,
-): String  // Returns pack ID
-```
+### 6. Edit Achievement
 
-### 6. Profile / Developer Features
+**Purpose**: Edit an achievement's details during pack creation.
 
-**Purpose**: Testing and development utilities.
+**Screen**: `EditAchievementScreen.kt`
+
+**ViewModel**: `EditAchievementViewModel.kt`
+
+**Functionality**:
+- Edit title, short description, long description
+- Select achievement image
+- Add/edit/remove steps
+- Configure substeps amount for incremental steps
+- Save or cancel changes
+
+**UI Components**:
+- Title bar: "Edit Achievement" with back button
+- Title text field (required)
+- Short description text field
+- Long description text field
+- Image picker section
+- Steps section:
+  - Add Step button
+  - Step cards with description and substeps amount
+  - Remove button per step
+- Save/Cancel buttons
+
+**Step Configuration**:
+- Description text field
+- Substeps amount (1-100)
+- If substeps = 1: Simple checkbox step
+- If substeps > 1: Incremental counter step
+
+### 7. Profile / Authentication
+
+**Purpose**: User login, registration, and profile management.
 
 **Location**: "Profile" tab (right bottom navigation)
 
-**Screen**: Defined inline in `App.kt` `profileNav()`
+**Screen**: `ProfileScreen.kt`
+
+**ViewModel**: `ProfileViewModel.kt`
 
 **Functionality**:
-- Currently: Single test button
-- Contains commented-out code for:
-  - User authentication testing
-  - API testing
-  - Pack creation testing
+- Login with username/password
+- Register new account
+- View logged-in profile
+- Logout
 
-**Current State**: Placeholder for future features
+**UI Components**:
 
-**Potential Future Features**:
-- User profile management
-- Authentication/login
-- Settings
-- Statistics/analytics
-- Export/import data
-- About/help information
+**Logged Out State**:
+- Profile avatar placeholder
+- "Guest" label with sign-in prompt
+- Login form:
+  - Username field
+  - Password field
+  - Display name field (registration only)
+- Login/Register button
+- Toggle between login/register mode
+- Debug quick login button
+
+**Logged In State**:
+- Profile avatar
+- Username display
+- Account info card
+- Logout button (red)
+- Debug section
+
+**Auth Flow**:
+1. User enters credentials
+2. ViewModel calls AuthRepository
+3. On success:
+   - Token saved to settings
+   - Token set on all APIs
+   - State updated to logged in
+   - Snackbar confirmation
+4. On error:
+   - Error message displayed
+   - Form remains editable
+
+**Debug Feature**:
+- Quick login button (user1/password1)
+- Auto-registers if user doesn't exist
+- Useful for testing
 
 ## Feature States
 
 ### Fully Implemented ✅
-- Achievement Pack List
+- Achievement Pack List (with auth)
 - Achievement List
-- Achievement Details
-- Add with Code
-- Progress tracking (simple & incremental steps)
-
-### Partially Implemented ⚠️
-- Create Achievement Pack (UI complete, save not fully connected)
-
-### Planned/Future 🔮
-- User authentication
+- Achievement Details (with progress sync)
+- Add with Code (with auth)
+- Create Achievement Pack (full flow)
+- Edit Achievement (with steps)
+- Progress tracking (simple & incremental, server-synced)
+- User Authentication (login/register/logout)
 - Profile management
-- Offline support with local persistence
-- Achievement sharing
-- Progress synchronization
-- Notifications/reminders
-- Achievement categories/tags
-- Search and filtering
-- Statistics and insights
+
+### Auth Requirements
+- Pack list: Requires login to see packs
+- Add by code: Requires login
+- Progress tracking: Syncs only when logged in
+- Create pack: Creates on server, adds to user collection
 
 ## Cross-Feature Components
 
 ### Snackbar System
 
 Used for showing messages across features:
-- Success messages (pack added)
-- Error messages (pack not found, already added)
-- Implemented at app level in `Scaffold`
+- Success messages (pack added, logged in)
+- Error messages (pack not found, login failed)
+- Implemented at app level in Scaffold
 - ViewModels emit messages via `Channel<String>`
-
-**Usage**:
-```kotlin
-LaunchedEffect(Unit) {
-    viewModel.messageFlow.collectLatest { message ->
-        snackbarHostState.showSnackbar(message)
-    }
-}
-```
 
 ### Loading States
 
 Implemented per-feature:
-- **Add Achievements**: Full-screen loading overlay with CircularProgressIndicator
-- **Achievement Details**: Loading state before showing content
-- Prevents user interaction during async operations
+- Pack list: isLoading state with indicator
+- Add by code: Full-screen loading overlay
+- Create pack: Loading overlay during save
+- Auth: Button shows progress indicator
+
+### Image Loading
+
+Using Coil 3 with:
+- Ktor network fetcher for remote images
+- FileKit platform file support for local images
+- AsyncImage composable for all images
 
 ### Navigation Events
 
-Used for complex navigation flows:
+For complex navigation flows:
 ```kotlin
 sealed class NavigationEvent {
     object NavigateToCreatePack : NavigationEvent()
-    object NavigateToCreateAchievement : NavigationEvent()
 }
-```
 
-Collected in UI and trigger navigation:
-```kotlin
-LaunchedEffect(Unit) {
-    viewModel.navigationFlow.collectLatest { event ->
-        when (event) {
-            NavigateToCreatePack -> navController.navigate(...)
-        }
-    }
+sealed class CreatePackNavigationEvent {
+    data object NavigateBack : CreatePackNavigationEvent()
 }
 ```
 
 ## Data Persistence
 
-**Current State**: In-memory only
-- Packs stored in `StateFlow` in repository
-- Lost on app restart
+**Server-Synced (requires login)**:
+- User's pack collection
+- Achievement step progress
+- Created packs and achievements
 
-**Impact**:
-- Users must re-add packs each session
-- Progress tracking not persisted
+**Local Persistence**:
+- Auth token and username (multiplatform-settings)
 
-**Future**: 
-- Local database (SQLDelight)
-- Achievement and pack caching
-- Progress persistence
-- Offline-first architecture
+**No Persistence**:
+- In-memory achievement cache
+- Form state during pack creation
 
 ## Error Handling
 
 ### Network Errors
-
-Handled in repositories:
+Handled in repositories with `.check()` extension:
 ```kotlin
-try {
-    val response = api.getAchievement(id)
-    response.check()  // Throws if not successful
-    // Process response
-} catch (e: Exception) {
-    throw e  // TODO: Better error handling
-}
+val response = api.someCall()
+response.check()  // Throws if not successful
 ```
 
 ### User-Facing Errors
-
-Communicated via:
 - Snackbar messages for recoverable errors
-- Error states in UI (future)
-- Toast messages (platform-specific, future)
+- Inline error text for form validation
+- Loading states prevent double-submission
 
-### Validation Errors
-
-- Pack already exists: IllegalStateException
-- Pack not found: NoSuchElementException
-- Invalid step progress: require() in data class
-
-## Feature Dependencies
-
-```
-Achievement Pack List
-    ↓
-Achievement List (requires pack ID)
-    ↓
-Achievement Details (requires achievement ID)
-
-Add Achievements
-    ↓
-Create Achievement Pack (optional path)
-```
-
-All features depend on:
-- API availability
-- Network connection
-- Valid authentication (future)
-
-## Accessibility Features
-
-Current implementation:
-- Content descriptions on images
-- Keyboard navigation support (text fields)
-- Semantic structure (headers, lists)
-
-Future improvements:
-- Screen reader optimization
-- Contrast adjustments
-- Font scaling support
-- Voice commands
-- Haptic feedback
-
-## Performance Considerations
-
-- **Lazy Loading**: LazyColumn for large lists
-- **State Hoisting**: Efficient recomposition
-- **Remember**: Caching computed values
-- **Coroutines**: Non-blocking operations
-- **Animated Progress**: Smooth 500ms transitions with easing
+### Auth Errors
+- 401: "Please log in" message
+- 404: "Not found" for invalid codes
+- 409: "Already in collection" for duplicate adds
 
 ## Platform-Specific Features
 
 ### Android
 - Material You dynamic colors
-- Native file picker
+- Native file picker via FileKit
 - System back button handling
 - Activity lifecycle integration
 
 ### Web (WasmJS)
-- Webpack dev server
 - Static color scheme
 - Browser-based file selection
 - Web-specific HTTP client (CIO)
 
 ## Future Feature Roadmap
 
-1. **Persistence Layer**: SQLDelight integration
-2. **Authentication**: User login/registration
-3. **Sync**: Cloud backup and multi-device sync
-4. **Sharing**: Share achievements with friends
-5. **Gamification**: Points, levels, badges
-6. **Social**: Leaderboards, challenges
-7. **Customization**: Themes, achievement templates
-8. **Analytics**: Progress insights, statistics
-9. **Notifications**: Reminders, encouragement
-10. **Export**: PDF reports, data export
-
+1. **Offline Support**: SQLDelight for local caching
+2. **Progress Sync Indicator**: Show when progress is syncing
+3. **Pack Sharing**: Improved sharing flow
+4. **Search**: Find packs and achievements
+5. **Categories**: Organize packs by type
+6. **Notifications**: Reminders and encouragement
+7. **Statistics**: Progress insights
+8. **iOS**: Enable iOS platform support

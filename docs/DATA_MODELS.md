@@ -29,7 +29,7 @@ data class Achievement(
 
 **Fields**:
 - `id`: Unique identifier (from backend)
-- `title`: Main achievement title (e.g., "САПР")
+- `title`: Main achievement title
 - `shortDescription`: Brief description shown in lists
 - `longDescription`: Detailed description shown in achievement details (optional)
 - `steps`: List of steps required to complete the achievement
@@ -50,12 +50,6 @@ val isDone: Boolean
     // True if all steps are completed
 ```
 
-**Usage**:
-- Displayed in achievement lists
-- Shown in detail screens
-- Progress tracking
-- Completion status
-
 ### AchievementStep
 
 Represents a single step within an achievement.
@@ -68,7 +62,7 @@ data class AchievementStep(
 ```
 
 **Fields**:
-- `description`: What needs to be done (e.g., "Первая лаба принята")
+- `description`: What needs to be done
 - `progress`: Current progress state (substeps completed)
 
 **Computed Properties**:
@@ -90,12 +84,10 @@ fun asNotStarted(): AchievementStep
 
 **Step Types**:
 1. **Simple Step**: Single checkbox (substepsAmount = 1)
-   - Example: "Первая лаба принята"
    - UI: Checkbox that can be checked/unchecked
    
 2. **Incremental Step**: Multiple substeps (substepsAmount > 1)
-   - Example: "Подготовиться хоть чуть чуть к экзу" (0/10)
-   - UI: "+1" button to increment progress, shows current count
+   - UI: +/- buttons with progress counter
 
 ### StepProgress
 
@@ -124,7 +116,6 @@ init {
 ```kotlin
 val progressFloat: Float
     // Progress as a float (0.0 to 1.0)
-    // Calculated as: substepsDone / substepsAmount
     
 val isCompleted: Boolean
     // True if substepsDone == substepsAmount
@@ -157,25 +148,75 @@ data class AchievementPack(
 
 **Fields**:
 - `id`: Unique identifier (from backend)
-- `name`: Pack name (e.g., "Computer Science Semester 1")
+- `name`: Pack name
 - `count`: Number of achievements in the pack
 - `achievementIds`: List of achievement IDs contained in this pack
 - `previewImageUrl`: Preview image for the pack (optional)
-- `code`: Shareable code to add this pack (e.g., "ABC")
+- `code`: Shareable code to add this pack
 
-**Usage**:
-- Browse available achievement packs
-- Add packs by code
-- Group related achievements together
-- Share achievement collections
+## UI State Models
+
+### Authentication
+
+```kotlin
+data class AuthState(
+    val isLoggedIn: Boolean = false,
+    val username: String? = null,
+    val accessToken: String? = null,
+    val isLoading: Boolean = false,
+    val error: String? = null
+)
+
+sealed class AuthResult {
+    data class Success(val username: String) : AuthResult()
+    data class Error(val message: String) : AuthResult()
+}
+```
+
+### Pack Creation
+
+```kotlin
+@JvmInline
+value class AchievementId(val value: String)
+
+data class EditableStep(
+    val description: String = "",
+    val substepsAmount: Int = 1
+)
+
+data class EditableAchievementData(
+    val id: AchievementId,
+    val title: String = "",
+    val shortDescription: String = "",
+    val longDescription: String = "",
+    val steps: List<EditableStep> = listOf(),
+    val imageFile: PlatformFile? = null
+)
+
+data class CreateAchievementPackUiState(
+    val packName: String = "",
+    val packDescription: String = "",
+    val achievements: List<EditableAchievementData> = listOf(),
+    val selectedImageFile: PlatformFile? = null,
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null
+) {
+    val canSave: Boolean
+        get() = packName.isNotBlank() && 
+                achievements.isNotEmpty() && 
+                achievements.all { it.title.isNotBlank() } &&
+                selectedImageFile != null &&
+                !isLoading
+}
+```
 
 ## Network Models
 
 Location: `shared/build/generated/openapi/src/commonMain/kotlin/.../data/network/models/`
 
-These models are **auto-generated** from `Achi_openapi.json` using the OpenAPI Generator plugin.
+These models are **auto-generated** from `Achi_openapi.json`.
 
-### Key Network Models
+### Key Response Models
 
 **AchievementSchema**:
 ```kotlin
@@ -194,7 +235,7 @@ data class AchievementSchema(
 ```kotlin
 data class AchievementStepSchema(
     val description: String,
-    val progress: StepProgress?
+    val substepsAmount: Int?
 )
 ```
 
@@ -210,7 +251,15 @@ data class AchievementPackSchema(
 )
 ```
 
-**Request Models**:
+**UserAchievementProgress**:
+```kotlin
+data class UserAchievementProgress(
+    val achievementId: String,
+    val steps: List<StepProgress>
+)
+```
+
+### Request Models
 
 **AchievementCreateBody**:
 ```kotlin
@@ -241,134 +290,71 @@ data class AchievementPackCreateBody(
 )
 ```
 
+**StepProgressUpdateBody**:
+```kotlin
+data class StepProgressUpdateBody(
+    val substepsDone: Int
+)
+```
+
 ## Model Mapping
 
-Location: `shared/src/commonMain/kotlin/com/plezha/achi/shared/data/`
+Location: `shared/src/commonMain/kotlin/com/plezha/achi/shared/data/network/Mappers.kt`
 
 ### Network to Domain Mapping
 
-**Achievement Mapping** (`AchievementRepository.kt`):
-
 ```kotlin
+// Resolves relative URLs by prepending base URL
+private fun resolveImageUrl(url: String?): String? {
+    if (url == null) return null
+    return if (url.startsWith("http://") || url.startsWith("https://")) {
+        url
+    } else {
+        "${ApiConfig.baseUrl}$url"
+    }
+}
+
+fun AchievementPackSchema.toAchievementPack() = AchievementPack(
+    id = id,
+    name = name,
+    count = count,
+    achievementIds = achievementIds,
+    previewImageUrl = resolveImageUrl(previewImageUrl),
+    code = code
+)
+
 fun AchievementSchema.toAchievement() = Achievement(
     id = id,
     title = title,
     shortDescription = shortDescription,
     longDescription = longDescription,
     steps = steps.map { it.toAchievementStep() },
-    previewImageUrl = previewImageUrl,
-    imageUrl = imageUrl
+    previewImageUrl = resolveImageUrl(previewImageUrl),
+    imageUrl = resolveImageUrl(imageUrl)
 )
 
 fun AchievementStepSchema.toAchievementStep() = AchievementStep(
     description = description,
-    progress = progress?.toDomainStepProgress() ?: StepProgress(0, 1)
-)
-
-fun com.plezha.achi.shared.data.network.models.StepProgress.toDomainStepProgress() = 
-    StepProgress(
-        substepsDone ?: 0,
-        substepsAmount ?: 1
-    )
-```
-
-**AchievementPack Mapping** (`AchievementPackRepository.kt`):
-
-```kotlin
-private fun AchievementPackSchema.toAchievementPack() = AchievementPack(
-    id = id,
-    name = name,
-    count = count,
-    achievementIds = achievementIds,
-    previewImageUrl = previewImageUrl,
-    code = code
+    progress = StepProgress(0, substepsAmount ?: 1)
 )
 ```
 
-### Mapping Strategy
-
-1. **Receive** network model from API
-2. **Transform** to domain model using extension functions
-3. **Store** domain model in repository
-4. **Expose** domain model to ViewModels
-
-**Benefits**:
-- Decouples UI from API changes
-- Provides sensible defaults (e.g., `StepProgress(0, 1)`)
-- Keeps domain models clean and focused
-- Enables offline-first architecture in the future
-
-## Data Validation
-
-### StepProgress Validation
-
-The only domain model with built-in validation:
+### Progress Mapping (UserRepository)
 
 ```kotlin
-data class StepProgress(
-    val substepsDone: Int = 0,
-    val substepsAmount: Int = 1
-) {
-    init {
-        require(substepsDone in 0..substepsAmount)
+fun UserAchievementProgress.toStepProgressList(): List<StepProgress> {
+    return steps.map { serverStep ->
+        StepProgress(
+            substepsDone = serverStep.substepsDone ?: 0,
+            substepsAmount = serverStep.substepsAmount ?: 1
+        )
     }
 }
 ```
 
-This ensures:
-- `substepsDone` is never negative
-- `substepsDone` never exceeds `substepsAmount`
-- Invalid states cannot be created
-
-### Repository-Level Validation
-
-Repositories perform additional validation:
-
-**Example from `AchievementPackRepository.kt`**:
-```kotlin
-val alreadyAddedPack = currentPacks.find { it.id == newPack.id }
-if (alreadyAddedPack != null) {
-    throw IllegalStateException(
-        "Pack \"${alreadyAddedPack.name}\" is already in the list"
-    )
-}
-```
-
-## Example Data
-
-### Sample Achievement
-
-From `AchievementRepository.kt`:
-
-```kotlin
-val achievementExample = Achievement(
-    id = "1",
-    title = "САПР",
-    shortDescription = "Системный Анализ и Принятие Решений",
-    steps = listOf(
-        AchievementStep(description = "Первая лаба принята"),
-        AchievementStep(description = "Вторая лаба принята"),
-        AchievementStep(description = "Третья лаба принята"),
-        AchievementStep(description = "Четвертая лаба принята"),
-        AchievementStep(description = "Пятая лаба принята"),
-        AchievementStep(description = "Шестая лаба принята"),
-        AchievementStep(
-            description = "Подготовиться хоть чуть чуть к экзу",
-            progress = StepProgress(0, 10)
-        ),
-        AchievementStep(description = "В зачётке зачёт"),
-    ),
-)
-```
-
-This example demonstrates:
-- Multiple simple steps (labs 1-6)
-- One incremental step (exam preparation with 10 substeps)
-- A final completion step (grade recorded)
-
 ## Data Flow Through Layers
 
-### Reading Data (Example: Load Achievement)
+### Reading Data (Example: Load Achievement with Progress)
 
 ```
 1. UI calls ViewModel.loadAchievementById(id)
@@ -377,19 +363,21 @@ This example demonstrates:
    ↓
 3. Repository checks in-memory cache
    ↓
-4. If not cached: calls achievementsApi.getAchievementAchievementsAchievementIdGet(id)
+4. If not cached: calls achievementsApi
    ↓
 5. Receives AchievementSchema (network model)
    ↓
-6. Maps to Achievement (domain model) using .toAchievement()
+6. Maps to Achievement (domain model)
    ↓
-7. Caches in repository's StateFlow
+7. If logged in: loads progress from UserRepository
    ↓
-8. Returns Achievement to ViewModel
+8. Merges progress with achievement steps
    ↓
-9. ViewModel updates UI state
+9. Returns Achievement to ViewModel
    ↓
-10. UI observes state and displays Achievement
+10. ViewModel updates UI state
+   ↓
+11. UI observes state and displays Achievement
 ```
 
 ### Creating Data (Example: Create Pack)
@@ -397,18 +385,23 @@ This example demonstrates:
 ```
 1. UI calls ViewModel.onSaveAchievementPack()
    ↓
-2. ViewModel collects form data and transforms to AchievementCreateBody list
+2. ViewModel collects form data
    ↓
-3. Calls repository.createAchievementPack(name, achievements, imagePath, fileName)
+3. Converts EditableAchievementData to AchievementCreateBody list
    ↓
-4. Repository:
-   - Creates each achievement via achievementsApi (receives AchievementSchema with ID)
-   - Uploads pack preview image via uploadApi
-   - Creates pack with collected IDs via packsApi (AchievementPackCreateBody)
+4. Calls repository.createAchievementPack(...)
    ↓
-5. Returns pack ID to ViewModel
+5. Repository:
+   - Uploads achievement images → gets URLs
+   - Creates each achievement via API → gets IDs
+   - Uploads pack preview image → gets URL
+   - Creates pack with IDs and URL
    ↓
-6. ViewModel updates UI state (success/error)
+6. Adds pack to user's collection
+   ↓
+7. Returns created pack to ViewModel
+   ↓
+8. ViewModel navigates back with success message
 ```
 
 ## Model Immutability
@@ -424,6 +417,33 @@ To modify: create a new instance using `copy()`:
 val updatedStep = step.copy(progress = StepProgress(5, 10))
 ```
 
+## Extension Functions
+
+**Achievement with Progress**:
+```kotlin
+fun Achievement.withProgress(progressList: List<StepProgress>): Achievement {
+    if (progressList.size != steps.size) return this
+    return copy(
+        steps = steps.mapIndexed { index, step ->
+            step.copy(progress = progressList[index])
+        }
+    )
+}
+```
+
+**Step Progress Updates**:
+```kotlin
+fun AchievementStep.withProgressIncreased() =
+    copy(progress = progress.copy(
+        substepsDone = (progress.substepsDone + 1).coerceAtMost(progress.substepsAmount)
+    ))
+
+fun AchievementStep.withProgressDecreased() =
+    copy(progress = progress.copy(
+        substepsDone = (progress.substepsDone - 1).coerceAtLeast(0)
+    ))
+```
+
 ## Null Safety
 
 Fields use Kotlin's null safety:
@@ -431,15 +451,21 @@ Fields use Kotlin's null safety:
 - **Nullable**: `longDescription: String?` - optional fields
 - **Defaults**: `substepsDone: Int = 0` - default values provided
 
-This provides compile-time safety and clear API contracts.
+## Validation
 
-## Future Model Extensions
+### StepProgress Validation
+```kotlin
+init {
+    require(substepsDone in 0..substepsAmount)
+}
+```
 
-Potential additions to support new features:
-- `userId` in Achievement for multi-user support
-- `completedAt: Instant?` for completion timestamps
-- `tags: List<String>` for categorization
-- `difficulty: Difficulty` enum for achievement difficulty
-- `points: Int` for gamification
-- Local-only fields for offline support (sync status, etc.)
-
+### UI State Validation
+```kotlin
+val canSave: Boolean
+    get() = packName.isNotBlank() && 
+            achievements.isNotEmpty() && 
+            achievements.all { it.title.isNotBlank() } &&
+            selectedImageFile != null &&
+            !isLoading
+```

@@ -20,11 +20,6 @@ plugins {
 }
 ```
 
-**Purpose**:
-- Declares plugins for all submodules
-- `apply false` makes plugins available without applying to root
-- Uses version catalog references (`libs.plugins.*`)
-
 ### Settings Configuration
 
 **File**: `settings.gradle.kts`
@@ -51,73 +46,36 @@ rootProject.name = "Achi"
 include(":shared")
 ```
 
-**Key Features**:
-- **TYPESAFE_PROJECT_ACCESSORS**: Type-safe references to subprojects
-- **Repository Configuration**: 
-  - `google()`: Android and Compose dependencies
-  - `mavenCentral()`: Kotlin and third-party libraries
-  - `gradlePluginPortal()`: Gradle plugins
-- **Module Structure**: Single `shared` module
-
-### Gradle Properties
-
-**File**: `gradle.properties`
-
-Common properties:
-```properties
-org.gradle.jvmargs=-Xmx4g
-kotlin.code.style=official
-android.useAndroidX=true
-android.nonTransitiveRClass=true
-org.gradle.parallel=true
-org.gradle.caching=true
-```
-
-**Performance Optimizations**:
-- `jvmargs`: Increases Gradle JVM memory to 4GB
-- `parallel`: Enables parallel execution
-- `caching`: Enables build cache
-
-**Android Settings**:
-- `useAndroidX`: Uses AndroidX libraries
-- `nonTransitiveRClass`: Optimizes R class generation
-
 ## Version Catalog
 
 **File**: `gradle/libs.versions.toml`
-
-Centralized dependency management using Gradle Version Catalogs.
 
 ### Versions
 
 ```toml
 [versions]
-agp = "8.8.2"                          # Android Gradle Plugin
-kotlin = "2.2.0"                       # Kotlin version
-junit = "4.13.2"                       # Testing
-junitVersion = "1.2.1"                 # AndroidX Test
-espressoCore = "3.6.1"                 # UI Testing
-kotlinxSerializationJson = "1.8.0"    # JSON serialization
-ktor = "3.1.0"                         # HTTP client
-lifecycleRuntimeKtx = "2.9.2"         # Lifecycle
-activityCompose = "1.10.0"            # Compose Activity
-androidx-navigation = "2.9.0-beta03"  # Navigation
-composeMultiplatform = "1.8.2"        # Compose Multiplatform
-kotlinTest = "2.1.21"                  # Kotlin Test
+agp = "8.9.1"
+kotlin = "2.3.0"
+junit = "4.13.2"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+kotlinxSerializationJson = "1.9.0"
+kotlinxDatetime = "0.7.0"
+ktor = "3.1.0"
+lifecycleRuntimeKtx = "2.9.2"
+activityCompose = "1.10.0"
+composeMultiplatform = "1.10.0"
+kotlinTest = "2.3.0"
+navigation3-ui = "1.0.0-alpha05"
+multiplatformSettings = "1.3.0"
 ```
-
-**Version Strategy**:
-- Use latest stable versions
-- Keep Kotlin and Compose versions synchronized
-- Update regularly for bug fixes and features
 
 ### Libraries
 
 ```toml
 [libraries]
-# Core Android/Compose
-androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
-androidx-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "androidx-navigation" }
+# Navigation 3 multiplatform
+jetbrains-navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3-ui" }
 
 # Ktor Client
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
@@ -127,14 +85,23 @@ ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negoti
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 
+# Serialization & DateTime
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+
+# Multiplatform Settings
+multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformSettings" }
+multiplatform-settings-no-arg = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatformSettings" }
+
+# Android
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlinTest" }
-
-# Serialization
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 ```
 
 ### Plugins
@@ -148,21 +115,9 @@ composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "k
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 ```
 
-**Usage in build files**:
-```kotlin
-plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-}
-dependencies {
-    implementation(libs.ktor.client.core)
-}
-```
-
 ## Shared Module Configuration
 
 **File**: `shared/build.gradle.kts`
-
-Main application module containing all code.
 
 ### Plugins
 
@@ -172,60 +127,64 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.android.application)
-    id("org.openapi.generator") version "7.14.0"
-    kotlin("plugin.serialization") version "2.1.0"
+    id("org.openapi.generator") version "7.18.0"
+    kotlin("plugin.serialization") version "2.3.0"
 }
 ```
 
-**Plugin Purposes**:
-- **kotlinMultiplatform**: Enables KMP
-- **composeMultiplatform**: Compose UI framework
-- **composeCompiler**: Kotlin compiler plugin for Compose
-- **android.application**: Android app configuration
-- **openapi.generator**: Generates API client code
-- **plugin.serialization**: Kotlin serialization support
-
 ### Kotlin Multiplatform Configuration
 
-#### Targets
+#### Android Target
 
 ```kotlin
 kotlin {
     androidTarget {
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
-    wasmJs {
-        outputModuleName = "achi"
-        browser {
-            commonWebpackConfig {
-                outputFileName = "achi.js"
-            }
-        }
-        binaries.executable()
-    }
-    
-    // iOS targets (commented out)
-    // iosX64(), iosArm64(), iosSimulatorArm64()
 }
 ```
 
-**Android Target**:
-- JVM target: Java 11
-- Compiles to Android-compatible bytecode
+#### WasmJS Target
 
-**WasmJS Target**:
-- Output module: `achi`
-- Output file: `achi.js`
-- Browser configuration with Webpack
-- Executable binary type
+```kotlin
+wasmJs {
+    outputModuleName = "achi"
+    browser {
+        val rootDirPath = project.rootDir.path
+        val projectDirPath = project.projectDir.path
+        commonWebpackConfig {
+            outputFileName = "achi.js"
+            devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
+                static = (static ?: mutableListOf()).apply {
+                    add(rootDirPath)
+                    add(projectDirPath)
+                }
+            }
+        }
+    }
+    binaries.executable()
+}
+```
 
-**iOS Targets** (prepared but inactive):
-- Framework name: `sharedKit`
-- Static framework
-- Would support x64, arm64, and simulator arm64
+#### iOS Targets (Prepared, Not Active)
+
+```kotlin
+val xcfName = "sharedKit"
+
+listOf<KotlinNativeTarget>(
+//  iosX64(),
+//  iosArm64(),
+//  iosSimulatorArm64()
+).forEach { iosTarget ->
+    iosTarget.binaries.framework {
+        baseName = xcfName
+        isStatic = true
+    }
+}
+```
 
 ### Source Sets
 
@@ -246,30 +205,32 @@ sourceSets {
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.ktor.client.logging)
             
-            // Navigation & Serialization
-            implementation(libs.androidx.navigation.compose)
-            implementation(libs.kotlinx.serialization.json)
+            // Navigation 3
+            implementation(libs.jetbrains.navigation3.ui)
             
-            // Other
+            // Serialization & DateTime
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.datetime)
+            
+            // Settings (for auth persistence)
+            implementation(libs.multiplatform.settings)
+            implementation(libs.multiplatform.settings.no.arg)
+            
+            // Collections
             implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
             
-            // FileKit (file picking)
-            val filekitversion = "0.10.0"
+            // FileKit
+            val filekitversion = "0.12.0"
             implementation("io.github.vinceglb:filekit-core:${filekitversion}")
             implementation("io.github.vinceglb:filekit-dialogs:${filekitversion}")
             implementation("io.github.vinceglb:filekit-dialogs-compose:${filekitversion}")
             implementation("io.github.vinceglb:filekit-coil:${filekitversion}")
+            
+            // Coil
+            implementation("io.coil-kt.coil3:coil-compose:3.1.0")
+            implementation("io.coil-kt.coil3:coil-network-ktor3:3.1.0")
         }
-        
-        // Add generated OpenAPI code to source set
         kotlin.srcDir("${buildDir}/generated/openapi/src/commonMain/kotlin")
-    }
-    
-    commonTest {
-        dependencies {
-            implementation(libs.kotlin.test)
-            implementation(libs.junit)
-        }
     }
     
     androidMain {
@@ -286,31 +247,20 @@ sourceSets {
             implementation(libs.ktor.client.cio)
         }
     }
-    
-    iosMain {
-        dependencies {
-            // iOS-specific dependencies would go here
-        }
-    }
 }
 ```
-
-**Dependency Strategy**:
-- **Common**: Shared across all platforms
-- **Platform-specific**: Only what's needed per platform
-- **Test**: Testing dependencies in test source sets
 
 ### Android Configuration
 
 ```kotlin
 android {
     namespace = "com.plezha.achi"
-    compileSdk = 35
-    
+    compileSdk = 36
+
     defaultConfig {
         applicationId = "com.plezha.achi"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
     }
@@ -324,6 +274,7 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     
@@ -334,50 +285,6 @@ android {
 }
 ```
 
-**Configuration Details**:
-- **namespace**: Package name
-- **compileSdk**: SDK version to compile against (35 = Android 15)
-- **minSdk**: Minimum Android version (24 = Android 7.0)
-- **targetSdk**: Target Android version
-- **versionCode**: Numeric version for Play Store
-- **versionName**: Human-readable version
-
-**Build Types**:
-- **debug**: Default, includes debugging symbols
-- **release**: Minification disabled (can be enabled)
-
-**Packaging**:
-- Excludes duplicate META-INF license files
-
-### WasmJS Configuration
-
-```kotlin
-wasmJs {
-    outputModuleName = "achi"
-    browser {
-        val rootDirPath = project.rootDir.path
-        val projectDirPath = project.projectDir.path
-        commonWebpackConfig {
-            outputFileName = "achi.js"
-            devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-                static = (static ?: mutableListOf()).apply {
-                    // Serve sources to debug inside browser
-                    add(rootDirPath)
-                    add(projectDirPath)
-                }
-            }
-        }
-    }
-    binaries.executable()
-}
-```
-
-**Webpack Dev Server**:
-- Serves static files from root and project directories
-- Enables source map debugging
-- Hot reload support
-- Output file: `achi.js`
-
 ### OpenAPI Code Generation
 
 ```kotlin
@@ -386,7 +293,7 @@ openApiGenerate {
     inputSpec.set(rootProject.file("Achi_openapi.json").toURI().toString())
     outputDir.set("${buildDir}/generated/openapi")
     packageName.set("com.plezha.achi.shared.data.network")
-    
+
     configOptions.set(mapOf(
         "library" to "multiplatform",
         "useCoroutines" to "true",
@@ -394,29 +301,11 @@ openApiGenerate {
         "sourceFolder" to "src/commonMain/kotlin"
     ))
 }
-```
 
-**Configuration**:
-- **generatorName**: `kotlin` - Generate Kotlin code
-- **inputSpec**: Path to OpenAPI spec file
-- **outputDir**: Where to generate code
-- **packageName**: Package for generated code
-- **library**: `multiplatform` - KMP support
-- **useCoroutines**: Use suspend functions
-- **dateLibrary**: Use kotlinx-datetime
-- **sourceFolder**: Source directory within output
-
-**Task Integration**:
-```kotlin
-tasks.withType<KotlinCompile>().configureEach {
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     dependsOn("openApiGenerate")
 }
 ```
-
-All Kotlin compilation depends on OpenAPI generation, ensuring API code is always up-to-date.
-
-**Compatibility Note**:
-> This openapigenerator version is poorly compatible with Ktor 3+, some errors might need to be fixed manually
 
 ## Build Tasks
 
@@ -447,9 +336,6 @@ All Kotlin compilation depends on OpenAPI generation, ensuring API code is alway
 
 # Run tests
 ./gradlew testDebugUnitTest
-
-# Android instrumented tests
-./gradlew connectedAndroidTest
 ```
 
 ### WasmJS Tasks
@@ -475,301 +361,58 @@ All Kotlin compilation depends on OpenAPI generation, ensuring API code is alway
 ./gradlew cleanOpenApiGenerate
 ```
 
-### Verification Tasks
-
-```bash
-# Run all checks
-./gradlew check
-
-# Lint
-./gradlew lint
-
-# Detekt (if configured)
-./gradlew detekt
-```
-
 ## Build Variants
 
 ### Android Build Types
 
-**Debug** (default):
+**Debug**:
 - Debuggable: Yes
 - Minification: No
-- Obfuscation: No
 - Signing: Debug keystore
-- Build speed: Fast
 
 **Release**:
 - Debuggable: No
-- Minification: Configured (currently disabled)
-- Obfuscation: Possible with R8/ProGuard
-- Signing: Requires release keystore
-- Build speed: Slower
-- Optimized for production
+- Minification: Currently disabled
+- Signing: Debug keystore (for development)
 
 ### WasmJS Build Modes
 
 **Development**:
 - Source maps: Yes
 - Minification: No
-- Debugging: Full
 - Dev server: Included
-- Build speed: Fast
 
 **Production**:
 - Source maps: Optional
 - Minification: Yes
-- Dead code elimination: Yes
 - Optimized bundle size
-- Build speed: Slower
 
-## Dependency Management
+## Output Locations
 
-### Version Updates
+**Android APK**:
+- Debug: `shared/build/outputs/apk/debug/shared-debug.apk`
+- Release: `shared/build/outputs/apk/release/shared-release.apk`
 
-**Check for updates**:
-```bash
-./gradlew dependencyUpdates
-```
+**WasmJS**:
+- Development: Served by Webpack dev server
+- Production: `shared/build/dist/wasmJs/productionExecutable/`
 
-**Strategy**:
-- Keep Kotlin and Compose in sync
-- Update Ktor carefully (API changes)
-- Test thoroughly after updates
-- Update AndroidX libraries together
+**Generated API Code**:
+- `shared/build/generated/openapi/src/commonMain/kotlin/`
 
-### Dependency Resolution
+## Version Summary
 
-**Conflict resolution** (if needed):
-```kotlin
-configurations.all {
-    resolutionStrategy {
-        force("org.jetbrains.kotlin:kotlin-stdlib:2.2.0")
-    }
-}
-```
-
-### Excluding Dependencies
-
-```kotlin
-implementation("some:library:1.0") {
-    exclude(group = "com.unwanted", module = "module")
-}
-```
-
-## Optimization Strategies
-
-### Build Performance
-
-**Gradle Daemon**:
-```properties
-org.gradle.daemon=true  # Default, keeps Gradle process running
-```
-
-**Parallel Execution**:
-```properties
-org.gradle.parallel=true
-```
-
-**Configuration Cache**:
-```properties
-org.gradle.configuration-cache=true  # Experimental, may break some plugins
-```
-
-**Build Cache**:
-```properties
-org.gradle.caching=true
-```
-
-**Increase Memory**:
-```properties
-org.gradle.jvmargs=-Xmx6g -XX:MaxMetaspaceSize=1g
-```
-
-### Android Optimization
-
-**R8** (code shrinker):
-```kotlin
-buildTypes {
-    release {
-        isMinifyEnabled = true
-        proguardFiles(
-            getDefaultProguardFile("proguard-android-optimize.txt"),
-            "proguard-rules.pro"
-        )
-    }
-}
-```
-
-**Non-transitive R classes**:
-```properties
-android.nonTransitiveRClass=true
-```
-
-**Disable unused features**:
-```kotlin
-android {
-    buildFeatures {
-        aidl = false
-        renderScript = false
-        shaders = false
-    }
-}
-```
-
-### WasmJS Optimization
-
-Production build automatically:
-- Minifies JavaScript
-- Optimizes Wasm binary
-- Removes dead code
-- Generates source maps (optional)
-
-## Multi-Module Structure (Future)
-
-Currently single `shared` module. Potential future structure:
-
-```
-Achi/
-├── shared/           # Common code
-├── androidApp/       # Android-specific
-├── webApp/          # Web-specific
-├── iosApp/          # iOS-specific
-├── core/            # Core business logic
-├── data/            # Data layer
-└── ui-common/       # Shared UI components
-```
-
-Benefits:
-- Better separation of concerns
-- Faster incremental builds
-- Platform-specific optimizations
-- Independent versioning
-
-## Signing Configuration (Android)
-
-### Debug Signing
-
-Automatic with debug keystore:
-- Location: `~/.android/debug.keystore`
-- No configuration needed
-
-### Release Signing
-
-**Create keystore**:
-```bash
-keytool -genkey -v -keystore release.keystore -alias achi -keyalg RSA -keysize 2048 -validity 10000
-```
-
-**Configure in `build.gradle.kts`**:
-```kotlin
-android {
-    signingConfigs {
-        create("release") {
-            storeFile = file("path/to/release.keystore")
-            storePassword = System.getenv("KEYSTORE_PASSWORD")
-            keyAlias = "achi"
-            keyPassword = System.getenv("KEY_PASSWORD")
-        }
-    }
-    buildTypes {
-        release {
-            signingConfig = signingConfigs.getByName("release")
-        }
-    }
-}
-```
-
-**Security**: Never commit keystore or passwords to version control.
-
-## Continuous Integration
-
-### GitHub Actions Example
-
-```yaml
-name: Build
-
-on: [push, pull_request]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-    
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    
-    - name: Build with Gradle
-      run: ./gradlew build
-    
-    - name: Upload APK
-      uses: actions/upload-artifact@v3
-      with:
-        name: app-debug
-        path: shared/build/outputs/apk/debug/shared-debug.apk
-```
-
-### Build Variants for CI
-
-- Run lint checks
-- Execute tests
-- Build all variants
-- Upload artifacts
-- Deploy (if main branch)
-
-## Troubleshooting Build Issues
-
-### Gradle Sync Failed
-
-```bash
-./gradlew --refresh-dependencies
-./gradlew clean build --stacktrace
-```
-
-### Out of Memory
-
-Increase memory in `gradle.properties`:
-```properties
-org.gradle.jvmargs=-Xmx8g -XX:MaxMetaspaceSize=2g
-```
-
-### Dependency Resolution Failed
-
-```bash
-./gradlew dependencies --configuration releaseRuntimeClasspath
-```
-
-Check for version conflicts and force versions if needed.
-
-### Build Cache Issues
-
-```bash
-./gradlew cleanBuildCache
-rm -rf ~/.gradle/caches
-```
-
-### OpenAPI Generation Issues
-
-```bash
-rm -rf shared/build/generated/openapi
-./gradlew openApiGenerate --stacktrace
-```
-
-## Future Build Enhancements
-
-- **KMM Mobile plugin**: Enhanced iOS support
-- **Convention plugins**: Reusable build logic
-- **Composite builds**: Multiple repositories
-- **Custom source sets**: Feature modules
-- **BuildSrc**: Kotlin build scripts
-- **Version catalogs**: Shared between projects
-- **Gradle Kotlin DSL precompiled scripts**: Type-safe build configuration
-
+| Component | Version |
+|-----------|---------|
+| Kotlin | 2.3.0 |
+| Compose Multiplatform | 1.10.0 |
+| Android Gradle Plugin | 8.9.1 |
+| Navigation 3 | 1.0.0-alpha05 |
+| Ktor | 3.1.0 |
+| Coil | 3.1.0 |
+| FileKit | 0.12.0 |
+| OpenAPI Generator | 7.18.0 |
+| Multiplatform Settings | 1.3.0 |
+| Android Compile SDK | 36 |
+| Android Min SDK | 24 |
+| Android Target SDK | 36 |

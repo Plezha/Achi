@@ -1,0 +1,309 @@
+# Achi - Memory Bank / Project Context
+
+## Documentation Maintenance Rules
+
+**When making code changes, update documentation if:**
+1. Adding/removing/renaming files or packages → Update `Project Structure` section below and relevant `docs/*.md`
+2. Adding new routes or changing navigation → Update `Navigation Structure` section and `docs/UI_STRUCTURE.md`
+3. Changing domain models → Update `Key Domain Models` section and `docs/DATA_MODELS.md`
+4. Adding/changing API endpoints → Update `API Integration` section and `docs/API_INTEGRATION.md`
+5. Changing build config or dependencies → Update `Version Summary` and `docs/BUILD_CONFIGURATION.md`
+6. Adding new features → Update `Current Feature Status` section and `docs/FEATURES.md`
+7. Changing architecture patterns → Update `Architecture` section and `docs/ARCHITECTURE.md`
+
+**Documentation files:**
+- `.cursorrules` - This memory bank (quick reference for AI)
+- `docs/ARCHITECTURE.md` - Detailed architecture patterns
+- `docs/FEATURES.md` - Feature documentation
+- `docs/DATA_MODELS.md` - Domain and UI models
+- `docs/UI_STRUCTURE.md` - Navigation and UI patterns
+- `docs/API_INTEGRATION.md` - API endpoints and integration
+- `docs/BUILD_CONFIGURATION.md` - Build setup and versions
+- `docs/DEVELOPMENT_SETUP.md` - Setup instructions
+
+**Keep docs in sync:** When you complete a significant change, briefly mention which docs were updated.
+
+---
+
+## Project Overview
+
+**Achi** is a Kotlin Multiplatform (KMP) achievement tracking application built with Compose Multiplatform. Users can manage collections of achievements (called "packs") and track progress through various steps. Features user authentication with server-synced progress.
+
+**Platforms**: Android (primary), Web/WasmJS (secondary), iOS (prepared but inactive)
+
+**Tech Stack**:
+- Kotlin 2.3.0 + Kotlin Multiplatform
+- Compose Multiplatform 1.10.0
+- Ktor 3.1.0 (HTTP client)
+- Navigation 3 (navigation3-ui 1.0.0-alpha05) - new KMP navigation
+- Material 3 design system
+- OpenAPI Generator 7.18.0 (API client generation)
+- Coil 3 (image loading with Ktor network fetcher)
+- FileKit 0.12.0 (file picking)
+- Multiplatform Settings 1.3.0 (persistent storage for auth tokens)
+
+## Architecture
+
+### Pattern: MVVM with Repository Layer + DI Container
+
+```
+UI Layer (Composables) → ViewModel → Repository → API (Network)
+     ↓                      ↓           ↓
+   StateFlow            StateFlow    Generated APIs
+                             ↑
+                        AppModule (DI)
+```
+
+### Project Structure
+
+```
+shared/src/commonMain/kotlin/com/plezha/achi/shared/
+├── App.kt                      # Main app entry, Coil setup, theme
+├── data/
+│   ├── model/                  # Domain models (Achievement, AchievementPack)
+│   ├── auth/
+│   │   └── AuthRepository.kt   # Login/register/logout, token management
+│   ├── network/
+│   │   ├── Mappers.kt          # Network → Domain model mapping
+│   │   └── NetworkUtils.kt     # createFormPart, check() extension
+│   ├── AchievementRepository.kt
+│   ├── AchievementPackRepository.kt
+│   └── UserRepository.kt       # User's pack collection & progress sync
+├── di/
+│   ├── ApiConfig.kt            # Base URL configuration
+│   └── AppModule.kt            # Manual DI container
+├── navigation/
+│   ├── Routes.kt               # All NavKey route definitions
+│   ├── NavGraph.kt             # createNavEntryProvider with all screens
+│   └── BottomNavBar.kt         # Bottom navigation component
+└── ui/
+    ├── add/                    # Add/Create achievement pack flow
+    │   ├── AddAchievementScreen.kt
+    │   ├── AddAchievementsViewModel.kt
+    │   ├── CreateAchievementPackScreen.kt
+    │   ├── CreateAchievementPackViewModel.kt
+    │   ├── EditAchievementScreen.kt
+    │   └── EditAchievementViewModel.kt
+    ├── list/
+    │   ├── achievementdetails/
+    │   ├── achievementlist/
+    │   └── packlist/
+    ├── profile/                # Login/register/logout UI
+    │   ├── ProfileScreen.kt
+    │   └── ProfileViewModel.kt
+    ├── common/                 # TitleBar, PreviewWrapper, PreviewData
+    └── theme/                  # Color, Typography, Theme
+```
+
+### Navigation Structure (Navigation 3)
+
+```kotlin
+// Routes defined in Routes.kt - all implement NavKey
+AchievementPackListRoute  // Start destination - pack list
+AddRoute                  // Add screen (create pack or add by code)
+CreateAchievementPackRoute // Create new pack form
+EditAchievementRoute(achievementIndex: Int) // Edit achievement in pack creation
+ProfileRoute              // Login/register/profile
+AchievementListRoute(id: String) // Achievements in a pack
+AchievementRoute(id: String)     // Achievement details
+```
+
+**Bottom Nav (3 tabs)**:
+- Add → AddRoute → CreateAchievementPackRoute → EditAchievementRoute
+- Achievements (start) → PackListRoute → AchievementListRoute → AchievementRoute
+- Profile → ProfileRoute
+
+## Key Domain Models
+
+```kotlin
+// Achievement pack containing multiple achievements
+data class AchievementPack(id, name, count, achievementIds, previewImageUrl?, code)
+
+// Individual achievement with steps
+data class Achievement(id, title, shortDescription, longDescription?, steps, previewImageUrl?, imageUrl?)
+
+// Step within an achievement
+data class AchievementStep(description, progress: StepProgress)
+
+// Progress tracking
+data class StepProgress(substepsDone: Int = 0, substepsAmount: Int = 1)
+```
+
+## API Integration
+
+**Generated from**: `Achi_openapi.json` at project root
+**Package**: `com.plezha.achi.shared.data.network`
+**Base URL**: Configured in `ApiConfig.baseUrl` (from OpenAPI spec)
+
+**Key APIs**:
+- `AchievementsApi` - CRUD for achievements
+- `PacksApi` - CRUD for packs, fetch by code
+- `UploadApi` - Image upload
+- `AuthenticationApi` - Login (token endpoint)
+- `UsersApi` - User registration
+- `UserCollectionApi` - User's pack collection (add/remove packs)
+- `UserProgressApi` - Achievement step progress sync
+
+## Authentication System
+
+**AuthRepository** handles:
+- Login with username/password → OAuth2 bearer token
+- Registration (auto-login after)
+- Session persistence via `multiplatform-settings`
+- Token injection to all APIs
+- Logout (clears token from APIs and settings)
+
+```kotlin
+// AuthState exposed via StateFlow
+data class AuthState(
+    isLoggedIn: Boolean,
+    username: String?,
+    accessToken: String?,
+    isLoading: Boolean,
+    error: String?
+)
+```
+
+**User-aware features**:
+- Pack list shows user's collection (requires login)
+- Progress tracking syncs to server (requires login)
+- Adding packs requires login
+
+## Coding Conventions
+
+### State Management
+```kotlin
+class ViewModel : ViewModel() {
+    private val _uiState = MutableStateFlow(UiState())
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+    
+    // One-time events via Channel
+    private val _messageChannel = Channel<String>()
+    val messageFlow = _messageChannel.receiveAsFlow()
+    
+    private val _navigationChannel = Channel<NavigationEvent>()
+    val navigationFlow = _navigationChannel.receiveAsFlow()
+}
+```
+
+### Dependency Injection (Manual via AppModule)
+```kotlin
+class AppModule(httpClientEngine: HttpClientEngine) {
+    // APIs created eagerly
+    val achievementsApi = AchievementsApi(baseUrl = ApiConfig.baseUrl, httpClientEngine = httpClientEngine)
+    
+    // Repositories created lazily
+    val authRepository: AuthRepository by lazy { ... }
+    val userRepository: UserRepository by lazy { ... }
+}
+
+// Usage in App.kt
+val appModule = remember { AppModule(httpClientEngine) }
+```
+
+### Navigation 3 Pattern
+```kotlin
+// Routes implement NavKey with polymorphic serialization
+@Serializable
+data class AchievementRoute(val id: String) : NavKey
+
+// entryProvider defines screen composables
+entry<AchievementRoute> { route ->
+    val viewModel = remember(route.id) { ... }
+    AchievementDetailsScreen(viewModel = viewModel, ...)
+}
+```
+
+## Current Feature Status
+
+### ✅ Fully Implemented
+- Achievement Pack List (user's collection, requires login)
+- Achievement List (browse achievements in pack)
+- Achievement Details (view + progress tracking with server sync)
+- Add with Code (fetch pack by code, add to user collection)
+- Create Achievement Pack (full flow with image upload)
+- Edit Achievement (during pack creation with steps)
+- User Authentication (login/register/logout)
+- Progress Sync (step progress saved to server)
+- Profile Screen (login form, logged-in state display)
+
+### ⚠️ Notes
+- Pack list requires login (shows empty when logged out)
+- Progress tracking requires login (local-only otherwise)
+- Debug login button available (user1/password1)
+
+### 🔮 Planned/Future
+- Offline support with local persistence (SQLDelight)
+- iOS platform support
+- Notifications/reminders
+- Pack sharing improvements
+
+## Build Commands
+
+```bash
+# Generate API code (required before first build)
+./gradlew openApiGenerate
+
+# Build all
+./gradlew build
+
+# Android
+./gradlew assembleDebug
+./gradlew installDebug
+
+# Web (development with hot reload)
+./gradlew wasmJsBrowserDevelopmentRun
+
+# Web (production)
+./gradlew wasmJsBrowserProductionWebpack
+```
+
+## Important Notes
+
+1. **Navigation 3**: Using new `navigation3-ui` library (alpha), not Jetpack Navigation Compose. Routes implement `NavKey`, navigation via `NavBackStack`.
+
+2. **Auth Required**: Most features require login. User's packs and progress are server-synced.
+
+3. **Optimistic Updates**: Progress changes update UI immediately, sync to server in background.
+
+4. **Image Loading**: Using Coil 3 with Ktor network fetcher and FileKit platform file support.
+
+5. **OpenAPI Generator 7.18.0**: May need manual fixes for Ktor 3+ compatibility.
+
+6. **Duplicate folders**: `achievementdetails`/`achievmentdetails` and `achievementlist`/`achievmentlist` (typos in folder names).
+
+## Theme
+
+- **Fonts**: Montserrat (headings), Open Sans (body)
+- **Colors**: Material 3 with blue primary (#415F91 light / #AAC7FF dark)
+- **Android**: Supports Material You dynamic colors
+- **Web**: Static color scheme only
+
+## File Locations Quick Reference
+
+| What | Where |
+|------|-------|
+| Main App Entry | `shared/src/commonMain/.../App.kt` |
+| DI Container | `shared/src/commonMain/.../di/AppModule.kt` |
+| Routes | `shared/src/commonMain/.../navigation/Routes.kt` |
+| Nav Graph | `shared/src/commonMain/.../navigation/NavGraph.kt` |
+| Auth | `shared/src/commonMain/.../data/auth/AuthRepository.kt` |
+| Theme | `shared/src/commonMain/.../ui/theme/` |
+| Domain Models | `shared/src/commonMain/.../data/model/` |
+| OpenAPI Spec | `Achi_openapi.json` (project root) |
+| Generated API | `shared/build/generated/openapi/` |
+| Version Catalog | `gradle/libs.versions.toml` |
+
+## Version Summary
+
+| Component | Version |
+|-----------|---------|
+| Kotlin | 2.3.0 |
+| Compose Multiplatform | 1.10.0 |
+| Navigation 3 | 1.0.0-alpha05 |
+| Ktor | 3.1.0 |
+| Coil | 3.1.0 |
+| FileKit | 0.12.0 |
+| OpenAPI Generator | 7.18.0 |
+| Android Compile SDK | 36 |
+| Android Min SDK | 24 |
