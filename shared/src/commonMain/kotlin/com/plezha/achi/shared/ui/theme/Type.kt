@@ -96,18 +96,15 @@ fun achiTypography() = Typography(
     ),
     labelLarge = baseline.labelLarge.copy(
         fontFamily = bodyFontFamily,
-        fontWeight = FontWeight.Normal,
-        color = baseline.labelLarge.color.copy(alpha = 0.75f)
+        fontWeight = FontWeight.Normal
     ),
     labelMedium = baseline.labelMedium.copy(
         fontFamily = bodyFontFamily,
-        fontWeight = FontWeight.Normal,
-        color = baseline.labelMedium.color.copy(alpha = 0.75f)
+        fontWeight = FontWeight.Normal
     ),
     labelSmall = baseline.labelSmall.copy(
         fontFamily = bodyFontFamily,
-        fontWeight = FontWeight.Normal,
-        color = baseline.labelSmall.color.copy(alpha = 0.75f)
+        fontWeight = FontWeight.Normal
     ),
 )
 
