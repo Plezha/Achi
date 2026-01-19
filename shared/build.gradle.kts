@@ -72,9 +72,10 @@ kotlin {
                 implementation("io.github.vinceglb:filekit-dialogs-compose:${filekitversion}")
                 implementation("io.github.vinceglb:filekit-coil:${filekitversion}")
                 
-                // Coil for image loading
                 implementation("io.coil-kt.coil3:coil-compose:3.1.0")
                 implementation("io.coil-kt.coil3:coil-network-ktor3:3.1.0")
+                
+                implementation("androidx.lifecycle:lifecycle-viewmodel:2.9.2")
             }
             kotlin.srcDir("${buildDir}/generated/openapi/src/commonMain/kotlin")
         }
@@ -107,7 +108,7 @@ kotlin {
 
         wasmJsMain {
             dependencies {
-                implementation(libs.ktor.client.cio)
+                implementation("io.ktor:ktor-client-js:3.1.0")
             }
         }
 
@@ -145,6 +146,7 @@ kotlin {
 
         iosMain {
             dependencies {
+                implementation("io.ktor:ktor-client-darwin:3.1.0")
                 // Add iOS-specific dependencies here. This a source set created by Kotlin Gradle
                 // Plugin (KGP) that each specific iOS target (e.g., iosX64) depends on as
                 // part of KMP’s default source set hierarchy. Note that this source set depends
