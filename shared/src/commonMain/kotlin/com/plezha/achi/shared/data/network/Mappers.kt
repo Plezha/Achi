@@ -7,14 +7,11 @@ import com.plezha.achi.shared.data.model.StepProgress
 import com.plezha.achi.shared.data.network.models.AchievementPackSchema
 import com.plezha.achi.shared.data.network.models.AchievementSchema
 import com.plezha.achi.shared.data.network.models.AchievementStepSchema
+import com.plezha.achi.shared.di.ApiConfig
 
 /**
  * Maps network schema models to domain models.
  */
-
-// Base URL for resolving relative image URLs
-// TODO: This should ideally come from a config/DI
-private const val IMAGE_BASE_URL = "http://10.0.2.2:8000"
 
 /**
  * Resolves an image URL - prepends base URL if the path is relative
@@ -24,7 +21,7 @@ private fun resolveImageUrl(url: String?): String? {
     return if (url.startsWith("http://") || url.startsWith("https://")) {
         url
     } else {
-        "$IMAGE_BASE_URL$url"
+        "${ApiConfig.baseUrl}$url"
     }
 }
 

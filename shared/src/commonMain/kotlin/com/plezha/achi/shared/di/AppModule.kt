@@ -16,9 +16,6 @@ import com.plezha.achi.shared.data.network.apis.UserProgressApi
 import com.plezha.achi.shared.data.network.apis.UsersApi
 import io.ktor.client.engine.HttpClientEngine
 
-// API Base URL for testing (Android emulator uses 10.0.2.2 to access host's localhost)
-private const val API_BASE_URL = "http://10.0.2.2:8000"
-
 /**
  * Manual dependency injection container.
  * Creates and holds all API clients and repositories.
@@ -26,13 +23,13 @@ private const val API_BASE_URL = "http://10.0.2.2:8000"
 class AppModule(httpClientEngine: HttpClientEngine) {
     
     // API Clients
-    val usersApi = UsersApi(baseUrl = API_BASE_URL, httpClientEngine = httpClientEngine)
-    val authApi = AuthenticationApi(baseUrl = API_BASE_URL, httpClientEngine = httpClientEngine)
-    val achievementsApi = AchievementsApi(baseUrl = API_BASE_URL, httpClientEngine = httpClientEngine)
-    val packsApi = PacksApi(baseUrl = API_BASE_URL, httpClientEngine = httpClientEngine)
-    val uploadApi = UploadApi(baseUrl = API_BASE_URL, httpClientEngine = httpClientEngine)
-    val userCollectionApi = UserCollectionApi(baseUrl = API_BASE_URL, httpClientEngine = httpClientEngine)
-    val userProgressApi = UserProgressApi(baseUrl = API_BASE_URL, httpClientEngine = httpClientEngine)
+    val usersApi = UsersApi(baseUrl = ApiConfig.baseUrl, httpClientEngine = httpClientEngine)
+    val authApi = AuthenticationApi(baseUrl = ApiConfig.baseUrl, httpClientEngine = httpClientEngine)
+    val achievementsApi = AchievementsApi(baseUrl = ApiConfig.baseUrl, httpClientEngine = httpClientEngine)
+    val packsApi = PacksApi(baseUrl = ApiConfig.baseUrl, httpClientEngine = httpClientEngine)
+    val uploadApi = UploadApi(baseUrl = ApiConfig.baseUrl, httpClientEngine = httpClientEngine)
+    val userCollectionApi = UserCollectionApi(baseUrl = ApiConfig.baseUrl, httpClientEngine = httpClientEngine)
+    val userProgressApi = UserProgressApi(baseUrl = ApiConfig.baseUrl, httpClientEngine = httpClientEngine)
     
     // Repositories
     val authRepository: AuthRepository by lazy {
