@@ -312,9 +312,8 @@ private fun Progress(
             )
             Text(
                 text = "${(progress*100f).roundToInt()}%",
-                style = MaterialTheme.typography.bodyMedium.let {
-                    it.copy(color = it.color.copy(alpha = 0.75f))
-                }
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         Spacer(modifier = Modifier.height(12.dp))
