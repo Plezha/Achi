@@ -9,3 +9,8 @@
 .cxx
 local.properties
 .kotlin/
+
+# Xcode user-specific files
+*.xcuserstate
+xcuserdata/
+*.xcworkspace/xcuserdata/
