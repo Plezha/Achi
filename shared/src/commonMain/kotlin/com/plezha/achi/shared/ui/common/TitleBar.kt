@@ -24,6 +24,7 @@ fun TitleBar(
     text: String,
     onBackClicked: (() -> Unit)? = null,
     modifier: Modifier,
+    actions: @Composable (() -> Unit)? = null,
 ) {
     Box(
         modifier = modifier
@@ -50,6 +51,11 @@ fun TitleBar(
                 .align(Alignment.Center)
                 .basicMarquee()
         )
+        if (actions != null) {
+            Box(modifier = Modifier.align(Alignment.CenterEnd)) {
+                actions()
+            }
+        }
     }
 }
 

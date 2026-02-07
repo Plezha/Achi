@@ -24,8 +24,10 @@ import com.plezha.achi.shared.ui.list.achievementlist.AchievementListViewModel
 import com.plezha.achi.shared.ui.list.achievementlist.AchievementsScreen
 import com.plezha.achi.shared.ui.list.packlist.AchievementPackList
 import com.plezha.achi.shared.ui.list.packlist.AchievementPackListViewModel
+import com.plezha.achi.shared.ui.debug.DebugPanelScreen
 import com.plezha.achi.shared.ui.profile.ProfileScreen
 import com.plezha.achi.shared.ui.profile.ProfileViewModel
+import com.plezha.achi.shared.ui.settings.SettingsScreen
 import kotlinx.coroutines.flow.collectLatest
 
 /**
@@ -200,6 +202,35 @@ fun createNavEntryProvider(
             }
         }
         
-        ProfileScreen(viewModel = profileViewModel)
+        ProfileScreen(
+            viewModel = profileViewModel,
+            onNavigateToSettings = { backStack.add(SettingsRoute) }
+        )
+    }
+
+    // Settings screen
+    entry<SettingsRoute> {
+        SettingsScreen(
+            onBackClicked = backStack::popBack,
+            onNavigateToDebugPanel = { backStack.add(DebugPanelRoute) }
+        )
+    }
+
+    // Debug panel screen (debug builds only, gated in SettingsScreen)
+    entry<DebugPanelRoute> {
+        val profileViewModel = remember {
+            ProfileViewModel(appModule.authRepository)
+        }
+
+        LaunchedEffect(Unit) {
+            profileViewModel.messageFlow.collectLatest { message ->
+                snackbarHostState.showSnackbar(message)
+            }
+        }
+
+        DebugPanelScreen(
+            onBackClicked = backStack::popBack,
+            onDebugLogin = profileViewModel::onDebugLogin
+        )
     }
 }

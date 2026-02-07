@@ -37,6 +37,12 @@ data class AchievementRoute(val id: String) : NavKey
 @Serializable
 data class AchievementListRoute(val id: String) : NavKey
 
+@Serializable
+data object SettingsRoute : NavKey
+
+@Serializable
+data object DebugPanelRoute : NavKey
+
 // Polymorphic serialization configuration for multiplatform support
 val navSavedStateConfig = SavedStateConfiguration {
     serializersModule = SerializersModule {
@@ -48,6 +54,8 @@ val navSavedStateConfig = SavedStateConfiguration {
             subclass(ProfileRoute::class, ProfileRoute.serializer())
             subclass(AchievementRoute::class, AchievementRoute.serializer())
             subclass(AchievementListRoute::class, AchievementListRoute.serializer())
+            subclass(SettingsRoute::class, SettingsRoute.serializer())
+            subclass(DebugPanelRoute::class, DebugPanelRoute.serializer())
         }
     }
 }

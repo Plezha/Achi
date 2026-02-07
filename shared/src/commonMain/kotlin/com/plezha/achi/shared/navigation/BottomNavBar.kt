@@ -23,7 +23,7 @@ fun BottomNavigationBar(
                     item.route is AddRoute
                 is AchievementPackListRoute, is AchievementListRoute, is AchievementRoute -> 
                     item.route is AchievementPackListRoute
-                is ProfileRoute -> 
+                is ProfileRoute, is SettingsRoute, is DebugPanelRoute -> 
                     item.route is ProfileRoute
                 else -> false
             }

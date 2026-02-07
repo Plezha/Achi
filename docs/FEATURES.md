@@ -263,14 +263,14 @@ Two methods to add achievement packs:
   - Display name field (registration only)
 - Login/Register button
 - Toggle between login/register mode
-- Debug quick login button
+- Settings gear icon in title bar → navigates to Settings screen
 
 **Logged In State**:
 - Profile avatar
 - Username display
 - Account info card
 - Logout button (red)
-- Debug section
+- Settings gear icon in title bar → navigates to Settings screen
 
 **Auth Flow**:
 1. User enters credentials
@@ -284,10 +284,52 @@ Two methods to add achievement packs:
    - Error message displayed
    - Form remains editable
 
-**Debug Feature**:
-- Quick login button (user1/password1)
-- Auto-registers if user doesn't exist
-- Useful for testing
+### 8. Settings Screen
+
+**Purpose**: App settings accessible from Profile screen via gear icon in the title bar.
+
+**Location**: `SettingsScreen.kt` — navigated via `SettingsRoute`
+
+**Functionality**:
+- "Debug Panel" row (only visible in debug builds, gated by `isDebug`) — navigates to `DebugPanelRoute`
+- Placeholder for future settings (e.g., theme, notifications)
+
+### 9. Debug Panel
+
+**Purpose**: Developer tools for testing and debugging (debug builds only).
+
+**Location**: Accessible from Settings screen via "Debug Panel" row
+
+**Screen**: `DebugPanelScreen.kt`
+
+**Functionality**:
+- Change API host at runtime (preset options + custom URL)
+- Quick login with debug credentials
+- Only visible in debug builds (gated by `isDebug`)
+
+**UI Components**:
+- Title bar with back navigation
+- Current host display card
+- Host selection with radio buttons:
+  - Production
+  - Localhost (Android Emulator)
+  - OpenAPI Default
+  - Custom URL (with text input)
+- Apply button (triggers AppModule recreation)
+- Quick Login button
+
+**Build-Type Gating**:
+- `isDebug` is an `expect/actual` property:
+  - Android: `BuildConfig.DEBUG`
+  - WasmJS: `true` (dev platform)
+  - iOS: `Platform.isDebugBinary`
+- Debug section in ProfileScreen only renders when `isDebug` is true
+- DebugPanelRoute registered in navigation but only reachable from debug UI
+
+**Host Switching**:
+- `ApiConfig.baseUrl` backed by `MutableStateFlow`
+- `App.kt` observes `ApiConfig.baseUrlFlow` and keys `AppModule` on it
+- Changing host recreates entire DI container (all API clients rebuilt)
 
 ## Feature States
 
@@ -301,6 +343,8 @@ Two methods to add achievement packs:
 - Progress tracking (simple & incremental, server-synced)
 - User Authentication (login/register/logout)
 - Profile management
+- Settings screen (gear icon from Profile title bar)
+- Debug Panel (debug builds only: host switching, quick login, via Settings)
 
 ### Auth Requirements
 - Pack list: Requires login to see packs
