@@ -133,7 +133,8 @@ fun createNavEntryProvider(
         val achievementPackListViewModel = remember {
             AchievementPackListViewModel(
                 userRepository = appModule.userRepository,
-                authRepository = appModule.authRepository
+                authRepository = appModule.authRepository,
+                achievementRepository = appModule.achievementRepository
             )
         }
 
@@ -163,7 +164,8 @@ fun createNavEntryProvider(
             onAchievementClick = { achievement ->
                 backStack.add(AchievementRoute(achievement.id))
             },
-            onBackClicked = backStack::popBack
+            onBackClicked = backStack::popBack,
+            onRetry = { achievementListViewModel.loadAchievementsByPackId(route.id) }
         )
     }
 
@@ -181,7 +183,8 @@ fun createNavEntryProvider(
 
         AchievementDetailsScreen(
             viewModel = viewModel,
-            onBackClicked = backStack::popBack
+            onBackClicked = backStack::popBack,
+            onRetry = { viewModel.loadAchievementById(route.id) }
         )
     }
 

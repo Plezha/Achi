@@ -8,4 +8,3 @@ data class AchievementPack(
     val previewImageUrl: String? = null,
     val code: String
 )
-
