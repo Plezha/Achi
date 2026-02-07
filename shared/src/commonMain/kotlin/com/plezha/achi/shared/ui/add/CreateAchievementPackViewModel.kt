@@ -6,6 +6,7 @@ import com.plezha.achi.shared.data.AchievementPackRepository
 import com.plezha.achi.shared.data.UserRepository
 import com.plezha.achi.shared.data.network.models.AchievementCreateBody
 import com.plezha.achi.shared.data.network.models.AchievementStepCreate
+import com.plezha.achi.shared.ui.common.UiText
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.name
 import io.github.vinceglb.filekit.readBytes
@@ -21,6 +22,8 @@ import kotlinx.coroutines.launch
 import kotlin.jvm.JvmInline
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import achi.shared.generated.resources.Res
+import achi.shared.generated.resources.*
 
 data class EditableStep(
     val description: String = "",
@@ -42,7 +45,7 @@ data class CreateAchievementPackUiState(
     val achievements: List<EditableAchievementData> = listOf(),
     val selectedImageFile: PlatformFile? = null,
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 ) {
     val canSave: Boolean
         get() = packName.isNotBlank() && 
@@ -67,8 +70,8 @@ class CreateAchievementPackViewModel(
     private val _navigationChannel = Channel<CreatePackNavigationEvent>()
     val navigationFlow: Flow<CreatePackNavigationEvent> = _navigationChannel.receiveAsFlow()
 
-    private val _messageChannel = Channel<String>()
-    val messageFlow: Flow<String> = _messageChannel.receiveAsFlow()
+    private val _messageChannel = Channel<UiText>()
+    val messageFlow: Flow<UiText> = _messageChannel.receiveAsFlow()
 
     fun onPackNameChange(name: String) {
         _uiState.update { it.copy(packName = name, errorMessage = null) }
@@ -140,20 +143,20 @@ class CreateAchievementPackViewModel(
 
         // Validation
         if (currentState.packName.isBlank()) {
-            _uiState.update { it.copy(errorMessage = "Pack name is required") }
+            _uiState.update { it.copy(errorMessage = UiText.Resource(Res.string.error_pack_name_required)) }
             return
         }
         if (currentState.achievements.isEmpty()) {
-            _uiState.update { it.copy(errorMessage = "Add at least one achievement") }
+            _uiState.update { it.copy(errorMessage = UiText.Resource(Res.string.error_add_achievement)) }
             return
         }
         if (currentState.achievements.any { it.title.isBlank() }) {
-            _uiState.update { it.copy(errorMessage = "All achievements must have a title") }
+            _uiState.update { it.copy(errorMessage = UiText.Resource(Res.string.error_achievement_title_required)) }
             return
         }
         val imageFile = currentState.selectedImageFile
         if (imageFile == null) {
-            _uiState.update { it.copy(errorMessage = "Please select a preview image") }
+            _uiState.update { it.copy(errorMessage = UiText.Resource(Res.string.error_select_preview_image)) }
             return
         }
 
@@ -214,14 +217,14 @@ class CreateAchievementPackViewModel(
 
                 // Reset the form after successful creation
                 _uiState.value = CreateAchievementPackUiState()
-                _messageChannel.send("Pack \"${currentState.packName}\" created successfully! Code: ${createdPack.code}")
+                _messageChannel.send(UiText.Resource(Res.string.msg_pack_created, currentState.packName, createdPack.code))
                 _navigationChannel.send(CreatePackNavigationEvent.NavigateBack)
 
             } catch (e: Exception) {
                 _uiState.update { 
                     it.copy(
                         isLoading = false, 
-                        errorMessage = e.message ?: "Failed to create pack"
+                        errorMessage = if (e.message != null) UiText.Raw(e.message!!) else UiText.Resource(Res.string.error_failed_to_create_pack)
                     ) 
                 }
             }

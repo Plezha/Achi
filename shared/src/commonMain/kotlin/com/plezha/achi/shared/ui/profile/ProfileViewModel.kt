@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.plezha.achi.shared.data.auth.AuthRepository
 import com.plezha.achi.shared.data.auth.AuthResult
 import com.plezha.achi.shared.data.auth.AuthState
+import com.plezha.achi.shared.ui.common.UiText
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import achi.shared.generated.resources.*
 
 data class ProfileUiState(
     val authState: AuthState = AuthState(),
@@ -29,8 +31,8 @@ class ProfileViewModel(
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
     
-    private val _messageChannel = Channel<String>()
-    val messageFlow: Flow<String> = _messageChannel.receiveAsFlow()
+    private val _messageChannel = Channel<UiText>()
+    val messageFlow: Flow<UiText> = _messageChannel.receiveAsFlow()
     
     // Debug credentials
     companion object {
@@ -69,7 +71,7 @@ class ProfileViewModel(
         val state = _uiState.value
         if (state.usernameInput.isBlank() || state.passwordInput.isBlank()) {
             viewModelScope.launch {
-                _messageChannel.send("Please enter username and password")
+                _messageChannel.send(UiText.Resource(Res.string.msg_enter_credentials))
             }
             return
         }
@@ -78,11 +80,11 @@ class ProfileViewModel(
             val result = authRepository.login(state.usernameInput, state.passwordInput)
             when (result) {
                 is AuthResult.Success -> {
-                    _messageChannel.send("Logged in as ${result.username}")
+                    _messageChannel.send(UiText.Resource(Res.string.msg_logged_in_as, result.username))
                     clearInputs()
                 }
                 is AuthResult.Error -> {
-                    _messageChannel.send(result.message)
+                    _messageChannel.send(UiText.Raw(result.message))
                 }
             }
         }
@@ -92,7 +94,7 @@ class ProfileViewModel(
         val state = _uiState.value
         if (state.usernameInput.isBlank() || state.passwordInput.isBlank()) {
             viewModelScope.launch {
-                _messageChannel.send("Please enter username and password")
+                _messageChannel.send(UiText.Resource(Res.string.msg_enter_credentials))
             }
             return
         }
@@ -103,11 +105,11 @@ class ProfileViewModel(
             val result = authRepository.register(state.usernameInput, state.passwordInput, displayName)
             when (result) {
                 is AuthResult.Success -> {
-                    _messageChannel.send("Registered and logged in as ${result.username}")
+                    _messageChannel.send(UiText.Resource(Res.string.msg_registered_as, result.username))
                     clearInputs()
                 }
                 is AuthResult.Error -> {
-                    _messageChannel.send(result.message)
+                    _messageChannel.send(UiText.Raw(result.message))
                 }
             }
         }
@@ -116,7 +118,7 @@ class ProfileViewModel(
     fun onLogout() {
         authRepository.logout()
         viewModelScope.launch {
-            _messageChannel.send("Logged out")
+            _messageChannel.send(UiText.Resource(Res.string.msg_logged_out))
         }
     }
     
@@ -128,10 +130,10 @@ class ProfileViewModel(
             val result = authRepository.login(DEBUG_USERNAME, DEBUG_PASSWORD)
             when (result) {
                 is AuthResult.Success -> {
-                    _messageChannel.send("[DEBUG] Logged in as ${result.username}")
+                    _messageChannel.send(UiText.Raw("[DEBUG] Logged in as ${result.username}"))
                 }
                 is AuthResult.Error -> {
-                    _messageChannel.send("[DEBUG] Login failed: ${result.message}")
+                    _messageChannel.send(UiText.Raw("[DEBUG] Login failed: ${result.message}"))
                 }
             }
         }

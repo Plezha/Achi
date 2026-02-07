@@ -42,9 +42,10 @@ import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import achi.shared.generated.resources.Res
-import achi.shared.generated.resources.ic_plus
+import achi.shared.generated.resources.*
 
 @Composable
 fun EditAchievementScreen(
@@ -94,7 +95,7 @@ private fun EditAchievementScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         TitleBar(
-            text = "Edit Achievement",
+            text = stringResource(Res.string.edit_achievement_title),
             onBackClicked = onBackClicked,
             modifier = Modifier.fillMaxWidth()
         )
@@ -109,7 +110,7 @@ private fun EditAchievementScreen(
             OutlinedTextField(
                 value = uiState.title,
                 onValueChange = onTitleChanged,
-                label = { Text("Title *") },
+                label = { Text(stringResource(Res.string.edit_achievement_title_field)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -120,7 +121,7 @@ private fun EditAchievementScreen(
             OutlinedTextField(
                 value = uiState.shortDescription,
                 onValueChange = onShortDescriptionChanged,
-                label = { Text("Short Description") },
+                label = { Text(stringResource(Res.string.edit_achievement_short_desc)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -131,7 +132,7 @@ private fun EditAchievementScreen(
             OutlinedTextField(
                 value = uiState.longDescription,
                 onValueChange = onLongDescriptionChanged,
-                label = { Text("Long Description (optional)") },
+                label = { Text(stringResource(Res.string.edit_achievement_long_desc)) },
                 minLines = 3,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -140,7 +141,7 @@ private fun EditAchievementScreen(
 
             // Achievement Image Section
             Text(
-                text = "Achievement Image (optional)",
+                text = stringResource(Res.string.edit_achievement_image),
                 style = MaterialTheme.typography.labelLarge
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -154,7 +155,7 @@ private fun EditAchievementScreen(
                 ) {
                     AsyncImage(
                         model = uiState.imageFile,
-                        contentDescription = "Achievement image",
+                        contentDescription = stringResource(Res.string.edit_achievement_image_cd),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )
@@ -164,7 +165,7 @@ private fun EditAchievementScreen(
                     onClick = { imagePickerLauncher.launch() },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Change Image")
+                    Text(stringResource(Res.string.common_change_image))
                 }
             } else {
                 OutlinedButton(
@@ -182,7 +183,7 @@ private fun EditAchievementScreen(
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text("Select Image")
+                        Text(stringResource(Res.string.common_select_image))
                     }
                 }
             }
@@ -196,11 +197,11 @@ private fun EditAchievementScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Steps (${uiState.steps.size})",
+                    text = stringResource(Res.string.edit_achievement_steps_count, uiState.steps.size),
                     style = MaterialTheme.typography.titleMedium
                 )
                 Button(onClick = onAddStep) {
-                    Text("Add Step")
+                    Text(stringResource(Res.string.edit_achievement_add_step))
                 }
             }
 
@@ -208,7 +209,7 @@ private fun EditAchievementScreen(
 
             if (uiState.steps.isEmpty()) {
                 Text(
-                    text = "No steps yet. A default step will be created if none are provided.",
+                    text = stringResource(Res.string.edit_achievement_no_steps),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     modifier = Modifier.padding(vertical = 8.dp)
@@ -237,14 +238,14 @@ private fun EditAchievementScreen(
                     onClick = onCancel,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(Res.string.common_cancel))
                 }
                 Button(
                     onClick = onSave,
                     enabled = uiState.canSave,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Save")
+                    Text(stringResource(Res.string.common_save))
                 }
             }
 
@@ -275,7 +276,7 @@ private fun StepEditCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Step #${index + 1}",
+                    text = stringResource(Res.string.edit_achievement_step_number, index + 1),
                     style = MaterialTheme.typography.labelLarge
                 )
                 OutlinedButton(
@@ -284,7 +285,7 @@ private fun StepEditCard(
                         contentColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Remove")
+                    Text(stringResource(Res.string.common_remove))
                 }
             }
 
@@ -293,7 +294,7 @@ private fun StepEditCard(
             OutlinedTextField(
                 value = step.description,
                 onValueChange = onDescriptionChanged,
-                label = { Text("Description") },
+                label = { Text(stringResource(Res.string.edit_achievement_description)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -304,7 +305,7 @@ private fun StepEditCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Substeps:",
+                    text = stringResource(Res.string.edit_achievement_substeps),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -319,7 +320,7 @@ private fun StepEditCard(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "(1-100)",
+                    text = stringResource(Res.string.edit_achievement_substeps_range),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )

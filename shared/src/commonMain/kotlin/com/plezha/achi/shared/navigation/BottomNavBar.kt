@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
@@ -41,7 +42,7 @@ fun BottomNavigationBar(
                     )
                 },
                 label = {
-                    Text(item.label)
+                    Text(stringResource(item.label))
                 }
             )
         }

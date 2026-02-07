@@ -2,6 +2,9 @@ package com.plezha.achi.shared.ui.settings
 
 import achi.shared.generated.resources.Res
 import achi.shared.generated.resources.ic_chevron_right
+import achi.shared.generated.resources.settings_title
+import achi.shared.generated.resources.settings_language
+import achi.shared.generated.resources.settings_language_subtitle
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.plezha.achi.shared.isDebug
 import com.plezha.achi.shared.ui.common.TitleBar
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
@@ -31,7 +35,7 @@ fun SettingsScreen(
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         TitleBar(
-            text = "Settings",
+            text = stringResource(Res.string.settings_title),
             onBackClicked = onBackClicked,
             modifier = Modifier.fillMaxWidth()
         )
@@ -41,6 +45,15 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
         ) {
+            // Language row (disabled for now)
+            SettingsRow(
+                title = stringResource(Res.string.settings_language),
+                subtitle = stringResource(Res.string.settings_language_subtitle),
+                onClick = { /* No-op for now */ },
+                enabled = false
+            )
+            HorizontalDivider()
+            
             // Debug Panel row (only visible in debug builds)
             if (isDebug) {
                 SettingsRow(
@@ -58,12 +71,30 @@ fun SettingsScreen(
 private fun SettingsRow(
     title: String,
     subtitle: String? = null,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    enabled: Boolean = true
 ) {
+    val contentAlpha = if (enabled) 1f else 0.38f
+    val textColor = if (enabled) {
+        MaterialTheme.colorScheme.onSurface
+    } else {
+        MaterialTheme.colorScheme.onSurface.copy(alpha = contentAlpha)
+    }
+    val subtitleColor = if (enabled) {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = contentAlpha)
+    }
+    val iconTint = if (enabled) {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = contentAlpha)
+    }
+    
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled, onClick = onClick)
             .padding(vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -71,21 +102,22 @@ private fun SettingsRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                color = textColor
             )
             if (subtitle != null) {
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = subtitleColor
                 )
             }
         }
         Icon(
             imageVector = vectorResource(Res.drawable.ic_chevron_right),
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = iconTint,
             modifier = Modifier.size(20.dp)
         )
     }

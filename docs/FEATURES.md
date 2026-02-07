@@ -291,8 +291,8 @@ Two methods to add achievement packs:
 **Location**: `SettingsScreen.kt` — navigated via `SettingsRoute`
 
 **Functionality**:
+- "Language" row (disabled, placeholder for future in-app language override)
 - "Debug Panel" row (only visible in debug builds, gated by `isDebug`) — navigates to `DebugPanelRoute`
-- Placeholder for future settings (e.g., theme, notifications)
 
 ### 9. Debug Panel
 
@@ -345,6 +345,7 @@ Two methods to add achievement packs:
 - Profile management
 - Settings screen (gear icon from Profile title bar)
 - Debug Panel (debug builds only: host switching, quick login, via Settings)
+- Localization (English + Russian, system language, UiText abstraction)
 
 ### Auth Requirements
 - Pack list: Requires login to see packs
@@ -354,13 +355,35 @@ Two methods to add achievement packs:
 
 ## Cross-Feature Components
 
+### Localization (i18n)
+
+The app supports English (default) and Russian localization via Compose Multiplatform string resources.
+
+**String resources**:
+- `composeResources/values/strings.xml` — English (default)
+- `composeResources/values-ru/strings.xml` — Russian translations
+
+**In Composables**: `stringResource(Res.string.key)` / `stringResource(Res.string.key, arg1, arg2)`
+
+**In ViewModels**: `UiText` sealed class (`ui/common/UiText.kt`):
+- `UiText.Resource(Res.string.key, args...)` — Localizable string resource
+- `UiText.Raw(string)` — Non-translatable raw string (server errors, debug)
+- `@Composable asString()` — Resolve in composable context
+- `suspend resolve()` — Resolve in coroutine context (e.g. LaunchedEffect)
+
+**Language detection**: Uses system language automatically.
+
+**Not translated**: Debug panel strings, preview-only strings.
+
+**Planned**: In-app language override (Settings placeholder exists, disabled).
+
 ### Snackbar System
 
 Used for showing messages across features:
 - Success messages (pack added, logged in)
 - Error messages (pack not found, login failed)
 - Implemented at app level in Scaffold
-- ViewModels emit messages via `Channel<String>`
+- ViewModels emit messages via `Channel<UiText>`, resolved in NavGraph LaunchedEffect blocks
 
 ### Loading States
 
@@ -438,11 +461,12 @@ response.check()  // Throws if not successful
 
 ## Future Feature Roadmap
 
-1. **Offline Support**: SQLDelight for local caching
-2. **Progress Sync Indicator**: Show when progress is syncing
-3. **Pack Sharing**: Improved sharing flow
-4. **Search**: Find packs and achievements
-5. **Categories**: Organize packs by type
-6. **Notifications**: Reminders and encouragement
-7. **Statistics**: Progress insights
-8. **iOS**: Enable iOS platform support
+1. **In-app Language Override**: Settings already has a disabled "Language" row placeholder
+2. **Offline Support**: SQLDelight for local caching
+3. **Progress Sync Indicator**: Show when progress is syncing
+4. **Pack Sharing**: Improved sharing flow
+5. **Search**: Find packs and achievements
+6. **Categories**: Organize packs by type
+7. **Notifications**: Reminders and encouragement
+8. **Statistics**: Progress insights
+9. **iOS**: Enable iOS platform support

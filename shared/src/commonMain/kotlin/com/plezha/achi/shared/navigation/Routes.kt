@@ -7,6 +7,9 @@ import achi.shared.generated.resources.ic_plus
 import achi.shared.generated.resources.ic_plus_filled_outside
 import achi.shared.generated.resources.ic_profile
 import achi.shared.generated.resources.ic_profile_filled
+import achi.shared.generated.resources.nav_add
+import achi.shared.generated.resources.nav_achievements
+import achi.shared.generated.resources.nav_profile
 import androidx.navigation3.runtime.NavKey
 import androidx.savedstate.serialization.SavedStateConfiguration
 import kotlinx.serialization.Serializable
@@ -14,6 +17,7 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
 
 // Navigation 3 routes - all implement NavKey
 @Serializable
@@ -65,11 +69,11 @@ data class TopLevelRoute<T : NavKey>(
     val route: T,
     val iconUnselected: DrawableResource,
     val iconSelected: DrawableResource,
-    val label: String
+    val label: StringResource
 )
 
 val topLevelRoutes = listOf(
-    TopLevelRoute(AddRoute, Res.drawable.ic_plus, Res.drawable.ic_plus_filled_outside, "Add"),
-    TopLevelRoute(AchievementPackListRoute, Res.drawable.ic_list, Res.drawable.ic_cup_filled, "Achievements"),
-    TopLevelRoute(ProfileRoute, Res.drawable.ic_profile, Res.drawable.ic_profile_filled, "Profile"),
+    TopLevelRoute(AddRoute, Res.drawable.ic_plus, Res.drawable.ic_plus_filled_outside, Res.string.nav_add),
+    TopLevelRoute(AchievementPackListRoute, Res.drawable.ic_list, Res.drawable.ic_cup_filled, Res.string.nav_achievements),
+    TopLevelRoute(ProfileRoute, Res.drawable.ic_profile, Res.drawable.ic_profile_filled, Res.string.nav_profile),
 )

@@ -1,7 +1,7 @@
 package com.plezha.achi.shared.ui.list.packlist
 
 import achi.shared.generated.resources.Res
-import achi.shared.generated.resources.img_trophy_lifting
+import achi.shared.generated.resources.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +42,7 @@ import coil3.compose.AsyncImage
 import com.plezha.achi.shared.data.model.AchievementPack
 import com.plezha.achi.shared.ui.common.TitleBar
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,7 +58,7 @@ fun AchievementPackList(
         modifier = modifier
     ) {
         TitleBar(
-            text = "My Packs",
+            text = stringResource(Res.string.pack_list_title),
             modifier = Modifier.fillMaxWidth(),
         )
         
@@ -84,12 +85,12 @@ fun AchievementPackList(
                             style = MaterialTheme.typography.displayMedium
                         )
                         Text(
-                            text = "Sign in to access your packs",
+                            text = stringResource(Res.string.pack_list_sign_in_required),
                             style = MaterialTheme.typography.titleMedium,
                             textAlign = TextAlign.Center
                         )
                         Text(
-                            text = "Your achievements sync across all your devices",
+                            text = stringResource(Res.string.pack_list_sync_description),
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -116,12 +117,12 @@ fun AchievementPackList(
                                 style = MaterialTheme.typography.displayMedium
                             )
                             Text(
-                                text = "No packs yet",
+                                text = stringResource(Res.string.pack_list_empty_title),
                                 style = MaterialTheme.typography.titleMedium,
                                 textAlign = TextAlign.Center
                             )
                             Text(
-                                text = "Add packs using a code or create your own in the Add tab",
+                                text = stringResource(Res.string.pack_list_empty_description),
                                 style = MaterialTheme.typography.bodyMedium,
                                 textAlign = TextAlign.Center,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -249,7 +250,7 @@ private fun PackCard(
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Text(
-                            text = "Code:",
+                            text = stringResource(Res.string.common_code_label),
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.White.copy(alpha = 0.7f)
                         )
@@ -274,7 +275,7 @@ private fun CountBadge(count: Int) {
         color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
     ) {
         Text(
-            text = "$count achievements",
+            text = stringResource(Res.string.pack_list_count_achievements, count),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onPrimaryContainer,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)

@@ -1,5 +1,7 @@
 package com.plezha.achi.shared.ui.add
 
+import achi.shared.generated.resources.Res
+import achi.shared.generated.resources.*
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -24,8 +26,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.plezha.achi.shared.ui.common.TitleBar
+import com.plezha.achi.shared.ui.common.UiText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -37,8 +41,8 @@ fun AddAchievementScreen(
     val isLoading = uiState.isLoading
 
     LaunchedEffect(Unit) {
-        addAchievementViewModel.messageFlow.collectLatest { message ->
-            showMessage(message)
+        addAchievementViewModel.messageFlow.collectLatest { uiText ->
+            showMessage(uiText.resolve())
         }
     }
 
@@ -48,7 +52,7 @@ fun AddAchievementScreen(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             TitleBar(
-                text = "Add Achievements",
+                text = stringResource(Res.string.add_title),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -58,12 +62,12 @@ fun AddAchievementScreen(
                     .padding(horizontal = 16.dp)
             ) {
                 Text(
-                    text = "Create Achievement Pack",
+                    text = stringResource(Res.string.add_create_pack_section),
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Create an achievement pack by filling out a form",
+                    text = stringResource(Res.string.add_create_pack_description),
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -73,7 +77,7 @@ fun AddAchievementScreen(
                     shape = MaterialTheme.shapes.medium
                 ) {
                     Text(
-                        text = "Create Achievement Pack",
+                        text = stringResource(Res.string.add_create_pack_button),
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
@@ -81,12 +85,12 @@ fun AddAchievementScreen(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Text(
-                    text = "Add with a Code",
+                    text = stringResource(Res.string.add_with_code_section),
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Add an achievement pack directly using a code",
+                    text = stringResource(Res.string.add_with_code_description),
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -94,7 +98,7 @@ fun AddAchievementScreen(
                 OutlinedTextField(
                     value = uiState.asciiCode,
                     onValueChange = addAchievementViewModel::onAsciiCodeChange,
-                    label = { Text("Enter Code") },
+                    label = { Text(stringResource(Res.string.add_enter_code)) },
                     enabled = !isLoading,
                     singleLine = true,
                     keyboardActions = KeyboardActions(

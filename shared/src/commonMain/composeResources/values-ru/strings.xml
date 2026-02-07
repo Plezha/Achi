@@ -1,0 +1,129 @@
+<resources>
+    <!-- Common -->
+    <string name="common_back">Назад</string>
+    <string name="common_retry">Повторить</string>
+    <string name="common_cancel">Отмена</string>
+    <string name="common_save">Сохранить</string>
+    <string name="common_remove">Удалить</string>
+    <string name="common_add">Добавить</string>
+    <string name="common_code_label">Код:</string>
+    <string name="common_change_image">Изменить изображение</string>
+    <string name="common_select_image">Выбрать изображение</string>
+    <string name="common_user_fallback">Пользователь</string>
+    <string name="common_error_generic">Произошла ошибка</string>
+
+
+    <!-- Navigation -->
+    <string name="nav_add">Добавить</string>
+    <string name="nav_achievements">Достижения</string>
+    <string name="nav_profile">Профиль</string>
+
+    <!-- Profile screen -->
+    <string name="profile_title">Профиль</string>
+    <string name="profile_settings_cd">Настройки</string>
+    <string name="profile_logged_in">Вход выполнен</string>
+    <string name="profile_guest">Гость</string>
+    <string name="profile_account">Аккаунт</string>
+    <string name="profile_username">Имя пользователя</string>
+    <string name="profile_password">Пароль</string>
+    <string name="profile_display_name_optional">Отображаемое имя (необязательно)</string>
+    <string name="profile_create_account">Создать аккаунт</string>
+    <string name="profile_sign_in">Войдите в свой аккаунт</string>
+    <string name="profile_login">Войти</string>
+    <string name="profile_register">Регистрация</string>
+    <string name="profile_logout">Выйти</string>
+    <string name="profile_toggle_to_signin">Уже есть аккаунт? Войти</string>
+    <string name="profile_toggle_to_register">Нет аккаунта? Зарегистрироваться</string>
+
+    <!-- Profile messages -->
+    <string name="msg_enter_credentials">Введите имя пользователя и пароль</string>
+    <string name="msg_logged_in_as">Вход выполнен как %1$s</string>
+    <string name="msg_registered_as">Зарегистрирован и выполнен вход как %1$s</string>
+    <string name="msg_logged_out">Выход выполнен</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_language">Язык</string>
+    <string name="settings_language_subtitle">Скоро — используется язык системы</string>
+
+    <!-- Pack list screen -->
+    <string name="pack_list_title">Мои наборы</string>
+    <string name="pack_list_sign_in_required">Войдите, чтобы увидеть свои наборы</string>
+    <string name="pack_list_sync_description">Ваши достижения синхронизируются на всех устройствах</string>
+    <string name="pack_list_empty_title">Наборов пока нет</string>
+    <string name="pack_list_empty_description">Добавьте наборы по коду или создайте свои во вкладке «Добавить»</string>
+    <string name="pack_list_count_achievements">%1$d достижений</string>
+
+    <!-- Achievement list screen -->
+    <string name="achievement_list_fallback_title">Достижения</string>
+    <string name="achievement_list_completed_count">%1$d из %2$d выполнено</string>
+    <string name="achievement_list_steps_progress">%1$d/%2$d шагов</string>
+    <string name="achievement_list_completed_cd">Выполнено</string>
+
+    <!-- Achievement details screen -->
+    <string name="achievement_details_title">Детали достижения</string>
+    <string name="achievement_details_steps">Шаги</string>
+    <string name="achievement_details_progress">Прогресс</string>
+    <string name="achievement_details_step_fallback">Шаг %1$d</string>
+
+    <!-- Add screen -->
+    <string name="add_title">Добавить достижения</string>
+    <string name="add_create_pack_section">Создать набор достижений</string>
+    <string name="add_create_pack_description">Создайте набор достижений, заполнив форму</string>
+    <string name="add_create_pack_button">Создать набор достижений</string>
+    <string name="add_with_code_section">Добавить по коду</string>
+    <string name="add_with_code_description">Добавьте набор достижений напрямую по коду</string>
+    <string name="add_enter_code">Введите код</string>
+
+    <!-- Add messages -->
+    <string name="msg_login_required">Войдите, чтобы добавить наборы достижений</string>
+    <string name="msg_pack_added">Набор «%1$s» успешно добавлен</string>
+    <string name="error_pack_already_in_collection">Набор с кодом «%1$s» уже в вашей коллекции</string>
+    <string name="error_pack_not_found">Набор с кодом «%1$s» не найден</string>
+    <string name="error_failed_to_add_pack">Не удалось добавить набор</string>
+
+    <!-- Create pack screen -->
+    <string name="create_pack_title">Создать набор достижений</string>
+    <string name="create_pack_name">Название набора</string>
+    <string name="create_pack_description_optional">Описание набора (необязательно)</string>
+    <string name="create_pack_preview_image">Изображение для превью</string>
+    <string name="create_pack_select_preview_image">Выбрать изображение для превью</string>
+    <string name="create_pack_preview_image_cd">Превью набора</string>
+    <string name="create_pack_achievements_count">Достижения (%1$d)</string>
+    <string name="create_pack_no_achievements">Достижений пока нет. Добавьте хотя бы одно.</string>
+    <string name="create_pack_save">Сохранить набор достижений</string>
+    <string name="create_pack_untitled">Без названия</string>
+    <string name="create_pack_steps_count">%1$d шагов</string>
+    <string name="create_pack_step_count_one">%1$d шаг</string>
+
+    <!-- Create pack messages -->
+    <string name="error_pack_name_required">Необходимо указать название набора</string>
+    <string name="error_add_achievement">Добавьте хотя бы одно достижение</string>
+    <string name="error_achievement_title_required">У всех достижений должно быть название</string>
+    <string name="error_select_preview_image">Выберите изображение для превью</string>
+    <string name="msg_pack_created">Набор «%1$s» успешно создан! Код: %2$s</string>
+    <string name="create_pack_default_step">Выполнить «%1$s»</string>
+    <string name="error_failed_to_create_pack">Не удалось создать набор</string>
+
+    <!-- Edit achievement screen -->
+    <string name="edit_achievement_title">Редактировать достижение</string>
+    <string name="edit_achievement_title_field">Название *</string>
+    <string name="edit_achievement_short_desc">Краткое описание</string>
+    <string name="edit_achievement_long_desc">Подробное описание (необязательно)</string>
+    <string name="edit_achievement_image">Изображение достижения (необязательно)</string>
+    <string name="edit_achievement_image_cd">Изображение достижения</string>
+    <string name="edit_achievement_steps_count">Шаги (%1$d)</string>
+    <string name="edit_achievement_add_step">Добавить шаг</string>
+    <string name="edit_achievement_no_steps">Шагов пока нет. Шаг по умолчанию будет создан автоматически.</string>
+    <string name="edit_achievement_step_number">Шаг #%1$d</string>
+    <string name="edit_achievement_description">Описание</string>
+    <string name="edit_achievement_substeps">Подшаги:</string>
+    <string name="edit_achievement_substeps_range">(1-100)</string>
+
+    <!-- Error messages -->
+    <string name="error_failed_to_load_achievement">Не удалось загрузить достижение</string>
+    <string name="error_unknown">Неизвестная ошибка</string>
+    <string name="error_failed_to_sync_progress">Не удалось синхронизировать прогресс: %1$s</string>
+    <string name="error_failed_to_load_achievements">Не удалось загрузить достижения</string>
+    <string name="error_failed_to_load_packs">Не удалось загрузить наборы</string>
+</resources>
