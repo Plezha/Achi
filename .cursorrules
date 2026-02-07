@@ -240,7 +240,7 @@ entry<AchievementRoute> { route ->
 - Pack list requires login (shows empty when logged out)
 - Progress tracking requires login (local-only otherwise)
 - Debug login button and debug panel only visible in debug builds
-- `isDebug` via expect/actual: BuildConfig.DEBUG (Android), true (WasmJS), Platform.isDebugBinary (iOS)
+- `isDebug` via expect/actual: BuildConfig.DEBUG (Android), webpack BannerPlugin flag (WasmJS), Platform.isDebugBinary (iOS)
 
 ### 🔮 Planned/Future
 - Offline support with local persistence (SQLDelight)
