@@ -59,6 +59,7 @@ UI Layer (Composables) → ViewModel → Repository → API (Network)
 ```
 shared/src/commonMain/kotlin/com/plezha/achi/shared/
 ├── App.kt                      # Main app entry, Coil setup, theme
+├── Platform.kt                 # expect val isDebug (actual per platform)
 ├── data/
 │   ├── model/                  # Domain models (Achievement, AchievementPack)
 │   ├── auth/
@@ -70,7 +71,7 @@ shared/src/commonMain/kotlin/com/plezha/achi/shared/
 │   ├── AchievementPackRepository.kt
 │   └── UserRepository.kt       # User's pack collection & progress sync
 ├── di/
-│   ├── ApiConfig.kt            # Base URL configuration
+│   ├── ApiConfig.kt            # Base URL config (mutable via StateFlow for debug panel)
 │   └── AppModule.kt            # Manual DI container
 ├── navigation/
 │   ├── Routes.kt               # All NavKey route definitions
@@ -88,6 +89,10 @@ shared/src/commonMain/kotlin/com/plezha/achi/shared/
     │   ├── achievementdetails/
     │   ├── achievementlist/
     │   └── packlist/
+    ├── debug/                  # Debug panel (debug builds only)
+    │   └── DebugPanelScreen.kt
+    ├── settings/               # Settings screen
+    │   └── SettingsScreen.kt
     ├── profile/                # Login/register/logout UI
     │   ├── ProfileScreen.kt
     │   └── ProfileViewModel.kt
@@ -106,12 +111,14 @@ EditAchievementRoute(achievementIndex: Int) // Edit achievement in pack creation
 ProfileRoute              // Login/register/profile
 AchievementListRoute(id: String) // Achievements in a pack
 AchievementRoute(id: String)     // Achievement details
+SettingsRoute                 // Settings (gear icon from Profile)
+DebugPanelRoute               // Debug panel (debug builds only, via Settings)
 ```
 
 **Bottom Nav (3 tabs)**:
 - Add → AddRoute → CreateAchievementPackRoute → EditAchievementRoute
 - Achievements (start) → PackListRoute → AchievementListRoute → AchievementRoute
-- Profile → ProfileRoute
+- Profile → ProfileRoute → SettingsRoute → DebugPanelRoute (debug builds only)
 
 ## Key Domain Models
 
@@ -226,11 +233,14 @@ entry<AchievementRoute> { route ->
 - User Authentication (login/register/logout)
 - Progress Sync (step progress saved to server)
 - Profile Screen (login form, logged-in state display)
+- Settings Screen (gear icon from Profile, hosts debug panel link)
+- Debug Panel (debug builds only: host switcher, quick login, via Settings)
 
 ### ⚠️ Notes
 - Pack list requires login (shows empty when logged out)
 - Progress tracking requires login (local-only otherwise)
-- Debug login button available (user1/password1)
+- Debug login button and debug panel only visible in debug builds
+- `isDebug` via expect/actual: BuildConfig.DEBUG (Android), true (WasmJS), Platform.isDebugBinary (iOS)
 
 ### 🔮 Planned/Future
 - Offline support with local persistence (SQLDelight)
@@ -272,6 +282,10 @@ entry<AchievementRoute> { route ->
 
 6. **Duplicate folders**: `achievementdetails`/`achievmentdetails` and `achievementlist`/`achievmentlist` (typos in folder names).
 
+7. **Settings Screen**: Accessible from Profile screen via gear icon in title bar. Contains debug panel link (gated by `isDebug`).
+
+8. **Debug Panel**: Available only in debug builds (gated by `isDebug`). Allows runtime API host switching (recreates `AppModule`) and quick login. Accessible from Settings screen.
+
 ## Theme
 
 - **Fonts**: Montserrat (headings), Open Sans (body)
@@ -292,6 +306,10 @@ entry<AchievementRoute> { route ->
 | Domain Models | `shared/src/commonMain/.../data/model/` |
 | OpenAPI Spec | `Achi_openapi.json` (project root) |
 | Generated API | `shared/build/generated/openapi/` |
+| Settings | `shared/src/commonMain/.../ui/settings/SettingsScreen.kt` |
+| Debug Panel | `shared/src/commonMain/.../ui/debug/DebugPanelScreen.kt` |
+| Platform (isDebug) | `shared/src/commonMain/.../Platform.kt` + platform actuals |
+| API Config | `shared/src/commonMain/.../di/ApiConfig.kt` |
 | Version Catalog | `gradle/libs.versions.toml` |
 
 ## Version Summary

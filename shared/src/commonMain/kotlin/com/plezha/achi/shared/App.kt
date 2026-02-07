@@ -6,6 +6,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -13,6 +15,7 @@ import androidx.navigation3.ui.NavDisplay
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
+import com.plezha.achi.shared.di.ApiConfig
 import com.plezha.achi.shared.di.AppModule
 import com.plezha.achi.shared.navigation.AchievementPackListRoute
 import com.plezha.achi.shared.navigation.BottomNavigationBar
@@ -43,8 +46,9 @@ fun AchiApp() {
 
 @Composable
 private fun AchiAppNav() {
-    // Create DI container
-    val appModule = remember { AppModule(httpClientEngine) }
+    // Create DI container, keyed on baseUrl so it rebuilds when host changes
+    val baseUrl by ApiConfig.baseUrlFlow.collectAsState()
+    val appModule = remember(baseUrl) { AppModule(httpClientEngine) }
     
     val snackbarHostState = remember { SnackbarHostState() }
 

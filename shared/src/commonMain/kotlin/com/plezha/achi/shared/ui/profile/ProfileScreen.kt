@@ -24,8 +24,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -43,11 +43,12 @@ import com.plezha.achi.shared.ui.common.TitleBar
 import org.jetbrains.compose.resources.vectorResource
 import achi.shared.generated.resources.Res
 import achi.shared.generated.resources.ic_profile_filled
-import androidx.compose.ui.text.AnnotatedString
+import achi.shared.generated.resources.ic_settings
 
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel
+    viewModel: ProfileViewModel,
+    onNavigateToSettings: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     
@@ -60,7 +61,7 @@ fun ProfileScreen(
         onLogin = viewModel::onLogin,
         onRegister = viewModel::onRegister,
         onLogout = viewModel::onLogout,
-        onDebugLogin = viewModel::onDebugLogin
+        onNavigateToSettings = onNavigateToSettings
     )
 }
 
@@ -74,7 +75,7 @@ private fun ProfileScreen(
     onLogin: () -> Unit,
     onRegister: () -> Unit,
     onLogout: () -> Unit,
-    onDebugLogin: () -> Unit
+    onNavigateToSettings: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     val isLoading = uiState.authState.isLoading
@@ -82,7 +83,15 @@ private fun ProfileScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         TitleBar(
             text = "Profile",
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            actions = {
+                IconButton(onClick = onNavigateToSettings) {
+                    Icon(
+                        imageVector = vectorResource(Res.drawable.ic_settings),
+                        contentDescription = "Settings"
+                    )
+                }
+            }
         )
         
         Column(
@@ -122,8 +131,7 @@ private fun ProfileScreen(
                     // Logged in state
                     LoggedInContent(
                         username = uiState.authState.username ?: "User",
-                        onLogout = onLogout,
-                        onDebugLogin = onDebugLogin
+                        onLogout = onLogout
                     )
                 } else {
                     // Login/Register form
@@ -135,8 +143,7 @@ private fun ProfileScreen(
                         onDisplayNameChanged = onDisplayNameChanged,
                         onToggleMode = onToggleMode,
                         onLogin = onLogin,
-                        onRegister = onRegister,
-                        onDebugLogin = onDebugLogin
+                        onRegister = onRegister
                     )
                 }
             }
@@ -147,8 +154,7 @@ private fun ProfileScreen(
 @Composable
 private fun LoggedInContent(
     username: String,
-    onLogout: () -> Unit,
-    onDebugLogin: () -> Unit
+    onLogout: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -207,11 +213,6 @@ private fun LoggedInContent(
         ) {
             Text("Logout")
         }
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        // Debug section
-        DebugSection(onDebugLogin = onDebugLogin)
     }
 }
 
@@ -224,8 +225,7 @@ private fun AuthForm(
     onDisplayNameChanged: (String) -> Unit,
     onToggleMode: () -> Unit,
     onLogin: () -> Unit,
-    onRegister: () -> Unit,
-    onDebugLogin: () -> Unit
+    onRegister: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -349,33 +349,6 @@ private fun AuthForm(
                 else 
                     "Don't have an account? Register"
             )
-        }
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        DebugSection(onDebugLogin = onDebugLogin)
-    }
-}
-
-@Composable
-private fun DebugSection(onDebugLogin: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Debug",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        OutlinedButton(
-            onClick = onDebugLogin,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Quick Login (user1/password1)")
         }
     }
 }

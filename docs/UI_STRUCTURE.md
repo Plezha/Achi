@@ -47,6 +47,12 @@ data class AchievementRoute(val id: String) : NavKey
 
 @Serializable
 data class AchievementListRoute(val id: String) : NavKey
+
+@Serializable
+data object SettingsRoute : NavKey
+
+@Serializable
+data object DebugPanelRoute : NavKey  // Debug builds only
 ```
 
 **Polymorphic Serialization** for saved state:
@@ -114,7 +120,7 @@ val isSelected = when (currentRoute) {
         item.route is AddRoute
     is AchievementPackListRoute, is AchievementListRoute, is AchievementRoute -> 
         item.route is AchievementPackListRoute
-    is ProfileRoute -> 
+    is ProfileRoute, is SettingsRoute, is DebugPanelRoute -> 
         item.route is ProfileRoute
     else -> false
 }
@@ -135,7 +141,8 @@ Location: `shared/src/commonMain/kotlin/com/plezha/achi/shared/ui/common/`
 **Parameters**:
 - `text: String` - Title text
 - `onBackClicked: (() -> Unit)? = null` - Optional back button
-- `modifier: Modifier = Modifier`
+- `modifier: Modifier` - Layout modifier
+- `actions: @Composable (() -> Unit)? = null` - Optional right-side action buttons (e.g. gear icon)
 
 **Usage**:
 ```kotlin
@@ -143,6 +150,17 @@ TitleBar(
     text = "Achievement Details",
     onBackClicked = { navController.navigateUp() },
     modifier = Modifier.fillMaxWidth()
+)
+
+// With actions slot (e.g. settings gear icon on Profile screen)
+TitleBar(
+    text = "Profile",
+    modifier = Modifier.fillMaxWidth(),
+    actions = {
+        IconButton(onClick = onNavigateToSettings) {
+            Icon(vectorResource(Res.drawable.ic_settings), contentDescription = "Settings")
+        }
+    }
 )
 ```
 
