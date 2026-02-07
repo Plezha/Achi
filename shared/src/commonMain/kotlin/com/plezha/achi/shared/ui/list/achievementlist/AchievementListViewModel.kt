@@ -8,6 +8,8 @@ import com.plezha.achi.shared.data.UserRepository
 import com.plezha.achi.shared.data.auth.AuthRepository
 import com.plezha.achi.shared.data.model.Achievement
 import com.plezha.achi.shared.data.model.AchievementPack
+import com.plezha.achi.shared.data.model.completedCount
+import com.plezha.achi.shared.data.model.overallProgress
 import com.plezha.achi.shared.data.toStepProgressList
 import com.plezha.achi.shared.ui.list.achievementdetails.withProgress
 import kotlinx.coroutines.Dispatchers
@@ -19,16 +21,16 @@ import kotlinx.coroutines.launch
 data class AchievementListUiState(
     val pack: AchievementPack? = null,
     val achievements: List<Achievement> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val error: String? = null
 ) {
     /** Overall progress across all achievements (0.0 to 1.0) */
     val overallProgress: Float
-        get() = if (achievements.isEmpty()) 0f 
-                else achievements.sumOf { it.progress }.toFloat() / achievements.size
+        get() = achievements.overallProgress()
     
     /** Number of fully completed achievements */
     val completedCount: Int
-        get() = achievements.count { it.isDone }
+        get() = achievements.completedCount()
 }
 
 class AchievementListViewModel(
@@ -46,38 +48,45 @@ class AchievementListViewModel(
 
     fun loadAchievementsByPackId(id: String) {
         viewModelScope.launch(Dispatchers.Default) {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             
-            val pack = achievementPackRepository.getAchievementPackById(id)
-            val achievementsList = pack.achievementIds.map {
-                achievementRepository.getAchievement(it)
-            }
-            
-            // Merge with user progress if logged in
-            val isLoggedIn = authRepository.authState.value.isLoggedIn
-            val achievementsWithProgress = if (isLoggedIn) {
-                achievementsList.map { achievement ->
-                    try {
-                        val progress = userRepository.getProgress(achievement.id)
-                        if (progress != null) {
-                            achievement.withProgress(progress.toStepProgressList())
-                        } else {
+            try {
+                val pack = achievementPackRepository.getAchievementPackById(id)
+                val achievementsList = pack.achievementIds.map {
+                    achievementRepository.getAchievement(it)
+                }
+                
+                // Merge with user progress if logged in
+                val isLoggedIn = authRepository.authState.value.isLoggedIn
+                val achievementsWithProgress = if (isLoggedIn) {
+                    achievementsList.map { achievement ->
+                        try {
+                            val progress = userRepository.getProgress(achievement.id)
+                            if (progress != null) {
+                                achievement.withProgress(progress.toStepProgressList())
+                            } else {
+                                achievement
+                            }
+                        } catch (e: Exception) {
                             achievement
                         }
-                    } catch (e: Exception) {
-                        achievement
                     }
+                } else {
+                    achievementsList
                 }
-            } else {
-                achievementsList
+                
+                _achievements.value = achievementsWithProgress
+                _uiState.value = AchievementListUiState(
+                    pack = pack,
+                    achievements = achievementsWithProgress,
+                    isLoading = false
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = e.message ?: "Failed to load achievements"
+                )
             }
-            
-            _achievements.value = achievementsWithProgress
-            _uiState.value = AchievementListUiState(
-                pack = pack,
-                achievements = achievementsWithProgress,
-                isLoading = false
-            )
         }
     }
 

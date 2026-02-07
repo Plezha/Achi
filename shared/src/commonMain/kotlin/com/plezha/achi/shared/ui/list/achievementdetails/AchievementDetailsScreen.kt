@@ -1,7 +1,7 @@
 package com.plezha.achi.shared.ui.list.achievementdetails
 
 import achi.shared.generated.resources.Res
-import achi.shared.generated.resources.img
+import achi.shared.generated.resources.img_trophy_lifting
 import androidx.annotation.FloatRange
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalIconButton
@@ -58,30 +59,63 @@ import kotlin.math.roundToInt
 @Composable
 fun AchievementDetailsScreen(
     viewModel: AchievementDetailsViewModel,
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    onRetry: () -> Unit = {}
 ) {
-    val uiState = viewModel.uiState.collectAsState()
-    if (uiState.value.loading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+    val uiState by viewModel.uiState.collectAsState()
+    
+    when {
+        uiState.loading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
         }
-    } else if (uiState.value.achievement != null) {
-        AchievementDetailsScreen(
-            achievement = uiState.value.achievement!!,
-            onStepProgressIncreased = { step, index -> 
-                viewModel.increaseStepProgress(step, index) 
-            },
-            onStepProgressDecreased = { step, index ->
-                viewModel.decreaseStepProgress(step, index)
-            },
-            onStepCompleted = { step, index ->
-                viewModel.setStepCompleted(step, true, index)
-            },
-            onStepProgressReset = { step, index ->
-                viewModel.setStepCompleted(step, false, index)
-            },
-            onBackClicked = onBackClicked,
-        )
+        uiState.errorMessage != null && uiState.achievement == null -> {
+            Column(modifier = Modifier.fillMaxSize()) {
+                TitleBar(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Achievement Details",
+                    onBackClicked = onBackClicked
+                )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.padding(32.dp)
+                    ) {
+                        Text(
+                            text = uiState.errorMessage ?: "An error occurred",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Button(onClick = onRetry) {
+                            Text("Retry")
+                        }
+                    }
+                }
+            }
+        }
+        uiState.achievement != null -> {
+            AchievementDetailsScreen(
+                achievement = uiState.achievement!!,
+                onStepProgressIncreased = { step, index -> 
+                    viewModel.increaseStepProgress(step, index) 
+                },
+                onStepProgressDecreased = { step, index ->
+                    viewModel.decreaseStepProgress(step, index)
+                },
+                onStepCompleted = { step, index ->
+                    viewModel.setStepCompleted(step, true, index)
+                },
+                onStepProgressReset = { step, index ->
+                    viewModel.setStepCompleted(step, false, index)
+                },
+                onBackClicked = onBackClicked,
+            )
+        }
     }
 }
 
@@ -118,7 +152,7 @@ private fun AchievementDetailsScreen(
                     )
                 } else {
                     Image(
-                        painter = painterResource(Res.drawable.img),
+                        painter = painterResource(Res.drawable.img_trophy_lifting),
                         contentScale = ContentScale.Crop,
                         contentDescription = null,
                         modifier = Modifier

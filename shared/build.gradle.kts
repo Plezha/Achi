@@ -55,6 +55,7 @@ kotlin {
                 implementation(compose.material3)
                 implementation(compose.components.resources)
                 implementation(compose.components.uiToolingPreview)
+
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.ktor.serialization.kotlinx.json)
@@ -63,19 +64,20 @@ kotlin {
                 implementation(libs.jetbrains.navigation3.ui)
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.datetime)
+                implementation(libs.kotlinx.collections.immutable)
+
                 implementation(libs.multiplatform.settings)
                 implementation(libs.multiplatform.settings.no.arg)
-                implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
-                val filekitversion = "0.12.0"
-                implementation("io.github.vinceglb:filekit-core:${filekitversion}")
-                implementation("io.github.vinceglb:filekit-dialogs:${filekitversion}")
-                implementation("io.github.vinceglb:filekit-dialogs-compose:${filekitversion}")
-                implementation("io.github.vinceglb:filekit-coil:${filekitversion}")
-                
-                implementation("io.coil-kt.coil3:coil-compose:3.1.0")
-                implementation("io.coil-kt.coil3:coil-network-ktor3:3.1.0")
-                
-                implementation("androidx.lifecycle:lifecycle-viewmodel:2.9.2")
+
+                implementation(libs.filekit.core)
+                implementation(libs.filekit.dialogs)
+                implementation(libs.filekit.dialogs.compose)
+                implementation(libs.filekit.coil)
+
+                implementation(libs.coil.compose)
+                implementation(libs.coil.network.ktor3)
+
+                implementation(libs.androidx.lifecycle.viewmodel)
             }
             kotlin.srcDir("${buildDir}/generated/openapi/src/commonMain/kotlin")
         }
@@ -108,7 +110,7 @@ kotlin {
 
         wasmJsMain {
             dependencies {
-                implementation("io.ktor:ktor-client-js:3.1.0")
+                implementation(libs.ktor.client.js)
             }
         }
 
@@ -146,7 +148,7 @@ kotlin {
 
         iosMain {
             dependencies {
-                implementation("io.ktor:ktor-client-darwin:3.1.0")
+                implementation(libs.ktor.client.darwin)
                 // Add iOS-specific dependencies here. This a source set created by Kotlin Gradle
                 // Plugin (KGP) that each specific iOS target (e.g., iosX64) depends on as
                 // part of KMP’s default source set hierarchy. Note that this source set depends

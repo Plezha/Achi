@@ -40,4 +40,14 @@ data class StepProgress(
     fun asNotStarted() = copy(substepsDone = 0)
 }
 
+/** Overall progress across all achievements (0.0 to 1.0) */
+fun List<Achievement>.overallProgress(): Float =
+    if (isEmpty()) 0f else sumOf { it.progress }.toFloat() / size
 
+/** Number of fully completed achievements */
+fun List<Achievement>.completedCount(): Int =
+    count { it.isDone }
+
+/** Whether every achievement in the list is completed */
+fun List<Achievement>.isAllCompleted(): Boolean =
+    isNotEmpty() && all { it.isDone }

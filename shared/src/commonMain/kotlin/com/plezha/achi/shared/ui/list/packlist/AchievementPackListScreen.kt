@@ -1,7 +1,7 @@
 package com.plezha.achi.shared.ui.list.packlist
 
 import achi.shared.generated.resources.Res
-import achi.shared.generated.resources.img
+import achi.shared.generated.resources.img_trophy_lifting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -147,8 +147,10 @@ fun AchievementPackList(
                             items = uiState.packs,
                             key = { it.id }
                         ) { achievementPack ->
+                            val progress = uiState.packProgress[achievementPack.id] ?: 0f
                             PackCard(
                                 pack = achievementPack,
+                                isPackComplete = progress >= 1.0f,
                                 onClick = { onPackClick(achievementPack) }
                             )
                         }
@@ -163,6 +165,7 @@ fun AchievementPackList(
 @Composable
 private fun PackCard(
     pack: AchievementPack,
+    isPackComplete: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -172,13 +175,11 @@ private fun PackCard(
         shape = RoundedCornerShape(16.dp)
     ) {
         Box {
-            // Background image with gradient overlay
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(2.2f)
             ) {
-                // Pack preview image
                 if (pack.previewImageUrl != null) {
                     AsyncImage(
                         model = pack.previewImageUrl,
@@ -188,14 +189,14 @@ private fun PackCard(
                     )
                 } else {
                     Image(
-                        painter = painterResource(Res.drawable.img),
+                        painter = painterResource(Res.drawable.img_trophy_lifting),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
                 
-                // Gradient overlay for text readability
+                // Gradient overlay
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -203,7 +204,11 @@ private fun PackCard(
                             Brush.verticalGradient(
                                 colors = listOf(
                                     Color.Transparent,
-                                    Color.Black.copy(alpha = 0.7f)
+                                    if (isPackComplete) {
+                                        Color.Green.copy(alpha = 0.5f)
+                                    } else {
+                                        Color.Black.copy(alpha = 0.7f)
+                                    }
                                 ),
                                 startY = 0f,
                                 endY = Float.POSITIVE_INFINITY

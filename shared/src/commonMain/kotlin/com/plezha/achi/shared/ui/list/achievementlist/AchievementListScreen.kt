@@ -2,8 +2,7 @@ package com.plezha.achi.shared.ui.list.achievementlist
 
 import achi.shared.generated.resources.Res
 import achi.shared.generated.resources.ic_check
-import achi.shared.generated.resources.ic_list
-import achi.shared.generated.resources.img
+import achi.shared.generated.resources.img_trophy_lifting
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -28,6 +27,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import org.jetbrains.compose.resources.vectorResource
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -64,7 +64,8 @@ import kotlin.math.roundToInt
 fun AchievementsScreen(
     achievementListViewModel: AchievementListViewModel,
     onAchievementClick: (Achievement) -> Unit,
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    onRetry: () -> Unit = {}
 ) {
     val uiState by achievementListViewModel.uiState.collectAsState()
 
@@ -77,41 +78,65 @@ fun AchievementsScreen(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        if (uiState.isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+        when {
+            uiState.isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
-        } else {
-            LazyColumn(
-                contentPadding = PaddingValues(bottom = 16.dp)
-            ) {
-                // Hero header with pack image and progress
-                uiState.pack?.let { pack ->
-                    item {
-                        PackHeroHeader(
-                            pack = pack,
-                            overallProgress = uiState.overallProgress,
-                            completedCount = uiState.completedCount,
-                            totalCount = uiState.achievements.size
+            uiState.error != null -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.padding(32.dp)
+                    ) {
+                        Text(
+                            text = uiState.error ?: "An error occurred",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.error
                         )
+                        Button(onClick = onRetry) {
+                            Text("Retry")
+                        }
                     }
                 }
+            }
+            else -> {
+                LazyColumn(
+                    contentPadding = PaddingValues(bottom = 16.dp)
+                ) {
+                    // Hero header with pack image and progress
+                    uiState.pack?.let { pack ->
+                        item {
+                            PackHeroHeader(
+                                pack = pack,
+                                overallProgress = uiState.overallProgress,
+                                completedCount = uiState.completedCount,
+                                totalCount = uiState.achievements.size
+                            )
+                        }
+                    }
 
-                // Achievement list
-                items(
-                    items = uiState.achievements,
-                    key = { it.id }
-                ) { achievement ->
-                    EnhancedAchievementCard(
-                        achievement = achievement,
-                        onClick = { onAchievementClick(achievement) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 6.dp)
-                    )
+                    // Achievement list
+                    items(
+                        items = uiState.achievements,
+                        key = { it.id }
+                    ) { achievement ->
+                        EnhancedAchievementCard(
+                            achievement = achievement,
+                            onClick = { onAchievementClick(achievement) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 6.dp)
+                        )
+                    }
                 }
             }
         }
@@ -140,7 +165,7 @@ private fun PackHeroHeader(
             )
         } else {
             Image(
-                painter = painterResource(Res.drawable.img),
+                painter = painterResource(Res.drawable.img_trophy_lifting),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
@@ -155,7 +180,11 @@ private fun PackHeroHeader(
                     Brush.verticalGradient(
                         colors = listOf(
                             Color.Transparent,
-                            Color.Black.copy(alpha = 0.8f)
+                            if (overallProgress >= 1.0f) {
+                                Color.Green.copy(alpha = 0.5f)
+                            } else {
+                                Color.Black.copy(alpha = 0.7f)
+                            }
                         )
                     )
                 )
@@ -360,7 +389,7 @@ fun AchievementCard(
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(Res.drawable.img),
+                painter = painterResource(Res.drawable.img_trophy_lifting),
                 contentScale = ContentScale.Crop,
                 contentDescription = null,
                 modifier = Modifier.size(24.dp)
