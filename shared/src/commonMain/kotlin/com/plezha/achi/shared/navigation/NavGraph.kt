@@ -25,6 +25,7 @@ import com.plezha.achi.shared.ui.list.achievementlist.AchievementsScreen
 import com.plezha.achi.shared.ui.list.packlist.AchievementPackList
 import com.plezha.achi.shared.ui.list.packlist.AchievementPackListViewModel
 import com.plezha.achi.shared.ui.debug.DebugPanelScreen
+import com.plezha.achi.shared.ui.common.UiText
 import com.plezha.achi.shared.ui.profile.ProfileScreen
 import com.plezha.achi.shared.ui.profile.ProfileViewModel
 import com.plezha.achi.shared.ui.settings.SettingsScreen
@@ -83,8 +84,8 @@ fun createNavEntryProvider(
         }
         
         LaunchedEffect(Unit) {
-            createAchievementPackViewModel.messageFlow.collectLatest { message ->
-                snackbarHostState.showSnackbar(message)
+            createAchievementPackViewModel.messageFlow.collectLatest { uiText ->
+                snackbarHostState.showSnackbar(uiText.resolve())
             }
         }
         
@@ -198,7 +199,8 @@ fun createNavEntryProvider(
         
         LaunchedEffect(Unit) {
             profileViewModel.messageFlow.collectLatest { message ->
-                snackbarHostState.showSnackbar(message)
+                val resolvedMessage = message.resolve()
+                snackbarHostState.showSnackbar(resolvedMessage)
             }
         }
         
@@ -223,8 +225,8 @@ fun createNavEntryProvider(
         }
 
         LaunchedEffect(Unit) {
-            profileViewModel.messageFlow.collectLatest { message ->
-                snackbarHostState.showSnackbar(message)
+            profileViewModel.messageFlow.collectLatest { uiText ->
+                snackbarHostState.showSnackbar(uiText.resolve())
             }
         }
 

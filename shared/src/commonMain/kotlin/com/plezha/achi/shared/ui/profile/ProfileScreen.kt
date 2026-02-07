@@ -40,10 +40,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.plezha.achi.shared.ui.common.TitleBar
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import achi.shared.generated.resources.Res
-import achi.shared.generated.resources.ic_profile_filled
-import achi.shared.generated.resources.ic_settings
+import achi.shared.generated.resources.*
 
 @Composable
 fun ProfileScreen(
@@ -82,13 +82,13 @@ private fun ProfileScreen(
     
     Column(modifier = Modifier.fillMaxSize()) {
         TitleBar(
-            text = "Profile",
+            text = stringResource(Res.string.profile_title),
             modifier = Modifier.fillMaxWidth(),
             actions = {
                 IconButton(onClick = onNavigateToSettings) {
                     Icon(
                         imageVector = vectorResource(Res.drawable.ic_settings),
-                        contentDescription = "Settings"
+                        contentDescription = stringResource(Res.string.profile_settings_cd)
                     )
                 }
             }
@@ -130,7 +130,7 @@ private fun ProfileScreen(
                 if (isLoggedIn) {
                     // Logged in state
                     LoggedInContent(
-                        username = uiState.authState.username ?: "User",
+                        username = uiState.authState.username ?: stringResource(Res.string.common_user_fallback),
                         onLogout = onLogout
                     )
                 } else {
@@ -168,7 +168,7 @@ private fun LoggedInContent(
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "Logged in",
+            text = stringResource(Res.string.profile_logged_in),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -185,7 +185,7 @@ private fun LoggedInContent(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Account",
+                    text = stringResource(Res.string.profile_account),
                     style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -194,7 +194,7 @@ private fun LoggedInContent(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Username",
+                        text = stringResource(Res.string.profile_username),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(text = username)
@@ -211,7 +211,7 @@ private fun LoggedInContent(
                 containerColor = MaterialTheme.colorScheme.error
             )
         ) {
-            Text("Logout")
+            Text(stringResource(Res.string.profile_logout))
         }
     }
 }
@@ -232,14 +232,14 @@ private fun AuthForm(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Guest",
+            text = stringResource(Res.string.profile_guest),
             style = MaterialTheme.typography.headlineMedium
         )
         
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = if (uiState.isRegisterMode) "Create an account" else "Sign in to your account",
+            text = if (uiState.isRegisterMode) stringResource(Res.string.profile_create_account) else stringResource(Res.string.profile_sign_in),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -250,7 +250,7 @@ private fun AuthForm(
         OutlinedTextField(
             value = uiState.usernameInput,
             onValueChange = onUsernameChanged,
-            label = { Text("Username") },
+            label = { Text(stringResource(Res.string.profile_username)) },
             enabled = !isLoading,
             singleLine = true,
             keyboardOptions = KeyboardOptions(
@@ -265,7 +265,7 @@ private fun AuthForm(
         OutlinedTextField(
             value = uiState.passwordInput,
             onValueChange = onPasswordChanged,
-            label = { Text("Password") },
+            label = { Text(stringResource(Res.string.profile_password)) },
             enabled = !isLoading,
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
@@ -290,7 +290,7 @@ private fun AuthForm(
                 OutlinedTextField(
                     value = uiState.displayNameInput,
                     onValueChange = onDisplayNameChanged,
-                    label = { Text("Display Name (optional)") },
+                    label = { Text(stringResource(Res.string.profile_display_name_optional)) },
                     enabled = !isLoading,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
@@ -335,7 +335,7 @@ private fun AuthForm(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             } else {
-                Text(if (uiState.isRegisterMode) "Register" else "Login")
+                Text(if (uiState.isRegisterMode) stringResource(Res.string.profile_register) else stringResource(Res.string.profile_login))
             }
         }
         
@@ -345,9 +345,9 @@ private fun AuthForm(
         TextButton(onClick = onToggleMode) {
             Text(
                 if (uiState.isRegisterMode) 
-                    "Already have an account? Sign in" 
+                    stringResource(Res.string.profile_toggle_to_signin) 
                 else 
-                    "Don't have an account? Register"
+                    stringResource(Res.string.profile_toggle_to_register)
             )
         }
     }

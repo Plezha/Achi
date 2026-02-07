@@ -96,8 +96,16 @@ shared/src/commonMain/kotlin/com/plezha/achi/shared/
     ├── profile/                # Login/register/logout UI
     │   ├── ProfileScreen.kt
     │   └── ProfileViewModel.kt
-    ├── common/                 # TitleBar, PreviewWrapper, PreviewData
+    ├── common/                 # TitleBar, PreviewWrapper, PreviewData, UiText
     └── theme/                  # Color, Typography, Theme
+```
+
+```
+shared/src/commonMain/composeResources/
+├── values/
+│   └── strings.xml             # English strings (default)
+└── values-ru/
+    └── strings.xml             # Russian translations
 ```
 
 ### Navigation Structure (Navigation 3)
@@ -184,13 +192,49 @@ class ViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
     
-    // One-time events via Channel
-    private val _messageChannel = Channel<String>()
+    // One-time events via Channel (UiText for localized messages)
+    private val _messageChannel = Channel<UiText>()
     val messageFlow = _messageChannel.receiveAsFlow()
     
     private val _navigationChannel = Channel<NavigationEvent>()
     val navigationFlow = _navigationChannel.receiveAsFlow()
 }
+```
+
+### Localization (i18n)
+
+**Languages**: English (default), Russian
+
+**String resources**: `composeResources/values/strings.xml` (EN), `composeResources/values-ru/strings.xml` (RU)
+
+**In Composables**: `stringResource(Res.string.key)` or `stringResource(Res.string.key, arg1, arg2)`
+
+**In ViewModels**: Emit `UiText` instead of raw strings:
+```kotlin
+// UiText sealed class (ui/common/UiText.kt)
+sealed class UiText {
+    data class Raw(val value: String) : UiText()
+    class Resource(val res: StringResource, vararg val args: Any) : UiText()
+    
+    @Composable fun asString(): String  // for composable context
+    suspend fun resolve(): String        // for coroutine context
+}
+
+// Usage in ViewModel
+_messageChannel.send(UiText.Resource(Res.string.msg_logged_in_as, username))
+_messageChannel.send(UiText.Raw(serverErrorMessage))  // non-translatable
+
+// Usage in NavGraph LaunchedEffect
+viewModel.messageFlow.collectLatest { uiText ->
+    snackbarHostState.showSnackbar(uiText.resolve())
+}
+```
+
+**For UiState error fields**: Use `UiText?` instead of `String?`, resolve with `.asString()` in composables.
+
+**Language detection**: System language (automatic). In-app override planned (Settings placeholder exists).
+
+**Not translated**: Debug panel strings, preview-only strings.
 ```
 
 ### Dependency Injection (Manual via AppModule)
@@ -235,6 +279,7 @@ entry<AchievementRoute> { route ->
 - Profile Screen (login form, logged-in state display)
 - Settings Screen (gear icon from Profile, hosts debug panel link)
 - Debug Panel (debug builds only: host switcher, quick login, via Settings)
+- Localization (English + Russian, system language, UiText abstraction)
 
 ### ⚠️ Notes
 - Pack list requires login (shows empty when logged out)
@@ -243,6 +288,7 @@ entry<AchievementRoute> { route ->
 - `isDebug` via expect/actual: BuildConfig.DEBUG (Android), webpack BannerPlugin flag (WasmJS), Platform.isDebugBinary (iOS)
 
 ### 🔮 Planned/Future
+- In-app language override (Settings placeholder exists)
 - Offline support with local persistence (SQLDelight)
 - iOS platform support
 - Notifications/reminders
@@ -310,6 +356,9 @@ entry<AchievementRoute> { route ->
 | Debug Panel | `shared/src/commonMain/.../ui/debug/DebugPanelScreen.kt` |
 | Platform (isDebug) | `shared/src/commonMain/.../Platform.kt` + platform actuals |
 | API Config | `shared/src/commonMain/.../di/ApiConfig.kt` |
+| UiText | `shared/src/commonMain/.../ui/common/UiText.kt` |
+| Strings (EN) | `shared/src/commonMain/composeResources/values/strings.xml` |
+| Strings (RU) | `shared/src/commonMain/composeResources/values-ru/strings.xml` |
 | Version Catalog | `gradle/libs.versions.toml` |
 
 ## Version Summary

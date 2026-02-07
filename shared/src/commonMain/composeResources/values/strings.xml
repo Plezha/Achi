@@ -1,0 +1,129 @@
+<resources>
+    <!-- Common -->
+    <string name="common_back">Back</string>
+    <string name="common_retry">Retry</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_save">Save</string>
+    <string name="common_remove">Remove</string>
+    <string name="common_add">Add</string>
+    <string name="common_code_label">Code:</string>
+    <string name="common_change_image">Change Image</string>
+    <string name="common_select_image">Select Image</string>
+    <string name="common_user_fallback">User</string>
+    <string name="common_error_generic">An error occurred</string>
+
+
+    <!-- Navigation -->
+    <string name="nav_add">Add</string>
+    <string name="nav_achievements">Achievements</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Profile screen -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_settings_cd">Settings</string>
+    <string name="profile_logged_in">Logged in</string>
+    <string name="profile_guest">Guest</string>
+    <string name="profile_account">Account</string>
+    <string name="profile_username">Username</string>
+    <string name="profile_password">Password</string>
+    <string name="profile_display_name_optional">Display Name (optional)</string>
+    <string name="profile_create_account">Create an account</string>
+    <string name="profile_sign_in">Sign in to your account</string>
+    <string name="profile_login">Login</string>
+    <string name="profile_register">Register</string>
+    <string name="profile_logout">Logout</string>
+    <string name="profile_toggle_to_signin">Already have an account? Sign in</string>
+    <string name="profile_toggle_to_register">Don\'t have an account? Register</string>
+
+    <!-- Profile messages -->
+    <string name="msg_enter_credentials">Please enter username and password</string>
+    <string name="msg_logged_in_as">Logged in as %1$s</string>
+    <string name="msg_registered_as">Registered and logged in as %1$s</string>
+    <string name="msg_logged_out">Logged out</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_subtitle">Coming soon — uses system language</string>
+
+    <!-- Pack list screen -->
+    <string name="pack_list_title">My Packs</string>
+    <string name="pack_list_sign_in_required">Sign in to access your packs</string>
+    <string name="pack_list_sync_description">Your achievements sync across all your devices</string>
+    <string name="pack_list_empty_title">No packs yet</string>
+    <string name="pack_list_empty_description">Add packs using a code or create your own in the Add tab</string>
+    <string name="pack_list_count_achievements">%1$d achievements</string>
+
+    <!-- Achievement list screen -->
+    <string name="achievement_list_fallback_title">Achievements</string>
+    <string name="achievement_list_completed_count">%1$d of %2$d completed</string>
+    <string name="achievement_list_steps_progress">%1$d/%2$d steps</string>
+    <string name="achievement_list_completed_cd">Completed</string>
+
+    <!-- Achievement details screen -->
+    <string name="achievement_details_title">Achievement Details</string>
+    <string name="achievement_details_steps">Steps</string>
+    <string name="achievement_details_progress">Progress</string>
+    <string name="achievement_details_step_fallback">Step %1$d</string>
+
+    <!-- Add screen -->
+    <string name="add_title">Add Achievements</string>
+    <string name="add_create_pack_section">Create Achievement Pack</string>
+    <string name="add_create_pack_description">Create an achievement pack by filling out a form</string>
+    <string name="add_create_pack_button">Create Achievement Pack</string>
+    <string name="add_with_code_section">Add with a Code</string>
+    <string name="add_with_code_description">Add an achievement pack directly using a code</string>
+    <string name="add_enter_code">Enter Code</string>
+
+    <!-- Add messages -->
+    <string name="msg_login_required">Please log in to add achievement packs</string>
+    <string name="msg_pack_added">%1$s pack successfully added</string>
+    <string name="error_pack_already_in_collection">Achievement pack with code \"%1$s\" is already in your collection</string>
+    <string name="error_pack_not_found">No achievement pack with code \"%1$s\" exists</string>
+    <string name="error_failed_to_add_pack">Failed to add pack</string>
+
+    <!-- Create pack screen -->
+    <string name="create_pack_title">Create Achievement Pack</string>
+    <string name="create_pack_name">Pack Name</string>
+    <string name="create_pack_description_optional">Pack Description (optional)</string>
+    <string name="create_pack_preview_image">Preview Image</string>
+    <string name="create_pack_select_preview_image">Select Preview Image</string>
+    <string name="create_pack_preview_image_cd">Pack preview image</string>
+    <string name="create_pack_achievements_count">Achievements (%1$d)</string>
+    <string name="create_pack_no_achievements">No achievements yet. Add at least one achievement.</string>
+    <string name="create_pack_save">Save Achievement Pack</string>
+    <string name="create_pack_untitled">Untitled Achievement</string>
+    <string name="create_pack_steps_count">%1$d steps</string>
+    <string name="create_pack_step_count_one">%1$d step</string>
+
+    <!-- Create pack messages -->
+    <string name="error_pack_name_required">Pack name is required</string>
+    <string name="error_add_achievement">Add at least one achievement</string>
+    <string name="error_achievement_title_required">All achievements must have a title</string>
+    <string name="error_select_preview_image">Please select a preview image</string>
+    <string name="msg_pack_created">Pack \"%1$s\" created successfully! Code: %2$s</string>
+    <string name="create_pack_default_step">Complete %1$s</string>
+    <string name="error_failed_to_create_pack">Failed to create pack</string>
+
+    <!-- Edit achievement screen -->
+    <string name="edit_achievement_title">Edit Achievement</string>
+    <string name="edit_achievement_title_field">Title *</string>
+    <string name="edit_achievement_short_desc">Short Description</string>
+    <string name="edit_achievement_long_desc">Long Description (optional)</string>
+    <string name="edit_achievement_image">Achievement Image (optional)</string>
+    <string name="edit_achievement_image_cd">Achievement image</string>
+    <string name="edit_achievement_steps_count">Steps (%1$d)</string>
+    <string name="edit_achievement_add_step">Add Step</string>
+    <string name="edit_achievement_no_steps">No steps yet. A default step will be created if none are provided.</string>
+    <string name="edit_achievement_step_number">Step #%1$d</string>
+    <string name="edit_achievement_description">Description</string>
+    <string name="edit_achievement_substeps">Substeps:</string>
+    <string name="edit_achievement_substeps_range">(1-100)</string>
+
+    <!-- Error messages -->
+    <string name="error_failed_to_load_achievement">Failed to load achievement</string>
+    <string name="error_unknown">Unknown error</string>
+    <string name="error_failed_to_sync_progress">Failed to sync progress: %1$s</string>
+    <string name="error_failed_to_load_achievements">Failed to load achievements</string>
+    <string name="error_failed_to_load_packs">Failed to load packs</string>
+</resources>

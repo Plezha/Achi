@@ -2,9 +2,12 @@ package com.plezha.achi.shared.ui.add
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import achi.shared.generated.resources.Res
+import achi.shared.generated.resources.*
 import com.plezha.achi.shared.data.AchievementPackRepository
 import com.plezha.achi.shared.data.UserRepository
 import com.plezha.achi.shared.data.auth.AuthRepository
+import com.plezha.achi.shared.ui.common.UiText
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,8 +35,8 @@ class AddAchievementsViewModel(
     private val _uiState = MutableStateFlow(AddAchievementUiState())
     val uiState: StateFlow<AddAchievementUiState> = _uiState.asStateFlow()
 
-    private val _messageChannel = Channel<String>()
-    val messageFlow: Flow<String> = _messageChannel.receiveAsFlow()
+    private val _messageChannel = Channel<UiText>()
+    val messageFlow: Flow<UiText> = _messageChannel.receiveAsFlow()
 
     private val _navigationChannel = Channel<NavigationEvent>()
     val navigationFlow: Flow<NavigationEvent> = _navigationChannel.receiveAsFlow()
@@ -61,7 +64,7 @@ class AddAchievementsViewModel(
         viewModelScope.launch {
             // Check if logged in first
             if (!_uiState.value.isLoggedIn) {
-                _messageChannel.send("Please log in to add achievement packs")
+                _messageChannel.send(UiText.Resource(Res.string.msg_login_required))
                 return@launch
             }
             
@@ -77,7 +80,7 @@ class AddAchievementsViewModel(
                         isLoading = false,
                     )
                 }
-                _messageChannel.send("${newPack.name} pack successfully added")
+                _messageChannel.send(UiText.Resource(Res.string.msg_pack_added, newPack.name))
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
@@ -87,12 +90,12 @@ class AddAchievementsViewModel(
                 // Handle different error cases based on response
                 val errorMessage = when {
                     e.message?.contains("409") == true -> 
-                        "Achievement pack with code \"$currentCode\" is already in your collection"
+                        UiText.Resource(Res.string.error_pack_already_in_collection, currentCode)
                     e.message?.contains("404") == true -> 
-                        "No achievement pack with code \"$currentCode\" exists"
+                        UiText.Resource(Res.string.error_pack_not_found, currentCode)
                     e.message?.contains("401") == true -> 
-                        "Please log in to add achievement packs"
-                    else -> e.message ?: "Failed to add pack"
+                        UiText.Resource(Res.string.msg_login_required)
+                    else -> if (e.message != null) UiText.Raw(e.message!!) else UiText.Resource(Res.string.error_failed_to_add_pack)
                 }
                 _messageChannel.send(errorMessage)
             }

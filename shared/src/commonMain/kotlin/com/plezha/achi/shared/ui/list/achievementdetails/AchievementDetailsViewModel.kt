@@ -2,6 +2,8 @@ package com.plezha.achi.shared.ui.list.achievementdetails
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import achi.shared.generated.resources.Res
+import achi.shared.generated.resources.*
 import com.plezha.achi.shared.data.AchievementRepository
 import com.plezha.achi.shared.data.UserRepository
 import com.plezha.achi.shared.data.auth.AuthRepository
@@ -9,6 +11,7 @@ import com.plezha.achi.shared.data.model.Achievement
 import com.plezha.achi.shared.data.model.AchievementStep
 import com.plezha.achi.shared.data.model.StepProgress
 import com.plezha.achi.shared.data.toStepProgressList
+import com.plezha.achi.shared.ui.common.UiText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,7 +58,7 @@ class AchievementDetailsViewModel(
                 _uiState.value = AchievementDetailsUiState(achievement = achievementWithProgress)
             } catch (e: Exception) {
                 _uiState.value = AchievementDetailsUiState(
-                    errorMessage = e.message ?: "Failed to load achievement"
+                    errorMessage = if (e.message != null) UiText.Raw(e.message!!) else UiText.Resource(Res.string.error_failed_to_load_achievement)
                 )
             }
         }
@@ -110,7 +113,7 @@ class AchievementDetailsViewModel(
                 val achievement = it.achievement!!
                 it.copy(achievement = localUpdate(achievement, stepIndex))
             } catch (e: Exception) {
-                it.copy(errorMessage = e.message ?: "Unknown error")
+                it.copy(errorMessage = if (e.message != null) UiText.Raw(e.message!!) else UiText.Resource(Res.string.error_unknown))
             }
         }
         
@@ -129,7 +132,7 @@ class AchievementDetailsViewModel(
                 } catch (e: Exception) {
                     // Log error but don't revert UI - could show a sync indicator
                     _uiState.update { 
-                        it.copy(errorMessage = "Failed to sync progress: ${e.message}")
+                        it.copy(errorMessage = UiText.Resource(Res.string.error_failed_to_sync_progress, e.message ?: ""))
                     }
                 }
             }
@@ -157,6 +160,6 @@ fun Achievement.withProgress(progressList: List<StepProgress>): Achievement {
 
 data class AchievementDetailsUiState(
     val loading: Boolean = false,
-    val errorMessage: String? = null,
+    val errorMessage: UiText? = null,
     val achievement: Achievement? = null
 )

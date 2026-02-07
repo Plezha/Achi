@@ -37,12 +37,14 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.plezha.achi.shared.ui.common.PreviewWrapper
 import com.plezha.achi.shared.ui.common.TitleBar
+import com.plezha.achi.shared.ui.common.UiText
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import achi.shared.generated.resources.Res
-import achi.shared.generated.resources.ic_plus
+import achi.shared.generated.resources.*
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -89,7 +91,7 @@ private fun CreateAchievementPackScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             TitleBar(
-                text = "Create Achievement Pack",
+                text = stringResource(Res.string.create_pack_title),
                 onBackClicked = onBackClicked,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -104,7 +106,7 @@ private fun CreateAchievementPackScreen(
                 OutlinedTextField(
                     value = uiState.packName,
                     onValueChange = onPackNameChanged,
-                    label = { Text("Pack Name") },
+                    label = { Text(stringResource(Res.string.create_pack_name)) },
                     enabled = !uiState.isLoading,
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
@@ -116,7 +118,7 @@ private fun CreateAchievementPackScreen(
                 OutlinedTextField(
                     value = uiState.packDescription,
                     onValueChange = onPackDescriptionChanged,
-                    label = { Text("Pack Description (optional)") },
+                    label = { Text(stringResource(Res.string.create_pack_description_optional)) },
                     enabled = !uiState.isLoading,
                     minLines = 2,
                     modifier = Modifier.fillMaxWidth()
@@ -126,7 +128,7 @@ private fun CreateAchievementPackScreen(
 
                 // Image Picker Section
                 Text(
-                    text = "Preview Image",
+                    text = stringResource(Res.string.create_pack_preview_image),
                     style = MaterialTheme.typography.labelLarge
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -141,7 +143,7 @@ private fun CreateAchievementPackScreen(
                     ) {
                         AsyncImage(
                             model = uiState.selectedImageFile,
-                            contentDescription = "Pack preview image",
+                            contentDescription = stringResource(Res.string.create_pack_preview_image_cd),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
@@ -152,7 +154,7 @@ private fun CreateAchievementPackScreen(
                         enabled = !uiState.isLoading,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Change Image")
+                        Text(stringResource(Res.string.common_change_image))
                     }
                 } else {
                     // Show picker button
@@ -172,7 +174,7 @@ private fun CreateAchievementPackScreen(
                                 modifier = Modifier.size(32.dp)
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("Select Preview Image")
+                            Text(stringResource(Res.string.create_pack_select_preview_image))
                         }
                     }
                 }
@@ -186,14 +188,14 @@ private fun CreateAchievementPackScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Achievements (${uiState.achievements.size})",
+                        text = stringResource(Res.string.create_pack_achievements_count, uiState.achievements.size),
                         style = MaterialTheme.typography.titleMedium
                     )
                     Button(
                         onClick = onAddAchievement,
                         enabled = !uiState.isLoading
                     ) {
-                        Text("Add")
+                        Text(stringResource(Res.string.common_add))
                     }
                 }
                 
@@ -212,7 +214,7 @@ private fun CreateAchievementPackScreen(
 
                 if (uiState.achievements.isEmpty()) {
                     Text(
-                        text = "No achievements yet. Add at least one achievement.",
+                        text = stringResource(Res.string.create_pack_no_achievements),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         modifier = Modifier.padding(vertical = 16.dp)
@@ -222,7 +224,7 @@ private fun CreateAchievementPackScreen(
                 // Error Message
                 AnimatedVisibility(visible = uiState.errorMessage != null) {
                     Text(
-                        text = uiState.errorMessage ?: "",
+                        text = uiState.errorMessage?.asString() ?: "",
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(vertical = 8.dp)
@@ -241,7 +243,7 @@ private fun CreateAchievementPackScreen(
                     shape = MaterialTheme.shapes.medium
                 ) {
                     Text(
-                        text = "Save Achievement Pack",
+                        text = stringResource(Res.string.create_pack_save),
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -319,7 +321,7 @@ private fun AchievementPreviewCard(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = achievement.title.ifBlank { "Untitled Achievement" },
+                    text = achievement.title.ifBlank { stringResource(Res.string.create_pack_untitled) },
                     style = MaterialTheme.typography.titleMedium,
                     color = if (achievement.title.isBlank()) 
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
@@ -337,7 +339,10 @@ private fun AchievementPreviewCard(
                 // Show step count if any
                 if (achievement.steps.isNotEmpty()) {
                     Text(
-                        text = "${achievement.steps.size} step${if (achievement.steps.size > 1) "s" else ""}",
+                        text = if (achievement.steps.size == 1) 
+                            stringResource(Res.string.create_pack_step_count_one, 1)
+                        else 
+                            stringResource(Res.string.create_pack_steps_count, achievement.steps.size),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
@@ -352,7 +357,7 @@ private fun AchievementPreviewCard(
                     contentColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Text("Remove")
+                Text(stringResource(Res.string.common_remove))
             }
         }
     }

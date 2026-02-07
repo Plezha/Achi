@@ -2,6 +2,7 @@ package com.plezha.achi.shared.ui.common
 
 import achi.shared.generated.resources.Res
 import achi.shared.generated.resources.ic_arrow_back
+import achi.shared.generated.resources.common_back
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -39,7 +41,7 @@ fun TitleBar(
             ) {
                 Icon(
                     imageVector = vectorResource(Res.drawable.ic_arrow_back),
-                    contentDescription = "Back"
+                    contentDescription = stringResource(Res.string.common_back)
                 )
             }
         }

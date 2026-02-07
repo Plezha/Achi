@@ -1,6 +1,7 @@
 package com.plezha.achi.shared.ui.list.achievementlist
 
 import achi.shared.generated.resources.Res
+import achi.shared.generated.resources.*
 import achi.shared.generated.resources.ic_check
 import achi.shared.generated.resources.img_trophy_lifting
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -26,6 +27,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -73,7 +75,7 @@ fun AchievementsScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         TitleBar(
-            text = uiState.pack?.name ?: "Achievements",
+            text = uiState.pack?.name ?: stringResource(Res.string.achievement_list_fallback_title),
             onBackClicked = onBackClicked,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -98,12 +100,12 @@ fun AchievementsScreen(
                         modifier = Modifier.padding(32.dp)
                     ) {
                         Text(
-                            text = uiState.error ?: "An error occurred",
+                            text = uiState.error?.asString() ?: stringResource(Res.string.common_error_generic),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.error
                         )
                         Button(onClick = onRetry) {
-                            Text("Retry")
+                            Text(stringResource(Res.string.common_retry))
                         }
                     }
                 }
@@ -212,7 +214,7 @@ private fun PackHeroHeader(
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Text(
-                            text = "Code:",
+                            text = stringResource(Res.string.common_code_label),
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.White.copy(alpha = 0.8f)
                         )
@@ -236,7 +238,7 @@ private fun PackHeroHeader(
                 ) {
                     Column {
                         Text(
-                            text = "$completedCount of $totalCount completed",
+                            text = stringResource(Res.string.achievement_list_completed_count, completedCount, totalCount),
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.White.copy(alpha = 0.8f)
                         )
@@ -302,7 +304,7 @@ private fun EnhancedAchievementCard(
                     ) {
                         Icon(
                             imageVector = vectorResource(Res.drawable.ic_check),
-                            contentDescription = "Completed",
+                            contentDescription = stringResource(Res.string.achievement_list_completed_cd),
                             tint = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier
                                 .size(48.dp)
@@ -356,7 +358,7 @@ private fun EnhancedAchievementCard(
                 Spacer(Modifier.height(4.dp))
                 // Steps progress text
                 Text(
-                    text = "${achievement.stepsDone}/${achievement.steps.size} steps",
+                    text = stringResource(Res.string.achievement_list_steps_progress, achievement.stepsDone, achievement.steps.size),
                     style = MaterialTheme.typography.labelSmall,
                     color = if (achievement.isDone) 
                         MaterialTheme.colorScheme.primary 
