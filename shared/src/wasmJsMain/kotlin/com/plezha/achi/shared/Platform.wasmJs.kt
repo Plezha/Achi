@@ -1,5 +1,11 @@
 package com.plezha.achi.shared
 
-// WasmJS is currently a secondary dev platform, so treat it as debug.
-// For production webpack builds, this can be overridden via webpack DefinePlugin.
-actual val isDebug: Boolean = true
+/**
+ * Reads the debug flag injected by webpack's BannerPlugin (see webpack.config.d/debug-flag.js).
+ * Returns true for development builds, false for production builds.
+ */
+@OptIn(ExperimentalWasmJsInterop::class)
+@JsFun("() => globalThis.__ACHI_IS_DEBUG__ === true")
+private external fun jsIsDebug(): Boolean
+
+actual val isDebug: Boolean = jsIsDebug()

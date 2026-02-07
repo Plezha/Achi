@@ -381,11 +381,13 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 - Source maps: Yes
 - Minification: No
 - Dev server: Included
+- `isDebug`: true (via webpack BannerPlugin, see `shared/webpack.config.d/debug-flag.js`)
 
 **Production**:
 - Source maps: Optional
 - Minification: Yes
 - Optimized bundle size
+- `isDebug`: false (via webpack BannerPlugin)
 
 ## Output Locations
 
