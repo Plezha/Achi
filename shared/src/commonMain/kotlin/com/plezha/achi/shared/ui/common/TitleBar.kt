@@ -4,7 +4,8 @@ import achi.shared.generated.resources.Res
 import achi.shared.generated.resources.ic_arrow_back
 import achi.shared.generated.resources.common_back
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -16,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -28,35 +30,37 @@ fun TitleBar(
     modifier: Modifier,
     actions: @Composable (() -> Unit)? = null,
 ) {
-    Box(
+    Row(
         modifier = modifier
             .padding(bottom = 8.dp)
-            .minimumInteractiveComponentSize()
+            .minimumInteractiveComponentSize(),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         if (onBackClicked != null) {
-            IconButton(
-                modifier = Modifier
-                    .align(Alignment.CenterStart),
-                onClick = onBackClicked
-            ) {
+            IconButton(onClick = onBackClicked) {
                 Icon(
                     imageVector = vectorResource(Res.drawable.ic_arrow_back),
                     contentDescription = stringResource(Res.string.common_back)
                 )
             }
+        } else if (actions != null) {
+            // Balance the actions side so the title stays visually centered
+            Spacer(Modifier.minimumInteractiveComponentSize())
         }
         Text(
             text = text,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center,
             modifier = Modifier
-                .align(Alignment.Center)
+                .weight(1f)
                 .basicMarquee()
         )
         if (actions != null) {
-            Box(modifier = Modifier.align(Alignment.CenterEnd)) {
-                actions()
-            }
+            actions()
+        } else if (onBackClicked != null) {
+            // Balance the back button side so the title stays visually centered
+            Spacer(Modifier.minimumInteractiveComponentSize())
         }
     }
 }
