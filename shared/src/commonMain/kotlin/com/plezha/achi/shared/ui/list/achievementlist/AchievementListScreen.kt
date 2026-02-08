@@ -32,6 +32,8 @@ import org.jetbrains.compose.resources.vectorResource
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -81,6 +83,7 @@ fun AchievementsScreen(
 ) {
     val uiState by achievementListViewModel.uiState.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var menuExpanded by remember { mutableStateOf(false) }
 
     // Delete confirmation dialog
     if (showDeleteDialog) {
@@ -119,41 +122,86 @@ fun AchievementsScreen(
             onBackClicked = onBackClicked,
             modifier = Modifier.fillMaxWidth(),
             actions = {
-                Row {
-                    IconButton(onClick = onCopyPack) {
+                Box {
+                    IconButton(onClick = { menuExpanded = true }) {
                         Icon(
-                            imageVector = vectorResource(Res.drawable.ic_copy),
-                            contentDescription = stringResource(Res.string.common_copy),
-                            tint = MaterialTheme.colorScheme.onSurface
+                            imageVector = vectorResource(Res.drawable.ic_more_vert),
+                            contentDescription = stringResource(Res.string.common_more_options)
                         )
                     }
-                    IconButton(
-                        onClick = if (uiState.isOwner) onEditPack else onNotOwnerAction
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false }
                     ) {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.ic_edit),
-                            contentDescription = stringResource(Res.string.common_edit),
-                            tint = if (uiState.isOwner) {
-                                MaterialTheme.colorScheme.onSurface
-                            } else {
-                                disabledTint
+                        DropdownMenuItem(
+                            text = { Text(stringResource(Res.string.common_copy)) },
+                            onClick = {
+                                menuExpanded = false
+                                onCopyPack()
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = vectorResource(Res.drawable.ic_copy),
+                                    contentDescription = null
+                                )
                             }
                         )
-                    }
-                    IconButton(
-                        onClick = if (uiState.isOwner) {
-                            { showDeleteDialog = true }
-                        } else {
-                            onNotOwnerAction
-                        }
-                    ) {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.ic_delete),
-                            contentDescription = stringResource(Res.string.common_delete),
-                            tint = if (uiState.isOwner) {
-                                MaterialTheme.colorScheme.onSurface
-                            } else {
-                                disabledTint
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    stringResource(Res.string.common_edit),
+                                    color = if (uiState.isOwner) {
+                                        Color.Unspecified
+                                    } else {
+                                        disabledTint
+                                    }
+                                )
+                            },
+                            onClick = {
+                                menuExpanded = false
+                                if (uiState.isOwner) onEditPack() else onNotOwnerAction()
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = vectorResource(Res.drawable.ic_edit),
+                                    contentDescription = null,
+                                    tint = if (uiState.isOwner) {
+                                        MaterialTheme.colorScheme.onSurface
+                                    } else {
+                                        disabledTint
+                                    }
+                                )
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    stringResource(Res.string.common_delete),
+                                    color = if (uiState.isOwner) {
+                                        Color.Unspecified
+                                    } else {
+                                        disabledTint
+                                    }
+                                )
+                            },
+                            onClick = {
+                                menuExpanded = false
+                                if (uiState.isOwner) {
+                                    showDeleteDialog = true
+                                } else {
+                                    onNotOwnerAction()
+                                }
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = vectorResource(Res.drawable.ic_delete),
+                                    contentDescription = null,
+                                    tint = if (uiState.isOwner) {
+                                        MaterialTheme.colorScheme.onSurface
+                                    } else {
+                                        disabledTint
+                                    }
+                                )
                             }
                         )
                     }

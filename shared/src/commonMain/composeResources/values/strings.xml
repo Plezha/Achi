@@ -11,6 +11,7 @@
     <string name="common_select_image">Select Image</string>
     <string name="common_user_fallback">User</string>
     <string name="common_error_generic">An error occurred</string>
+    <string name="common_more_options">More options</string>
 
 
     <!-- Navigation -->
