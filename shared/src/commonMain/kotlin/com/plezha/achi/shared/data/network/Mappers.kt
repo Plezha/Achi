@@ -31,7 +31,8 @@ fun AchievementPackSchema.toAchievementPack() = AchievementPack(
     count = count,
     achievementIds = achievementIds,
     previewImageUrl = resolveImageUrl(previewImageUrl),
-    code = code
+    code = code,
+    creatorId = creatorId
 )
 
 fun AchievementSchema.toAchievement() = Achievement(
@@ -41,7 +42,8 @@ fun AchievementSchema.toAchievement() = Achievement(
     longDescription = longDescription,
     steps = steps.map { it.toAchievementStep() },
     previewImageUrl = resolveImageUrl(previewImageUrl),
-    imageUrl = resolveImageUrl(imageUrl)
+    imageUrl = resolveImageUrl(imageUrl),
+    creatorId = creatorId
 )
 
 fun AchievementStepSchema.toAchievementStep() = AchievementStep(

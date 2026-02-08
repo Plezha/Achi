@@ -106,6 +106,25 @@
     <string name="msg_pack_created">Набор «%1$s» успешно создан! Код: %2$s</string>
     <string name="error_failed_to_create_pack">Не удалось создать набор</string>
 
+    <!-- Edit pack screen -->
+    <string name="edit_pack_title">Редактировать набор</string>
+    <string name="edit_pack_save">Сохранить изменения</string>
+    <string name="msg_pack_updated">Набор «%1$s» успешно обновлён</string>
+    <string name="error_failed_to_update_pack">Не удалось обновить набор</string>
+
+    <!-- Delete pack -->
+    <string name="msg_pack_deleted">Набор «%1$s» удалён</string>
+    <string name="error_failed_to_delete_pack">Не удалось удалить набор</string>
+    <string name="delete_pack_confirm_title">Удалить набор?</string>
+    <string name="delete_pack_confirm_message">Это действие нельзя отменить. Набор и все его достижения будут удалены навсегда.</string>
+    <string name="common_delete">Удалить</string>
+    <string name="common_edit">Редактировать</string>
+    <string name="common_copy">Копировать</string>
+    <string name="msg_only_creator_can_modify">Только создатель набора может его редактировать или удалить</string>
+    <string name="msg_pack_copied">Набор «%1$s» скопирован</string>
+    <string name="msg_login_required_to_copy">Войдите, чтобы копировать наборы</string>
+    <string name="error_failed_to_copy_pack">Не удалось скопировать набор</string>
+
     <!-- Edit achievement screen -->
     <string name="edit_achievement_title">Редактировать достижение</string>
     <string name="edit_achievement_title_field">Название *</string>

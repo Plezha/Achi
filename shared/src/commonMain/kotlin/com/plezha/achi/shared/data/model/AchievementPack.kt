@@ -6,5 +6,6 @@ data class AchievementPack(
     val count: Int,
     val achievementIds: List<String>,
     val previewImageUrl: String? = null,
-    val code: String
+    val code: String,
+    val creatorId: String = ""
 )

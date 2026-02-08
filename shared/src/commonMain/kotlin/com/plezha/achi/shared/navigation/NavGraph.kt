@@ -3,7 +3,10 @@ package com.plezha.achi.shared.navigation
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -20,6 +23,7 @@ import com.plezha.achi.shared.ui.add.EditAchievementViewModel
 import com.plezha.achi.shared.ui.add.NavigationEvent
 import com.plezha.achi.shared.ui.list.achievementdetails.AchievementDetailsScreen
 import com.plezha.achi.shared.ui.list.achievementdetails.AchievementDetailsViewModel
+import com.plezha.achi.shared.ui.list.achievementlist.AchievementListNavigationEvent
 import com.plezha.achi.shared.ui.list.achievementlist.AchievementListViewModel
 import com.plezha.achi.shared.ui.list.achievementlist.AchievementsScreen
 import com.plezha.achi.shared.ui.list.packlist.AchievementPackList
@@ -51,6 +55,18 @@ fun createNavEntryProvider(
     addAchievementsViewModel: AddAchievementsViewModel,
     createAchievementPackViewModel: CreateAchievementPackViewModel
 ) = entryProvider {
+    // Shared reference to the active pack ViewModel (either create or edit mode)
+    // EditAchievementRoute reads this to know which ViewModel to update
+    val activePackViewModel = remember { mutableStateOf(createAchievementPackViewModel) }
+
+    // Cache for edit pack ViewModels — hoisted to entryProvider scope so they survive
+    // entry composition disposal during navigation (e.g. EditPackRoute → EditAchievementRoute → back)
+    val editPackVmCache = remember { mutableMapOf<String, CreateAchievementPackViewModel>() }
+
+    // Incremented after a pack edit completes — used as a remember key to force
+    // AchievementListViewModel recreation so it reloads fresh data from the server
+    var editVersion by remember { mutableStateOf(0) }
+
     // Add screen
     entry<AddRoute> {
         LaunchedEffect(Unit) {
@@ -73,6 +89,8 @@ fun createNavEntryProvider(
 
     // Create Achievement Pack screen
     entry<CreateAchievementPackRoute> {
+        activePackViewModel.value = createAchievementPackViewModel
+
         LaunchedEffect(Unit) {
             createAchievementPackViewModel.navigationFlow.collectLatest { event ->
                 when (event) {
@@ -98,9 +116,10 @@ fun createNavEntryProvider(
         )
     }
 
-    // Edit Achievement screen (part of pack creation flow)
+    // Edit Achievement screen (part of pack creation/edit flow)
     entry<EditAchievementRoute> { route ->
-        val achievementData = createAchievementPackViewModel.getAchievementAtIndex(route.achievementIndex)
+        val currentPackViewModel = activePackViewModel.value
+        val achievementData = currentPackViewModel.getAchievementAtIndex(route.achievementIndex)
         val editViewModel = remember(route.achievementIndex) {
             EditAchievementViewModel(
                 achievementId = achievementData?.id ?: AchievementId(""),
@@ -112,7 +131,7 @@ fun createNavEntryProvider(
             editViewModel.navigationFlow.collectLatest { event ->
                 when (event) {
                     is EditAchievementNavigationEvent.SaveAndNavigateBack -> {
-                        createAchievementPackViewModel.updateAchievementAtIndex(
+                        currentPackViewModel.updateAchievementAtIndex(
                             route.achievementIndex,
                             event.achievement
                         )
@@ -131,13 +150,60 @@ fun createNavEntryProvider(
         )
     }
 
+    // Edit Pack screen (reuses CreateAchievementPackScreen in edit mode)
+    entry<EditPackRoute> { route ->
+        // Use the hoisted cache so the ViewModel survives navigation to EditAchievementRoute and back
+        val editPackViewModel = editPackVmCache.getOrPut(route.packId) {
+            CreateAchievementPackViewModel(
+                repository = appModule.achievementPackRepository,
+                userRepository = appModule.userRepository,
+                achievementRepository = appModule.achievementRepository,
+                editPackId = route.packId
+            ).apply {
+                loadExistingPack(route.packId)
+            }
+        }
+
+        activePackViewModel.value = editPackViewModel
+
+        LaunchedEffect(Unit) {
+            editPackViewModel.navigationFlow.collectLatest { event ->
+                when (event) {
+                    is CreatePackNavigationEvent.NavigateBack -> {
+                        editPackVmCache.remove(route.packId)
+                        editVersion+=1
+                        backStack.popBack()
+                    }
+                }
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            editPackViewModel.messageFlow.collectLatest { uiText ->
+                snackbarHostState.showSnackbar(uiText.resolve())
+            }
+        }
+
+        CreateAchievementPackScreen(
+            createAchievementPackViewModel = editPackViewModel,
+            onBackClicked = {
+                editPackVmCache.remove(route.packId)
+                backStack.popBack()
+            },
+            onAchievementClick = { index ->
+                backStack.add(EditAchievementRoute(index))
+            }
+        )
+    }
+
     // Achievement Pack List screen
     entry<AchievementPackListRoute> {
         val achievementPackListViewModel = remember(appModule) {
             AchievementPackListViewModel(
                 userRepository = appModule.userRepository,
                 authRepository = appModule.authRepository,
-                achievementRepository = appModule.achievementRepository
+                achievementRepository = appModule.achievementRepository,
+                achievementPackRepository = appModule.achievementPackRepository
             )
         }
 
@@ -151,7 +217,9 @@ fun createNavEntryProvider(
 
     // Achievement List screen
     entry<AchievementListRoute> { route ->
-        val achievementListViewModel = remember(route.id, appModule) {
+        // editVersion is included so that after a pack edit completes (version incremented),
+        // a fresh ViewModel is created and loadAchievementsByPackId re-fetches from the server.
+        val achievementListViewModel = remember(route.id, appModule, editVersion) {
             AchievementListViewModel(
                 achievementRepository = appModule.achievementRepository,
                 achievementPackRepository = appModule.achievementPackRepository,
@@ -162,13 +230,43 @@ fun createNavEntryProvider(
             }
         }
 
+        LaunchedEffect(Unit) {
+            achievementListViewModel.messageFlow.collectLatest { uiText ->
+                snackbarHostState.showSnackbar(uiText.resolve())
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            achievementListViewModel.navigationFlow.collectLatest { event ->
+                when (event) {
+                    is AchievementListNavigationEvent.NavigateToCopy -> {
+                        backStack.add(AchievementListRoute(event.packId))
+                    }
+                }
+            }
+        }
+
         AchievementsScreen(
             achievementListViewModel = achievementListViewModel,
             onAchievementClick = { achievement ->
                 backStack.add(AchievementRoute(achievement.id))
             },
             onBackClicked = backStack::popBack,
-            onRetry = { achievementListViewModel.loadAchievementsByPackId(route.id) }
+            onRetry = { achievementListViewModel.loadAchievementsByPackId(route.id) },
+            onEditPack = {
+                backStack.add(EditPackRoute(route.id))
+            },
+            onDeletePack = {
+                achievementListViewModel.deletePack {
+                    backStack.popBack()
+                }
+            },
+            onNotOwnerAction = {
+                achievementListViewModel.showNotOwnerMessage()
+            },
+            onCopyPack = {
+                achievementListViewModel.copyPack()
+            }
         )
     }
 

@@ -21,6 +21,7 @@ Achi is an achievement tracking application that allows users to manage collecti
 - Shows pack name and achievement count for each pack
 - Card-based UI with preview images
 - Tap a pack to view its achievements
+- Edit and delete icons on packs owned by the current user
 - Loading state while fetching from server
 - Empty state when logged out or no packs
 
@@ -56,6 +57,8 @@ Achi is an achievement tracking application that allows users to manage collecti
 - Displays achievements for a selected pack
 - Shows title and short description for each achievement
 - Back button to return to pack list
+- Copy action in title bar (available to all users) — duplicates the pack and all its achievements as a new pack owned by the current user, then navigates to the copy
+- Edit and delete actions in title bar for packs owned by the current user
 - Tap an achievement to view details
 
 **UI Components**:
@@ -242,7 +245,82 @@ Two methods to add achievement packs:
 - If substeps = 1: Simple checkbox step
 - If substeps > 1: Incremental counter step
 
-### 7. Profile / Authentication
+### 7. Pack Editing
+
+**Purpose**: Edit existing achievement packs that the user owns.
+
+**Screen**: `CreateAchievementPackScreen.kt` (reused in edit mode)
+
+**ViewModel**: `CreateAchievementPackViewModel.kt` (supports both create and edit modes)
+
+**Route**: `EditPackRoute(packId: String)`
+
+**Functionality**:
+- Navigate to pack editing via `EditPackRoute` with pack ID
+- Load existing pack data (name, description, preview image, achievements)
+- Reuse `CreateAchievementPackScreen` UI in edit mode
+- Edit pack name and description
+- Edit existing achievements (add, modify, remove)
+- Update pack preview image
+- Save changes to server (updates pack and achievements)
+- Navigate back to pack list on success
+
+**Edit Mode Detection**:
+- ViewModel initialized with `packId` parameter for edit mode
+- Loads pack data from `AchievementPackRepository`
+- Pre-populates form fields with existing data
+- Uses update API endpoints instead of create endpoints
+
+**User Flow**:
+1. User taps edit icon on owned pack in pack list
+2. Navigates to `EditPackRoute(packId)`
+3. Screen loads with existing pack data
+4. User modifies pack details and achievements
+5. User taps "Save Achievement Pack"
+6. Pack and achievements updated on server
+7. Navigates back to pack list with success message
+
+**Ownership Check**:
+- Edit actions only visible for packs where `pack.creatorId == currentUserId`
+- Edit icon shown only on owned packs in pack list
+- Edit action shown only in title bar for owned packs in achievement list
+
+### 8. Pack Deletion
+
+**Purpose**: Delete achievement packs that the user owns.
+
+**Functionality**:
+- Delete action available in pack list (edit icon menu) and achievement list (title bar menu)
+- Confirmation dialog before deletion
+- Deletes pack from server via `PacksApi`
+- Removes pack from user's collection
+- Navigates back to pack list after deletion
+- Shows success/error message via Snackbar
+
+**UI Components**:
+- Delete icon/action in pack list (for owned packs)
+- Delete action in achievement list title bar menu (for owned packs)
+- Confirmation dialog:
+  - "Delete Pack" title
+  - Confirmation message with pack name
+  - "Cancel" and "Delete" buttons
+- Loading state during deletion
+
+**User Flow**:
+1. User taps delete icon/action on owned pack
+2. Confirmation dialog appears
+3. User confirms deletion
+4. Pack deleted from server
+5. Pack removed from user's collection
+6. Navigates back to pack list (if deleting from achievement list)
+7. Success message shown via Snackbar
+
+**Ownership Check**:
+- Delete actions only visible for packs where `pack.creatorId == currentUserId`
+- Delete icon shown only on owned packs in pack list
+- Delete action shown only in title bar menu for owned packs in achievement list
+
+### 9. Profile / Authentication
 
 **Purpose**: User login, registration, and profile management.
 
@@ -290,7 +368,7 @@ Two methods to add achievement packs:
    - Error message displayed
    - Form remains editable
 
-### 8. Settings Screen
+### 10. Settings Screen
 
 **Purpose**: App settings accessible from Profile screen via gear icon in the title bar.
 
@@ -300,7 +378,7 @@ Two methods to add achievement packs:
 - "Language" row (disabled, placeholder for future in-app language override)
 - "Debug Panel" row (only visible in debug builds, gated by `isDebug`) — navigates to `DebugPanelRoute`
 
-### 9. Debug Panel
+### 11. Debug Panel
 
 **Purpose**: Developer tools for testing and debugging (debug builds only).
 
@@ -349,6 +427,9 @@ Two methods to add achievement packs:
 - Add with Code (with auth)
 - Create Achievement Pack (full flow)
 - Edit Achievement (with steps)
+- Pack Editing (edit existing packs via CreateAchievementPackScreen reuse)
+- Pack Deletion (delete packs with confirmation dialog)
+- Pack Copying (duplicate a pack with all achievements as a new pack owned by the current user)
 - Progress tracking (simple & incremental, server-synced)
 - User Authentication (login/register/logout)
 - Profile management

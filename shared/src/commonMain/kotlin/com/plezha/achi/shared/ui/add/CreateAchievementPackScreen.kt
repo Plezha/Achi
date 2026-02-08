@@ -91,7 +91,9 @@ private fun CreateAchievementPackScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             TitleBar(
-                text = stringResource(Res.string.create_pack_title),
+                text = stringResource(
+                    if (uiState.isEditMode) Res.string.edit_pack_title else Res.string.create_pack_title
+                ),
                 onBackClicked = onBackClicked,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -133,8 +135,9 @@ private fun CreateAchievementPackScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 
-                if (uiState.selectedImageFile != null) {
-                    // Show selected image preview
+                // Show image preview: prefer new file, fall back to existing URL
+                val imageModel: Any? = uiState.selectedImageFile ?: uiState.existingPreviewImageUrl
+                if (imageModel != null) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -142,7 +145,7 @@ private fun CreateAchievementPackScreen(
                             .clip(RoundedCornerShape(12.dp))
                     ) {
                         AsyncImage(
-                            model = uiState.selectedImageFile,
+                            model = imageModel,
                             contentDescription = stringResource(Res.string.create_pack_preview_image_cd),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
@@ -243,7 +246,9 @@ private fun CreateAchievementPackScreen(
                     shape = MaterialTheme.shapes.medium
                 ) {
                     Text(
-                        text = stringResource(Res.string.create_pack_save),
+                        text = stringResource(
+                            if (uiState.isEditMode) Res.string.edit_pack_save else Res.string.create_pack_save
+                        ),
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -297,9 +302,10 @@ private fun AchievementPreviewCard(
                     .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
-                if (achievement.imageFile != null) {
+                val achievementImageModel: Any? = achievement.imageFile ?: achievement.existingImageUrl
+                if (achievementImageModel != null) {
                     AsyncImage(
-                        model = achievement.imageFile,
+                        model = achievementImageModel,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
