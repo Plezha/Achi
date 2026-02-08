@@ -278,7 +278,7 @@ entry<AchievementRoute> { route ->
 - Progress Sync (step progress saved to server)
 - Profile Screen (login form, logged-in state display)
 - Settings Screen (gear icon from Profile, hosts debug panel link)
-- Debug Panel (debug builds only: host switcher, quick login, via Settings)
+- Debug Panel (debug builds only: host switcher with persistence, quick login, via Settings)
 - Localization (English + Russian, system language, UiText abstraction)
 
 ### ⚠️ Notes
@@ -330,7 +330,7 @@ entry<AchievementRoute> { route ->
 
 7. **Settings Screen**: Accessible from Profile screen via gear icon in title bar. Contains debug panel link (gated by `isDebug`).
 
-8. **Debug Panel**: Available only in debug builds (gated by `isDebug`). Allows runtime API host switching (recreates `AppModule`) and quick login. Accessible from Settings screen.
+8. **Debug Panel**: Available only in debug builds (gated by `isDebug`). Allows runtime API host switching (persisted via `Settings`, recreates `AppModule` and all ViewModels) and quick login. Accessible from Settings screen.
 
 ## Theme
 

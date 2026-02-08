@@ -133,7 +133,7 @@ fun createNavEntryProvider(
 
     // Achievement Pack List screen
     entry<AchievementPackListRoute> {
-        val achievementPackListViewModel = remember {
+        val achievementPackListViewModel = remember(appModule) {
             AchievementPackListViewModel(
                 userRepository = appModule.userRepository,
                 authRepository = appModule.authRepository,
@@ -151,7 +151,7 @@ fun createNavEntryProvider(
 
     // Achievement List screen
     entry<AchievementListRoute> { route ->
-        val achievementListViewModel = remember(route.id) {
+        val achievementListViewModel = remember(route.id, appModule) {
             AchievementListViewModel(
                 achievementRepository = appModule.achievementRepository,
                 achievementPackRepository = appModule.achievementPackRepository,
@@ -174,7 +174,7 @@ fun createNavEntryProvider(
 
     // Achievement Details screen
     entry<AchievementRoute> { route ->
-        val viewModel = remember(route.id) {
+        val viewModel = remember(route.id, appModule) {
             AchievementDetailsViewModel(
                 repository = appModule.achievementRepository,
                 userRepository = appModule.userRepository,
@@ -193,7 +193,7 @@ fun createNavEntryProvider(
 
     // Profile screen
     entry<ProfileRoute> {
-        val profileViewModel = remember {
+        val profileViewModel = remember(appModule) {
             ProfileViewModel(appModule.authRepository)
         }
         
@@ -220,7 +220,7 @@ fun createNavEntryProvider(
 
     // Debug panel screen (debug builds only, gated in SettingsScreen)
     entry<DebugPanelRoute> {
-        val profileViewModel = remember {
+        val profileViewModel = remember(appModule) {
             ProfileViewModel(appModule.authRepository)
         }
 
