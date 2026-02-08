@@ -63,7 +63,7 @@ class AchievementListViewModel(
                         try {
                             val progress = userRepository.getProgress(achievement.id)
                             if (progress != null) {
-                                achievement.withProgress(progress.toStepProgressList())
+                                achievement.withProgress(progress.toStepProgressList(), progress.isCompleted)
                             } else {
                                 achievement
                             }

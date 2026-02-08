@@ -1,5 +1,6 @@
 package com.plezha.achi.shared.ui.list.achievementdetails
 
+import achi.shared.generated.resources.*
 import achi.shared.generated.resources.Res
 import achi.shared.generated.resources.img_trophy_lifting
 import androidx.annotation.FloatRange
@@ -23,6 +24,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalIconButton
@@ -49,9 +51,11 @@ import coil3.compose.AsyncImage
 import com.plezha.achi.shared.data.model.Achievement
 import com.plezha.achi.shared.data.model.AchievementStep
 import com.plezha.achi.shared.ui.common.PreviewWrapper
+import com.plezha.achi.shared.ui.common.UiText
 import com.plezha.achi.shared.ui.common.TitleBar
 import com.plezha.achi.shared.ui.common.achievementExample
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.roundToInt
 
@@ -87,7 +91,7 @@ fun AchievementDetailsScreen(
                         modifier = Modifier.padding(32.dp)
                     ) {
                         Text(
-                            text = uiState.errorMessage ?: "An error occurred",
+                            text = uiState.errorMessage?.asString() ?: stringResource(Res.string.common_error_generic),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.error
                         )
@@ -113,6 +117,7 @@ fun AchievementDetailsScreen(
                 onStepProgressReset = { step, index ->
                     viewModel.setStepCompleted(step, false, index)
                 },
+                onToggleCompletion = { viewModel.toggleCompletion() },
                 onBackClicked = onBackClicked,
             )
         }
@@ -126,6 +131,7 @@ private fun AchievementDetailsScreen(
     onStepProgressReset: (AchievementStep, Int) -> Unit,
     onStepProgressIncreased: (AchievementStep, Int) -> Unit,
     onStepProgressDecreased: (AchievementStep, Int) -> Unit,
+    onToggleCompletion: () -> Unit,
     onBackClicked: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -166,39 +172,52 @@ private fun AchievementDetailsScreen(
                     progress = achievement.progress.toFloat()
                 )
             }
-            item {
-                AchievementDetails(achievement)
-                Text(
-                    text = "Steps",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-                Spacer(Modifier.height(8.dp))
-            }
-            itemsIndexed(
-                items = achievement.steps,
-            ) { index, step ->
-                val stepModifier = remember {
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                }
-                if (step.progress.substepsAmount == 1) {
-                    SimpleStep(
-                        step = step,
-                        stepIndex = index,
-                        modifier = stepModifier.padding(vertical = 12.dp),
-                        onStepCompleted = onStepCompleted,
-                        onStepProgressReset = onStepProgressReset
+            if (achievement.steps.isNotEmpty()) {
+                item {
+                    AchievementDetails(achievement)
+                    Text(
+                        text = "Steps",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
-                } else {
-                    IncrementalStep(
-                        step = step,
-                        stepIndex = index,
-                        onStepProgressIncreased = onStepProgressIncreased,
-                        onStepProgressDecreased = onStepProgressDecreased,
-                        modifier = stepModifier.padding(vertical = 4.dp)
+                    Spacer(Modifier.height(8.dp))
+                }
+                itemsIndexed(
+                    items = achievement.steps,
+                ) { index, step ->
+                    val stepModifier = remember {
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    }
+                    if (step.progress.substepsAmount == 1) {
+                        SimpleStep(
+                            step = step,
+                            stepIndex = index,
+                            modifier = stepModifier.padding(vertical = 12.dp),
+                            onStepCompleted = onStepCompleted,
+                            onStepProgressReset = onStepProgressReset
+                        )
+                    } else {
+                        IncrementalStep(
+                            step = step,
+                            stepIndex = index,
+                            onStepProgressIncreased = onStepProgressIncreased,
+                            onStepProgressDecreased = onStepProgressDecreased,
+                            modifier = stepModifier.padding(vertical = 4.dp)
+                        )
+                    }
+                }
+            } else {
+                item {
+                    AchievementDetails(achievement)
+                    CompletionToggle(
+                        isCompleted = achievement.isDone,
+                        onToggleCompletion = onToggleCompletion,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
                     )
                 }
             }
@@ -329,6 +348,39 @@ private fun AchievementDetails(achievement: Achievement) {
 }
 
 @Composable
+private fun CompletionToggle(
+    isCompleted: Boolean,
+    onToggleCompletion: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onToggleCompletion,
+        modifier = modifier,
+        colors = if (isCompleted) {
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            )
+        } else {
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    ) {
+        Text(
+            text = if (isCompleted) {
+                stringResource(Res.string.achievement_details_completed)
+            } else {
+                stringResource(Res.string.achievement_details_mark_complete)
+            },
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
 private fun Progress(
     @FloatRange(0.0, 1.0) progress: Float
 ) {
@@ -452,7 +504,9 @@ private fun AchievementDetailsScreenPreview() {
             onStepProgressReset = { _, _ -> },
             onStepProgressIncreased = { _, _ -> },
             onStepProgressDecreased = { _, _ -> },
-        ) { }
+            onToggleCompletion = {},
+            onBackClicked = {}
+        )
     }
 }
 

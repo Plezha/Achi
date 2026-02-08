@@ -23,7 +23,8 @@ data class Achievement(
     val longDescription: String? = null,
     val steps: List<AchievementStep>,
     val previewImageUrl: String? = null,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val isCompleted: Boolean = false
 )
 ```
 
@@ -32,22 +33,24 @@ data class Achievement(
 - `title`: Main achievement title
 - `shortDescription`: Brief description shown in lists
 - `longDescription`: Detailed description shown in achievement details (optional)
-- `steps`: List of steps required to complete the achievement
+- `steps`: List of steps required to complete the achievement (can be empty for stepless achievements)
 - `previewImageUrl`: Small preview image URL (optional)
 - `imageUrl`: Full-size image URL for details screen (optional)
+- `isCompleted`: Direct completion flag for stepless achievements (default false)
 
 **Computed Properties**:
 
 ```kotlin
 val progress: Double
-    // Average progress across all steps (0.0 to 1.0)
-    // Calculated as: sum of all step progress / number of steps
+    // For achievements with steps: average progress across all steps (0.0 to 1.0)
+    // For stepless achievements: 1.0 if isCompleted, 0.0 otherwise
     
 val stepsDone: Int
     // Count of completed steps
     
 val isDone: Boolean
-    // True if all steps are completed
+    // For achievements with steps: true if all steps completed
+    // For stepless achievements: true if isCompleted
 ```
 
 ### AchievementStep
@@ -421,11 +424,13 @@ val updatedStep = step.copy(progress = StepProgress(5, 10))
 
 **Achievement with Progress**:
 ```kotlin
-fun Achievement.withProgress(progressList: List<StepProgress>): Achievement {
-    if (progressList.size != steps.size) return this
+fun Achievement.withProgress(progressList: List<StepProgress>, isCompleted: Boolean = false): Achievement {
     return copy(
-        steps = steps.mapIndexed { index, step ->
-            step.copy(progress = progressList[index])
+        isCompleted = isCompleted,
+        steps = if (progressList.size != steps.size) steps else {
+            steps.mapIndexed { index, step ->
+                step.copy(progress = progressList[index])
+            }
         }
     )
 }

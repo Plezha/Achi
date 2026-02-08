@@ -134,8 +134,8 @@ DebugPanelRoute               // Debug panel (debug builds only, via Settings)
 // Achievement pack containing multiple achievements
 data class AchievementPack(id, name, count, achievementIds, previewImageUrl?, code)
 
-// Individual achievement with steps
-data class Achievement(id, title, shortDescription, longDescription?, steps, previewImageUrl?, imageUrl?)
+// Individual achievement with steps (steps can be empty for stepless achievements)
+data class Achievement(id, title, shortDescription, longDescription?, steps, previewImageUrl?, imageUrl?, isCompleted)
 
 // Step within an achievement
 data class AchievementStep(description, progress: StepProgress)
@@ -270,7 +270,7 @@ entry<AchievementRoute> { route ->
 ### ✅ Fully Implemented
 - Achievement Pack List (user's collection, requires login)
 - Achievement List (browse achievements in pack)
-- Achievement Details (view + progress tracking with server sync)
+- Achievement Details (view + progress tracking with server sync, stepless completion toggle)
 - Add with Code (fetch pack by code, add to user collection)
 - Create Achievement Pack (full flow with image upload)
 - Edit Achievement (during pack creation with steps)

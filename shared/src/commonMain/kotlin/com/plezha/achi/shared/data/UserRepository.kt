@@ -5,6 +5,7 @@ import com.plezha.achi.shared.data.model.StepProgress
 import com.plezha.achi.shared.data.network.apis.UserCollectionApi
 import com.plezha.achi.shared.data.network.apis.UserProgressApi
 import com.plezha.achi.shared.data.network.check
+import com.plezha.achi.shared.data.network.models.AchievementCompletionBody
 import com.plezha.achi.shared.data.network.models.StepProgressUpdateBody
 import com.plezha.achi.shared.data.network.models.UserAchievementProgress
 import com.plezha.achi.shared.data.network.toAchievementPack
@@ -44,6 +45,9 @@ interface UserRepository {
     
     /** Update step progress and sync to server */
     suspend fun updateStepProgress(achievementId: String, stepIndex: Int, substepsDone: Int): UserAchievementProgress
+    
+    /** Update achievement completion status (for stepless achievements) */
+    suspend fun updateAchievementCompletion(achievementId: String, isCompleted: Boolean): UserAchievementProgress
     
     /** Clear all cached data (call on logout) */
     fun clearCache()
@@ -139,6 +143,23 @@ class UserRepositoryImpl(
             achievementId = achievementId,
             stepIndex = stepIndex,
             stepProgressUpdateBody = StepProgressUpdateBody(substepsDone = substepsDone)
+        )
+        response.check()
+        val updatedProgress = response.body()
+        
+        // Update cache
+        _progressCache.update { it + (achievementId to updatedProgress) }
+        
+        return updatedProgress
+    }
+    
+    override suspend fun updateAchievementCompletion(
+        achievementId: String,
+        isCompleted: Boolean
+    ): UserAchievementProgress {
+        val response = userProgressApi.toggleAchievementCompletionUserProgressAchievementIdCompletePatch(
+            achievementId = achievementId,
+            achievementCompletionBody = AchievementCompletionBody(isCompleted = isCompleted)
         )
         response.check()
         val updatedProgress = response.body()

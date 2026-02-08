@@ -90,6 +90,13 @@ The Achi application integrates with a backend API for achievement and pack mana
 - **Response**: Updated progress
 - **Authentication**: Required
 
+**PATCH /user/progress/{achievement_id}/complete**
+- **Purpose**: Toggle achievement completion status (for stepless achievements)
+- **Path Parameter**: `achievement_id` (string)
+- **Request Body**: `AchievementCompletionBody` with `isCompleted` (boolean)
+- **Response**: Updated progress
+- **Authentication**: Required
+
 #### Achievements API
 
 **Tag**: Achievements

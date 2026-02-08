@@ -100,7 +100,7 @@ fun AchievementsScreen(
                         modifier = Modifier.padding(32.dp)
                     ) {
                         Text(
-                            text = uiState.error?.asString() ?: stringResource(Res.string.common_error_generic),
+                            text = uiState.error ?: stringResource(Res.string.common_error_generic),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.error
                         )
