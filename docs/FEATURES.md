@@ -304,6 +304,7 @@ Two methods to add achievement packs:
 
 **Functionality**:
 - Change API host at runtime (preset options + custom URL)
+- Selected host is **persisted** via `multiplatform-settings` and survives app restarts
 - Quick login with debug credentials
 - Only visible in debug builds (gated by `isDebug`)
 
@@ -327,9 +328,11 @@ Two methods to add achievement packs:
 - DebugPanelRoute registered in navigation but only reachable from debug UI
 
 **Host Switching**:
-- `ApiConfig.baseUrl` backed by `MutableStateFlow`
+- `ApiConfig.baseUrl` backed by `MutableStateFlow`, persisted via `Settings`
+- On app start, reads saved host from settings (defaults to PROD if none saved)
 - `App.kt` observes `ApiConfig.baseUrlFlow` and keys `AppModule` on it
 - Changing host recreates entire DI container (all API clients rebuilt)
+- All ViewModels are keyed on `appModule`/`baseUrl` so they recreate with fresh repositories
 
 ## Feature States
 

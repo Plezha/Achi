@@ -56,14 +56,15 @@ private fun AchiAppNav() {
     val backStack = rememberNavBackStack(navSavedStateConfig, AchievementPackListRoute)
 
     // Shared ViewModels for pack creation flow
-    val addAchievementsViewModel = remember { 
+    // Keyed on baseUrl so they recreate with fresh repositories when host changes
+    val addAchievementsViewModel = remember(baseUrl) { 
         AddAchievementsViewModel(
             achievementPackRepository = appModule.achievementPackRepository,
             userRepository = appModule.userRepository,
             authRepository = appModule.authRepository
         ) 
     }
-    val createAchievementPackViewModel = remember { 
+    val createAchievementPackViewModel = remember(baseUrl) { 
         CreateAchievementPackViewModel(
             repository = appModule.achievementPackRepository,
             userRepository = appModule.userRepository
