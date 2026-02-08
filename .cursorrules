@@ -96,7 +96,7 @@ shared/src/commonMain/kotlin/com/plezha/achi/shared/
     ├── profile/                # Login/register/logout UI
     │   ├── ProfileScreen.kt
     │   └── ProfileViewModel.kt
-    ├── common/                 # TitleBar, PreviewWrapper, PreviewData, UiText
+    ├── common/                 # TitleBar, PreviewWrapper, PreviewData, UiText, LegalTextDialog
     └── theme/                  # Color, Typography, Theme
 ```
 
@@ -280,9 +280,10 @@ entry<AchievementRoute> { route ->
 - Pack Deletion (delete packs with confirmation dialog)
 - Pack Copying (duplicate a pack as a new pack owned by the current user)
 - User Authentication (login/register/logout)
+- Terms of Service & Privacy Policy (acceptance at registration, viewable from Settings via LegalTextDialog)
 - Progress Sync (step progress saved to server)
-- Profile Screen (login form, logged-in state display)
-- Settings Screen (gear icon from Profile, hosts debug panel link)
+- Profile Screen (login form with terms acceptance, logged-in state display)
+- Settings Screen (gear icon from Profile, hosts Contact Us mailto link, ToS/Privacy Policy dialogs, and debug panel link)
 - Debug Panel (debug builds only: host switcher with persistence, quick login, via Settings)
 - Localization (English + Russian, system language, UiText abstraction)
 
@@ -362,6 +363,7 @@ entry<AchievementRoute> { route ->
 | Platform (isDebug) | `shared/src/commonMain/.../Platform.kt` + platform actuals |
 | API Config | `shared/src/commonMain/.../di/ApiConfig.kt` |
 | UiText | `shared/src/commonMain/.../ui/common/UiText.kt` |
+| LegalTextDialog | `shared/src/commonMain/.../ui/common/LegalTextDialog.kt` |
 | Strings (EN) | `shared/src/commonMain/composeResources/values/strings.xml` |
 | Strings (RU) | `shared/src/commonMain/composeResources/values-ru/strings.xml` |
 | Version Catalog | `gradle/libs.versions.toml` |

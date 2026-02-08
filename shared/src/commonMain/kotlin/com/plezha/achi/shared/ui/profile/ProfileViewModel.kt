@@ -21,7 +21,8 @@ data class ProfileUiState(
     val isRegisterMode: Boolean = false,
     val usernameInput: String = "",
     val passwordInput: String = "",
-    val displayNameInput: String = ""
+    val displayNameInput: String = "",
+    val termsAccepted: Boolean = false
 )
 
 class ProfileViewModel(
@@ -62,6 +63,10 @@ class ProfileViewModel(
         _uiState.update { it.copy(displayNameInput = displayName) }
     }
     
+    fun onTermsAcceptedChanged(accepted: Boolean) {
+        _uiState.update { it.copy(termsAccepted = accepted) }
+    }
+    
     fun toggleRegisterMode() {
         _uiState.update { it.copy(isRegisterMode = !it.isRegisterMode) }
         authRepository.clearError()
@@ -95,6 +100,12 @@ class ProfileViewModel(
         if (state.usernameInput.isBlank() || state.passwordInput.isBlank()) {
             viewModelScope.launch {
                 _messageChannel.send(UiText.Resource(Res.string.msg_enter_credentials))
+            }
+            return
+        }
+        if (!state.termsAccepted) {
+            viewModelScope.launch {
+                _messageChannel.send(UiText.Resource(Res.string.error_accept_terms))
             }
             return
         }
@@ -144,7 +155,8 @@ class ProfileViewModel(
             it.copy(
                 usernameInput = "",
                 passwordInput = "",
-                displayNameInput = ""
+                displayNameInput = "",
+                termsAccepted = false
             )
         }
     }
