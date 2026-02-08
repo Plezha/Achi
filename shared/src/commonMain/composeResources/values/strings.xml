@@ -106,6 +106,25 @@
     <string name="msg_pack_created">Pack \"%1$s\" created successfully! Code: %2$s</string>
     <string name="error_failed_to_create_pack">Failed to create pack</string>
 
+    <!-- Edit pack screen -->
+    <string name="edit_pack_title">Edit Pack</string>
+    <string name="edit_pack_save">Save Changes</string>
+    <string name="msg_pack_updated">Pack \"%1$s\" updated successfully</string>
+    <string name="error_failed_to_update_pack">Failed to update pack</string>
+
+    <!-- Delete pack -->
+    <string name="msg_pack_deleted">Pack \"%1$s\" deleted</string>
+    <string name="error_failed_to_delete_pack">Failed to delete pack</string>
+    <string name="delete_pack_confirm_title">Delete Pack?</string>
+    <string name="delete_pack_confirm_message">This action cannot be undone. The pack and all its achievements will be permanently deleted.</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_edit">Edit</string>
+    <string name="common_copy">Copy</string>
+    <string name="msg_only_creator_can_modify">Only the pack creator can edit or delete this pack</string>
+    <string name="msg_pack_copied">Pack \"%1$s\" copied</string>
+    <string name="msg_login_required_to_copy">Log in to copy packs</string>
+    <string name="error_failed_to_copy_pack">Failed to copy pack</string>
+
     <!-- Edit achievement screen -->
     <string name="edit_achievement_title">Edit Achievement</string>
     <string name="edit_achievement_title_field">Title *</string>

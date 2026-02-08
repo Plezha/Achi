@@ -9,13 +9,18 @@ import com.plezha.achi.shared.data.network.apis.UserProgressApi
 import com.plezha.achi.shared.data.network.apis.UsersApi
 import com.plezha.achi.shared.data.network.models.UserCreateBody
 import com.russhwolf.settings.Settings
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 data class AuthState(
     val isLoggedIn: Boolean = false,
     val username: String? = null,
+    val userId: String? = null,
     val accessToken: String? = null,
     val isLoading: Boolean = false,
     val error: String? = null
@@ -36,6 +41,7 @@ class AuthRepository(
     private val userProgressApi: UserProgressApi
 ) {
     private val settings: Settings = Settings()
+    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     
     private val _authState = MutableStateFlow(AuthState())
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
@@ -43,6 +49,7 @@ class AuthRepository(
     companion object {
         private const val KEY_ACCESS_TOKEN = "access_token"
         private const val KEY_USERNAME = "username"
+        private const val KEY_USER_ID = "user_id"
     }
     
     init {
@@ -53,6 +60,7 @@ class AuthRepository(
     private fun restoreSession() {
         val savedToken = settings.getStringOrNull(KEY_ACCESS_TOKEN)
         val savedUsername = settings.getStringOrNull(KEY_USERNAME)
+        val savedUserId = settings.getStringOrNull(KEY_USER_ID)
         
         if (savedToken != null && savedUsername != null) {
             // Restore token to APIs
@@ -60,12 +68,28 @@ class AuthRepository(
             _authState.value = AuthState(
                 isLoggedIn = true,
                 username = savedUsername,
+                userId = savedUserId,
                 accessToken = savedToken
             )
+            
+            // Backfill userId if missing (for sessions saved before userId was persisted)
+            if (savedUserId == null) {
+                scope.launch {
+                    try {
+                        val userResponse = usersApi.getCurrentUserUsersMeGet()
+                        if (userResponse.success) {
+                            val userId = userResponse.body().id
+                            settings.putString(KEY_USER_ID, userId)
+                            _authState.value = _authState.value.copy(userId = userId)
+                        }
+                    } catch (_: Exception) { }
+                }
+            }
         }
     }
     
     private fun setTokenOnApis(token: String) {
+        usersApi.setAccessToken(token)
         achievementsApi.setAccessToken(token)
         packsApi.setAccessToken(token)
         uploadApi.setAccessToken(token)
@@ -74,6 +98,7 @@ class AuthRepository(
     }
     
     private fun clearTokenOnApis() {
+        usersApi.setAccessToken("")
         achievementsApi.setAccessToken("")
         packsApi.setAccessToken("")
         uploadApi.setAccessToken("")
@@ -90,16 +115,28 @@ class AuthRepository(
             if (response.success) {
                 val token = response.body().accessToken
                 
+                // Set token on APIs before fetching user info
+                setTokenOnApis(token)
+                
+                // Fetch user ID from /users/me
+                val userId = try {
+                    val userResponse = usersApi.getCurrentUserUsersMeGet()
+                    if (userResponse.success) userResponse.body().id else null
+                } catch (_: Exception) {
+                    null
+                }
+                
                 // Save to settings
                 settings.putString(KEY_ACCESS_TOKEN, token)
                 settings.putString(KEY_USERNAME, username)
-                
-                // Set token on APIs
-                setTokenOnApis(token)
+                if (userId != null) {
+                    settings.putString(KEY_USER_ID, userId)
+                }
                 
                 _authState.value = AuthState(
                     isLoggedIn = true,
                     username = username,
+                    userId = userId,
                     accessToken = token
                 )
                 
@@ -147,6 +184,7 @@ class AuthRepository(
         // Clear saved data
         settings.remove(KEY_ACCESS_TOKEN)
         settings.remove(KEY_USERNAME)
+        settings.remove(KEY_USER_ID)
         
         // Clear tokens from APIs
         clearTokenOnApis()

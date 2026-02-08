@@ -1,18 +1,25 @@
 package com.plezha.achi.shared.ui.list.packlist
 
+import achi.shared.generated.resources.Res
+import achi.shared.generated.resources.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.plezha.achi.shared.data.AchievementPackRepository
 import com.plezha.achi.shared.data.AchievementRepository
 import com.plezha.achi.shared.data.UserRepository
 import com.plezha.achi.shared.data.auth.AuthRepository
 import com.plezha.achi.shared.data.model.AchievementPack
 import com.plezha.achi.shared.data.model.overallProgress
 import com.plezha.achi.shared.data.toStepProgressMap
+import com.plezha.achi.shared.ui.common.UiText
 import com.plezha.achi.shared.ui.list.achievementdetails.withProgress
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -21,27 +28,32 @@ data class PackListUiState(
     val packProgress: Map<String, Float> = emptyMap(),
     val isLoading: Boolean = false,
     val isLoggedIn: Boolean = false,
+    val currentUserId: String? = null,
     val error: String? = null
 )
 
 class AchievementPackListViewModel(
     private val userRepository: UserRepository,
     private val authRepository: AuthRepository,
-    private val achievementRepository: AchievementRepository
+    private val achievementRepository: AchievementRepository,
+    private val achievementPackRepository: AchievementPackRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PackListUiState())
     val uiState: StateFlow<PackListUiState> = _uiState
+
+    private val _messageChannel = Channel<UiText>()
+    val messageFlow: Flow<UiText> = _messageChannel.receiveAsFlow()
 
     init {
         // Observe auth state to load packs when logged in
         viewModelScope.launch {
             authRepository.authState.collect { authState ->
-                _uiState.update { it.copy(isLoggedIn = authState.isLoggedIn) }
+                _uiState.update { it.copy(isLoggedIn = authState.isLoggedIn, currentUserId = authState.userId) }
                 if (authState.isLoggedIn) {
                     loadUserPacks()
                 } else {
                     // Clear packs when logged out
-                    _uiState.update { it.copy(packs = emptyList(), packProgress = emptyMap()) }
+                    _uiState.update { it.copy(packs = emptyList(), packProgress = emptyMap(), currentUserId = null) }
                 }
             }
         }
@@ -107,6 +119,24 @@ class AchievementPackListViewModel(
             }.awaitAll().toMap()
 
             _uiState.update { it.copy(packProgress = progressMap) }
+        }
+    }
+
+    fun deletePack(pack: AchievementPack) {
+        viewModelScope.launch {
+            try {
+                achievementPackRepository.deleteAchievementPack(pack.id)
+                // Also remove from user's collection
+                try {
+                    userRepository.removePackFromCollection(pack.id)
+                } catch (_: Exception) { }
+                _messageChannel.send(UiText.Resource(Res.string.msg_pack_deleted, pack.name))
+            } catch (e: Exception) {
+                _messageChannel.send(
+                    if (e.message != null) UiText.Raw(e.message!!)
+                    else UiText.Resource(Res.string.error_failed_to_delete_pack)
+                )
+            }
         }
     }
 }

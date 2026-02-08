@@ -29,17 +29,23 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -67,9 +73,43 @@ fun AchievementsScreen(
     achievementListViewModel: AchievementListViewModel,
     onAchievementClick: (Achievement) -> Unit,
     onBackClicked: () -> Unit,
-    onRetry: () -> Unit = {}
+    onRetry: () -> Unit = {},
+    onEditPack: () -> Unit = {},
+    onDeletePack: () -> Unit = {},
+    onNotOwnerAction: () -> Unit = {},
+    onCopyPack: () -> Unit = {}
 ) {
     val uiState by achievementListViewModel.uiState.collectAsState()
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    // Delete confirmation dialog
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text(stringResource(Res.string.delete_pack_confirm_title)) },
+            text = { Text(stringResource(Res.string.delete_pack_confirm_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        onDeletePack()
+                    }
+                ) {
+                    Text(
+                        stringResource(Res.string.common_delete),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text(stringResource(Res.string.common_cancel))
+                }
+            }
+        )
+    }
+
+    val disabledTint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -78,6 +118,47 @@ fun AchievementsScreen(
             text = uiState.pack?.name ?: stringResource(Res.string.achievement_list_fallback_title),
             onBackClicked = onBackClicked,
             modifier = Modifier.fillMaxWidth(),
+            actions = {
+                Row {
+                    IconButton(onClick = onCopyPack) {
+                        Icon(
+                            imageVector = vectorResource(Res.drawable.ic_copy),
+                            contentDescription = stringResource(Res.string.common_copy),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    IconButton(
+                        onClick = if (uiState.isOwner) onEditPack else onNotOwnerAction
+                    ) {
+                        Icon(
+                            imageVector = vectorResource(Res.drawable.ic_edit),
+                            contentDescription = stringResource(Res.string.common_edit),
+                            tint = if (uiState.isOwner) {
+                                MaterialTheme.colorScheme.onSurface
+                            } else {
+                                disabledTint
+                            }
+                        )
+                    }
+                    IconButton(
+                        onClick = if (uiState.isOwner) {
+                            { showDeleteDialog = true }
+                        } else {
+                            onNotOwnerAction
+                        }
+                    ) {
+                        Icon(
+                            imageVector = vectorResource(Res.drawable.ic_delete),
+                            contentDescription = stringResource(Res.string.common_delete),
+                            tint = if (uiState.isOwner) {
+                                MaterialTheme.colorScheme.onSurface
+                            } else {
+                                disabledTint
+                            }
+                        )
+                    }
+                }
+            }
         )
 
         when {
@@ -326,7 +407,7 @@ private fun EnhancedAchievementCard(
                     )
                     // Progress percentage in center
                     Text(
-                        text = "${(achievement.progress * 100).roundToInt()}",
+                        text = "${(achievement.progress * 100).roundToInt()}%",
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary

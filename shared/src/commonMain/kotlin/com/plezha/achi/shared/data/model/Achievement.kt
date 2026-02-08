@@ -9,7 +9,8 @@ data class Achievement(
     val steps: List<AchievementStep>,
     val previewImageUrl: String? = null,
     val imageUrl: String? = null,
-    val isCompleted: Boolean = false
+    val isCompleted: Boolean = false,
+    val creatorId: String = ""
 ) {
     val progress
         get() = if (steps.isEmpty()) {

@@ -42,6 +42,9 @@ data class AchievementRoute(val id: String) : NavKey
 data class AchievementListRoute(val id: String) : NavKey
 
 @Serializable
+data class EditPackRoute(val packId: String) : NavKey
+
+@Serializable
 data object SettingsRoute : NavKey
 
 @Serializable
@@ -58,6 +61,7 @@ val navSavedStateConfig = SavedStateConfiguration {
             subclass(ProfileRoute::class, ProfileRoute.serializer())
             subclass(AchievementRoute::class, AchievementRoute.serializer())
             subclass(AchievementListRoute::class, AchievementListRoute.serializer())
+            subclass(EditPackRoute::class, EditPackRoute.serializer())
             subclass(SettingsRoute::class, SettingsRoute.serializer())
             subclass(DebugPanelRoute::class, DebugPanelRoute.serializer())
         }

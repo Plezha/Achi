@@ -68,7 +68,7 @@ shared/src/commonMain/kotlin/com/plezha/achi/shared/
 │   │   ├── Mappers.kt          # Network → Domain model mapping
 │   │   └── NetworkUtils.kt     # createFormPart, check() extension
 │   ├── AchievementRepository.kt
-│   ├── AchievementPackRepository.kt
+│   ├── AchievementPackRepository.kt  # AchievementEditData, AchievementStepEditData
 │   └── UserRepository.kt       # User's pack collection & progress sync
 ├── di/
 │   ├── ApiConfig.kt            # Base URL config (mutable via StateFlow for debug panel)
@@ -115,6 +115,7 @@ shared/src/commonMain/composeResources/
 AchievementPackListRoute  // Start destination - pack list
 AddRoute                  // Add screen (create pack or add by code)
 CreateAchievementPackRoute // Create new pack form
+EditPackRoute(packId: String) // Edit existing pack
 EditAchievementRoute(achievementIndex: Int) // Edit achievement in pack creation
 ProfileRoute              // Login/register/profile
 AchievementListRoute(id: String) // Achievements in a pack
@@ -132,10 +133,10 @@ DebugPanelRoute               // Debug panel (debug builds only, via Settings)
 
 ```kotlin
 // Achievement pack containing multiple achievements
-data class AchievementPack(id, name, count, achievementIds, previewImageUrl?, code)
+data class AchievementPack(id, name, count, achievementIds, previewImageUrl?, code, creatorId)
 
 // Individual achievement with steps (steps can be empty for stepless achievements)
-data class Achievement(id, title, shortDescription, longDescription?, steps, previewImageUrl?, imageUrl?, isCompleted)
+data class Achievement(id, title, shortDescription, longDescription?, steps, previewImageUrl?, imageUrl?, isCompleted, creatorId)
 
 // Step within an achievement (id is a stable server-assigned identifier)
 data class AchievementStep(id: String, description, progress: StepProgress)
@@ -173,6 +174,7 @@ data class StepProgress(substepsDone: Int = 0, substepsAmount: Int = 1)
 data class AuthState(
     isLoggedIn: Boolean,
     username: String?,
+    userId: String?,
     accessToken: String?,
     isLoading: Boolean,
     error: String?
@@ -274,6 +276,9 @@ entry<AchievementRoute> { route ->
 - Add with Code (fetch pack by code, add to user collection)
 - Create Achievement Pack (full flow with image upload)
 - Edit Achievement (during pack creation with steps)
+- Pack Editing (edit existing packs via CreateAchievementPackScreen reuse)
+- Pack Deletion (delete packs with confirmation dialog)
+- Pack Copying (duplicate a pack as a new pack owned by the current user)
 - User Authentication (login/register/logout)
 - Progress Sync (step progress saved to server)
 - Profile Screen (login form, logged-in state display)

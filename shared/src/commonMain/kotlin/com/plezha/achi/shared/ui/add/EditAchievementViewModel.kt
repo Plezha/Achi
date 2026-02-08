@@ -11,6 +11,10 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 
 data class EditAchievementUiState(
+    /** Server ID for existing achievements (null for newly created ones) */
+    val serverId: String? = null,
+    /** Existing image URL for achievements loaded from server */
+    val existingImageUrl: String? = null,
     val title: String = "",
     val shortDescription: String = "",
     val longDescription: String = "",
@@ -34,6 +38,8 @@ class EditAchievementViewModel(
     private val _uiState = MutableStateFlow(
         initialData?.let { data ->
             EditAchievementUiState(
+                serverId = data.serverId,
+                existingImageUrl = data.existingImageUrl,
                 title = data.title,
                 shortDescription = data.shortDescription,
                 longDescription = data.longDescription,
@@ -105,11 +111,13 @@ class EditAchievementViewModel(
 
         val achievement = EditableAchievementData(
             id = achievementId,
+            serverId = state.serverId,
             title = state.title,
             shortDescription = state.shortDescription,
             longDescription = state.longDescription,
             steps = state.steps,
-            imageFile = state.imageFile
+            imageFile = state.imageFile,
+            existingImageUrl = state.existingImageUrl
         )
         _navigationChannel.send(EditAchievementNavigationEvent.SaveAndNavigateBack(achievement))
     }
