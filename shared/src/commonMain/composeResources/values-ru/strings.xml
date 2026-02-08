@@ -65,6 +65,8 @@
     <string name="achievement_details_steps">Шаги</string>
     <string name="achievement_details_progress">Прогресс</string>
     <string name="achievement_details_step_fallback">Шаг %1$d</string>
+    <string name="achievement_details_mark_complete">Отметить выполненным</string>
+    <string name="achievement_details_completed">Выполнено</string>
 
     <!-- Add screen -->
     <string name="add_title">Добавить достижения</string>
@@ -102,7 +104,6 @@
     <string name="error_achievement_title_required">У всех достижений должно быть название</string>
     <string name="error_select_preview_image">Выберите изображение для превью</string>
     <string name="msg_pack_created">Набор «%1$s» успешно создан! Код: %2$s</string>
-    <string name="create_pack_default_step">Выполнить «%1$s»</string>
     <string name="error_failed_to_create_pack">Не удалось создать набор</string>
 
     <!-- Edit achievement screen -->
@@ -114,7 +115,7 @@
     <string name="edit_achievement_image_cd">Изображение достижения</string>
     <string name="edit_achievement_steps_count">Шаги (%1$d)</string>
     <string name="edit_achievement_add_step">Добавить шаг</string>
-    <string name="edit_achievement_no_steps">Шагов пока нет. Шаг по умолчанию будет создан автоматически.</string>
+    <string name="edit_achievement_no_steps">Шагов пока нет.</string>
     <string name="edit_achievement_step_number">Шаг #%1$d</string>
     <string name="edit_achievement_description">Описание</string>
     <string name="edit_achievement_substeps">Подшаги:</string>

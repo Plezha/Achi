@@ -65,6 +65,8 @@
     <string name="achievement_details_steps">Steps</string>
     <string name="achievement_details_progress">Progress</string>
     <string name="achievement_details_step_fallback">Step %1$d</string>
+    <string name="achievement_details_mark_complete">Mark as complete</string>
+    <string name="achievement_details_completed">Completed</string>
 
     <!-- Add screen -->
     <string name="add_title">Add Achievements</string>
@@ -102,7 +104,6 @@
     <string name="error_achievement_title_required">All achievements must have a title</string>
     <string name="error_select_preview_image">Please select a preview image</string>
     <string name="msg_pack_created">Pack \"%1$s\" created successfully! Code: %2$s</string>
-    <string name="create_pack_default_step">Complete %1$s</string>
     <string name="error_failed_to_create_pack">Failed to create pack</string>
 
     <!-- Edit achievement screen -->
@@ -114,7 +115,7 @@
     <string name="edit_achievement_image_cd">Achievement image</string>
     <string name="edit_achievement_steps_count">Steps (%1$d)</string>
     <string name="edit_achievement_add_step">Add Step</string>
-    <string name="edit_achievement_no_steps">No steps yet. A default step will be created if none are provided.</string>
+    <string name="edit_achievement_no_steps">No steps yet.</string>
     <string name="edit_achievement_step_number">Step #%1$d</string>
     <string name="edit_achievement_description">Description</string>
     <string name="edit_achievement_substeps">Substeps:</string>

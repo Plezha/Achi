@@ -43,7 +43,7 @@ class AchievementDetailsViewModel(
                         val progress = userRepository.getProgress(id)
                         if (progress != null) {
                             // Merge server progress with achievement steps
-                            achievement.withProgress(progress.toStepProgressList())
+                            achievement.withProgress(progress.toStepProgressList(), progress.isCompleted)
                         } else {
                             achievement
                         }
@@ -101,6 +101,35 @@ class AchievementDetailsViewModel(
             )
         }
     }
+
+    fun toggleCompletion() {
+        val achievement = _uiState.value.achievement ?: return
+        val newIsCompleted = !achievement.isCompleted
+
+        // Optimistic UI update
+        _uiState.update {
+            it.copy(achievement = achievement.copy(isCompleted = newIsCompleted))
+        }
+
+        // Sync to server if logged in
+        val achievementId = currentAchievementId ?: return
+        val isLoggedIn = authRepository.authState.value.isLoggedIn
+
+        if (isLoggedIn) {
+            viewModelScope.launch {
+                try {
+                    userRepository.updateAchievementCompletion(
+                        achievementId = achievementId,
+                        isCompleted = newIsCompleted
+                    )
+                } catch (e: Exception) {
+                    _uiState.update {
+                        it.copy(errorMessage = UiText.Resource(Res.string.error_failed_to_sync_progress, e.message ?: ""))
+                    }
+                }
+            }
+        }
+    }
     
     private fun updateStepProgressInternal(
         stepIndex: Int,
@@ -147,13 +176,15 @@ fun AchievementStep.withProgressDecreased() =
     copy(progress = progress.copy(substepsDone = (progress.substepsDone - 1).coerceAtLeast(0)))
 
 /**
- * Returns a copy of the achievement with the given step progress applied
+ * Returns a copy of the achievement with the given step progress and completion status applied
  */
-fun Achievement.withProgress(progressList: List<StepProgress>): Achievement {
-    if (progressList.size != steps.size) return this
+fun Achievement.withProgress(progressList: List<StepProgress>, isCompleted: Boolean = false): Achievement {
     return copy(
-        steps = steps.mapIndexed { index, step ->
-            step.copy(progress = progressList[index])
+        isCompleted = isCompleted,
+        steps = if (progressList.size != steps.size) steps else {
+            steps.mapIndexed { index, step ->
+                step.copy(progress = progressList[index])
+            }
         }
     )
 }

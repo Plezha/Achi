@@ -169,16 +169,11 @@ class CreateAchievementPackViewModel(
                     AchievementCreateBody(
                         title = achievement.title,
                         shortDescription = achievement.shortDescription.ifBlank { achievement.title },
-                        steps = if (achievement.steps.isEmpty()) {
-                            // Default step if none provided
-                            listOf(AchievementStepCreate(description = "Complete ${achievement.title}"))
-                        } else {
-                            achievement.steps.map { step ->
-                                AchievementStepCreate(
-                                    description = step.description,
-                                    substepsAmount = step.substepsAmount
-                                )
-                            }
+                        steps = achievement.steps.map { step ->
+                            AchievementStepCreate(
+                                description = step.description,
+                                substepsAmount = step.substepsAmount
+                            )
                         },
                         longDescription = achievement.longDescription.ifBlank { null }
                         // imageUrl and previewImageUrl will be set by repository after uploading

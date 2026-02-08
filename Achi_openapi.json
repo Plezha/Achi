@@ -488,6 +488,84 @@
         ]
       }
     },
+    "/user/progress/{achievement_id}/complete": {
+      "patch": {
+        "tags": [
+          "User Progress"
+        ],
+        "summary": "Toggle Achievement Completion",
+        "description": "Directly set completion status for an achievement (for stepless achievements).",
+        "operationId": "toggle_achievement_completion_user_progress__achievement_id__complete_patch",
+        "parameters": [
+          {
+            "name": "achievement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Achievement Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AchievementCompletionBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Completion status updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserAchievementProgress"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Achievement not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
     "/user/progress/batch": {
       "get": {
         "tags": [
@@ -1361,6 +1439,19 @@
           "substeps_done"
         ],
         "title": "StepProgressUpdateBody"
+      },
+      "AchievementCompletionBody": {
+        "properties": {
+          "is_completed": {
+            "type": "boolean",
+            "title": "Is Completed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "is_completed"
+        ],
+        "title": "AchievementCompletionBody"
       },
       "UserProgressBatchResponse": {
         "properties": {

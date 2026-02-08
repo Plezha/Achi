@@ -103,6 +103,12 @@ achievementListViewModel.loadAchievementsByPackId(packId)
   - "Steps" header
   - List of steps with appropriate controls
 
+**Stepless Achievement**:
+- If an achievement has no steps, a "Mark as complete" toggle button is shown instead
+- Tapping toggles the achievement between complete and incomplete
+- Uses a dedicated API endpoint (PATCH /user/progress/{id}/complete)
+- Optimistic UI update with background server sync
+
 **Step Types**:
 
 **Simple Step** (substepsAmount = 1):

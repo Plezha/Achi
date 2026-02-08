@@ -8,14 +8,19 @@ data class Achievement(
     val longDescription: String? = null,
     val steps: List<AchievementStep>,
     val previewImageUrl: String? = null,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val isCompleted: Boolean = false
 ) {
     val progress
-        get() = steps.sumOf { it.progress.progressFloat.toDouble() } / steps.size
+        get() = if (steps.isEmpty()) {
+            if (isCompleted) 1.0 else 0.0
+        } else {
+            steps.sumOf { it.progress.progressFloat.toDouble() } / steps.size
+        }
     val stepsDone
         get() = steps.count { it.isDone }
     val isDone
-        get() = stepsDone == steps.size
+        get() = if (steps.isEmpty()) isCompleted else stepsDone == steps.size
 }
 
 data class AchievementStep(
