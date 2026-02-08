@@ -45,6 +45,7 @@ fun AchievementSchema.toAchievement() = Achievement(
 )
 
 fun AchievementStepSchema.toAchievementStep() = AchievementStep(
+    id = id,
     description = description,
     progress = StepProgress(0, substepsAmount ?: 1)
 )

@@ -59,12 +59,14 @@ Represents a single step within an achievement.
 
 ```kotlin
 data class AchievementStep(
+    val id: String,
     val description: String,
     val progress: StepProgress = StepProgress(),
 )
 ```
 
 **Fields**:
+- `id`: Stable server-assigned identifier for the step
 - `description`: What needs to be done
 - `progress`: Current progress state (substeps completed)
 
@@ -237,6 +239,7 @@ data class AchievementSchema(
 **AchievementStepSchema**:
 ```kotlin
 data class AchievementStepSchema(
+    val id: String,
     val description: String,
     val substepsAmount: Int?
 )
@@ -280,6 +283,7 @@ data class AchievementCreateBody(
 ```kotlin
 data class AchievementStepCreate(
     val description: String,
+    val id: String? = null,
     val substepsAmount: Int? = null
 )
 ```
@@ -337,6 +341,7 @@ fun AchievementSchema.toAchievement() = Achievement(
 )
 
 fun AchievementStepSchema.toAchievementStep() = AchievementStep(
+    id = id,
     description = description,
     progress = StepProgress(0, substepsAmount ?: 1)
 )
@@ -345,9 +350,9 @@ fun AchievementStepSchema.toAchievementStep() = AchievementStep(
 ### Progress Mapping (UserRepository)
 
 ```kotlin
-fun UserAchievementProgress.toStepProgressList(): List<StepProgress> {
-    return steps.map { serverStep ->
-        StepProgress(
+fun UserAchievementProgress.toStepProgressMap(): Map<String, StepProgress> {
+    return steps.associate { serverStep ->
+        serverStep.stepId to StepProgress(
             substepsDone = serverStep.substepsDone ?: 0,
             substepsAmount = serverStep.substepsAmount ?: 1
         )

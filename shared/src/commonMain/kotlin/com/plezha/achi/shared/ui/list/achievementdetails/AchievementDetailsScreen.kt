@@ -105,17 +105,17 @@ fun AchievementDetailsScreen(
         uiState.achievement != null -> {
             AchievementDetailsScreen(
                 achievement = uiState.achievement!!,
-                onStepProgressIncreased = { step, index -> 
-                    viewModel.increaseStepProgress(step, index) 
+                onStepProgressIncreased = { step -> 
+                    viewModel.increaseStepProgress(step) 
                 },
-                onStepProgressDecreased = { step, index ->
-                    viewModel.decreaseStepProgress(step, index)
+                onStepProgressDecreased = { step ->
+                    viewModel.decreaseStepProgress(step)
                 },
-                onStepCompleted = { step, index ->
-                    viewModel.setStepCompleted(step, true, index)
+                onStepCompleted = { step ->
+                    viewModel.setStepCompleted(step, true)
                 },
-                onStepProgressReset = { step, index ->
-                    viewModel.setStepCompleted(step, false, index)
+                onStepProgressReset = { step ->
+                    viewModel.setStepCompleted(step, false)
                 },
                 onToggleCompletion = { viewModel.toggleCompletion() },
                 onBackClicked = onBackClicked,
@@ -127,10 +127,10 @@ fun AchievementDetailsScreen(
 @Composable
 private fun AchievementDetailsScreen(
     achievement: Achievement,
-    onStepCompleted: (AchievementStep, Int) -> Unit,
-    onStepProgressReset: (AchievementStep, Int) -> Unit,
-    onStepProgressIncreased: (AchievementStep, Int) -> Unit,
-    onStepProgressDecreased: (AchievementStep, Int) -> Unit,
+    onStepCompleted: (AchievementStep) -> Unit,
+    onStepProgressReset: (AchievementStep) -> Unit,
+    onStepProgressIncreased: (AchievementStep) -> Unit,
+    onStepProgressDecreased: (AchievementStep) -> Unit,
     onToggleCompletion: () -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -194,7 +194,7 @@ private fun AchievementDetailsScreen(
                     if (step.progress.substepsAmount == 1) {
                         SimpleStep(
                             step = step,
-                            stepIndex = index,
+                            displayIndex = index,
                             modifier = stepModifier.padding(vertical = 12.dp),
                             onStepCompleted = onStepCompleted,
                             onStepProgressReset = onStepProgressReset
@@ -202,7 +202,7 @@ private fun AchievementDetailsScreen(
                     } else {
                         IncrementalStep(
                             step = step,
-                            stepIndex = index,
+                            displayIndex = index,
                             onStepProgressIncreased = onStepProgressIncreased,
                             onStepProgressDecreased = onStepProgressDecreased,
                             modifier = stepModifier.padding(vertical = 4.dp)
@@ -228,12 +228,12 @@ private fun AchievementDetailsScreen(
 @Composable
 private fun IncrementalStep(
     step: AchievementStep,
-    stepIndex: Int,
-    onStepProgressIncreased: (AchievementStep, Int) -> Unit,
-    onStepProgressDecreased: (AchievementStep, Int) -> Unit,
+    displayIndex: Int,
+    onStepProgressIncreased: (AchievementStep) -> Unit,
+    onStepProgressDecreased: (AchievementStep) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val displayDescription = step.description.ifBlank { "Step ${stepIndex + 1}" }
+    val displayDescription = step.description.ifBlank { "Step ${displayIndex + 1}" }
     
     Row(
         modifier = modifier,
@@ -258,7 +258,7 @@ private fun IncrementalStep(
             ) {
                 // Minus button
                 FilledTonalIconButton(
-                    onClick = { onStepProgressDecreased(step, stepIndex) },
+                    onClick = { onStepProgressDecreased(step) },
                     enabled = step.progress.substepsDone > 0,
                     modifier = Modifier.size(36.dp)
                 ) {
@@ -279,7 +279,7 @@ private fun IncrementalStep(
                 
                 // Plus button
                 FilledTonalIconButton(
-                    onClick = { onStepProgressIncreased(step, stepIndex) },
+                    onClick = { onStepProgressIncreased(step) },
                     enabled = step.progress.substepsDone < step.progress.substepsAmount,
                     modifier = Modifier.size(36.dp)
                 ) {
@@ -297,12 +297,12 @@ private fun IncrementalStep(
 @Composable
 private fun SimpleStep(
     step: AchievementStep,
-    stepIndex: Int,
-    onStepCompleted: (AchievementStep, Int) -> Unit,
-    onStepProgressReset: (AchievementStep, Int) -> Unit,
+    displayIndex: Int,
+    onStepCompleted: (AchievementStep) -> Unit,
+    onStepProgressReset: (AchievementStep) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val displayDescription = step.description.ifBlank { "Step ${stepIndex + 1}" }
+    val displayDescription = step.description.ifBlank { "Step ${displayIndex + 1}" }
     
     Row(
         modifier = modifier,
@@ -317,9 +317,9 @@ private fun SimpleStep(
                 checked = step.isDone,
                 onCheckedChange = {
                     if (it) {
-                        onStepCompleted(step, stepIndex)
+                        onStepCompleted(step)
                     } else {
-                        onStepProgressReset(step, stepIndex)
+                        onStepProgressReset(step)
                     }
                 }
             )
@@ -500,10 +500,10 @@ private fun AchievementDetailsScreenPreview() {
     PreviewWrapper {
         AchievementDetailsScreen(
             achievement = achievementExample,
-            onStepCompleted = { _, _ -> },
-            onStepProgressReset = { _, _ -> },
-            onStepProgressIncreased = { _, _ -> },
-            onStepProgressDecreased = { _, _ -> },
+            onStepCompleted = { },
+            onStepProgressReset = { },
+            onStepProgressIncreased = { },
+            onStepProgressDecreased = { },
             onToggleCompletion = {},
             onBackClicked = {}
         )

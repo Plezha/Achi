@@ -24,6 +24,7 @@ data class Achievement(
 }
 
 data class AchievementStep(
+    val id: String,
     val description: String,
     val progress: StepProgress = StepProgress(),
 ) {

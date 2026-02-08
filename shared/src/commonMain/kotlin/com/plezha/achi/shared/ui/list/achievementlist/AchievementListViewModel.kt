@@ -10,7 +10,7 @@ import com.plezha.achi.shared.data.model.Achievement
 import com.plezha.achi.shared.data.model.AchievementPack
 import com.plezha.achi.shared.data.model.completedCount
 import com.plezha.achi.shared.data.model.overallProgress
-import com.plezha.achi.shared.data.toStepProgressList
+import com.plezha.achi.shared.data.toStepProgressMap
 import com.plezha.achi.shared.ui.list.achievementdetails.withProgress
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,7 +63,7 @@ class AchievementListViewModel(
                         try {
                             val progress = userRepository.getProgress(achievement.id)
                             if (progress != null) {
-                                achievement.withProgress(progress.toStepProgressList(), progress.isCompleted)
+                                achievement.withProgress(progress.toStepProgressMap(), progress.isCompleted)
                             } else {
                                 achievement
                             }

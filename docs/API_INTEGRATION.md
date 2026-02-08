@@ -83,9 +83,9 @@ The Achi application integrates with a backend API for achievement and pack mana
 - **Response**: Progress with step states
 - **Authentication**: Required
 
-**PATCH /user/progress/{achievement_id}/steps/{step_index}**
+**PATCH /user/progress/{achievement_id}/steps/{step_id}**
 - **Purpose**: Update step progress
-- **Path Parameters**: `achievement_id`, `step_index`
+- **Path Parameters**: `achievement_id`, `step_id` (stable step ID string)
 - **Request Body**: `StepProgressUpdateBody` with `substepsDone`
 - **Response**: Updated progress
 - **Authentication**: Required
@@ -457,12 +457,12 @@ override suspend fun addPackByCode(code: String): AchievementPack {
 ```kotlin
 override suspend fun updateStepProgress(
     achievementId: String,
-    stepIndex: Int,
+    stepId: String,
     substepsDone: Int
 ): UserAchievementProgress {
-    val response = userProgressApi.updateStepProgressUserProgressAchievementIdStepsStepIndexPatch(
+    val response = userProgressApi.updateStepProgressUserProgressAchievementIdStepsStepIdPatch(
         achievementId = achievementId,
-        stepIndex = stepIndex,
+        stepId = stepId,
         stepProgressUpdateBody = StepProgressUpdateBody(substepsDone = substepsDone)
     )
     response.check()

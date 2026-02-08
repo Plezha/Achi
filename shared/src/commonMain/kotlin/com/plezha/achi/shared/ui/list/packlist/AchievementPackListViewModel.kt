@@ -7,7 +7,7 @@ import com.plezha.achi.shared.data.UserRepository
 import com.plezha.achi.shared.data.auth.AuthRepository
 import com.plezha.achi.shared.data.model.AchievementPack
 import com.plezha.achi.shared.data.model.overallProgress
-import com.plezha.achi.shared.data.toStepProgressList
+import com.plezha.achi.shared.data.toStepProgressMap
 import com.plezha.achi.shared.ui.list.achievementdetails.withProgress
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -91,7 +91,7 @@ class AchievementPackListViewModel(
                             try {
                                 val progress = userRepository.getProgress(achievement.id)
                                 if (progress != null) {
-                                    achievement.withProgress(progress.toStepProgressList(), progress.isCompleted)
+                                    achievement.withProgress(progress.toStepProgressMap(), progress.isCompleted)
                                 } else {
                                     achievement
                                 }
