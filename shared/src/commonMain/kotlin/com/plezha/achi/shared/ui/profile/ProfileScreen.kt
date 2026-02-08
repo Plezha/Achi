@@ -16,12 +16,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,12 +35,20 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.plezha.achi.shared.ui.common.LegalTextDialog
 import com.plezha.achi.shared.ui.common.TitleBar
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -57,6 +67,7 @@ fun ProfileScreen(
         onUsernameChanged = viewModel::onUsernameChanged,
         onPasswordChanged = viewModel::onPasswordChanged,
         onDisplayNameChanged = viewModel::onDisplayNameChanged,
+        onTermsAcceptedChanged = viewModel::onTermsAcceptedChanged,
         onToggleMode = viewModel::toggleRegisterMode,
         onLogin = viewModel::onLogin,
         onRegister = viewModel::onRegister,
@@ -71,6 +82,7 @@ private fun ProfileScreen(
     onUsernameChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
     onDisplayNameChanged: (String) -> Unit,
+    onTermsAcceptedChanged: (Boolean) -> Unit,
     onToggleMode: () -> Unit,
     onLogin: () -> Unit,
     onRegister: () -> Unit,
@@ -141,6 +153,7 @@ private fun ProfileScreen(
                         onUsernameChanged = onUsernameChanged,
                         onPasswordChanged = onPasswordChanged,
                         onDisplayNameChanged = onDisplayNameChanged,
+                        onTermsAcceptedChanged = onTermsAcceptedChanged,
                         onToggleMode = onToggleMode,
                         onLogin = onLogin,
                         onRegister = onRegister
@@ -223,10 +236,14 @@ private fun AuthForm(
     onUsernameChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
     onDisplayNameChanged: (String) -> Unit,
+    onTermsAcceptedChanged: (Boolean) -> Unit,
     onToggleMode: () -> Unit,
     onLogin: () -> Unit,
     onRegister: () -> Unit
 ) {
+    var showTermsDialog by remember { mutableStateOf(false) }
+    var showPrivacyDialog by remember { mutableStateOf(false) }
+    
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -305,6 +322,24 @@ private fun AuthForm(
             }
         }
         
+        // Terms acceptance checkbox (only for registration)
+        AnimatedVisibility(
+            visible = uiState.isRegisterMode,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Column {
+                Spacer(modifier = Modifier.height(12.dp))
+                TermsAcceptanceRow(
+                    checked = uiState.termsAccepted,
+                    onCheckedChange = onTermsAcceptedChanged,
+                    onTermsClicked = { showTermsDialog = true },
+                    onPrivacyClicked = { showPrivacyDialog = true },
+                    enabled = !isLoading
+                )
+            }
+        }
+        
         // Error message
         AnimatedVisibility(
             visible = uiState.authState.error != null,
@@ -350,5 +385,80 @@ private fun AuthForm(
                     stringResource(Res.string.profile_toggle_to_register)
             )
         }
+    }
+    
+    // Legal text dialogs
+    if (showTermsDialog) {
+        LegalTextDialog(
+            title = stringResource(Res.string.legal_terms_of_service),
+            content = stringResource(Res.string.legal_tos_content),
+            onDismiss = { showTermsDialog = false }
+        )
+    }
+    if (showPrivacyDialog) {
+        LegalTextDialog(
+            title = stringResource(Res.string.legal_privacy_policy),
+            content = stringResource(Res.string.legal_privacy_content),
+            onDismiss = { showPrivacyDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun TermsAcceptanceRow(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    onTermsClicked: () -> Unit,
+    onPrivacyClicked: () -> Unit,
+    enabled: Boolean
+) {
+    val prefix = stringResource(Res.string.profile_accept_terms_prefix)
+    val termsLabel = stringResource(Res.string.legal_terms_of_service)
+    val and = stringResource(Res.string.profile_accept_terms_and)
+    val privacyLabel = stringResource(Res.string.legal_privacy_policy)
+    val linkColor = MaterialTheme.colorScheme.primary
+    val textColor = MaterialTheme.colorScheme.onSurface
+    val textStyle = MaterialTheme.typography.bodySmall.copy(color = textColor)
+    
+    val annotatedString = buildAnnotatedString {
+        withStyle(SpanStyle(color = textColor)) {
+            append(prefix)
+        }
+        pushStringAnnotation(tag = "TERMS", annotation = "terms")
+        withStyle(SpanStyle(color = linkColor, textDecoration = TextDecoration.Underline)) {
+            append(termsLabel)
+        }
+        pop()
+        withStyle(SpanStyle(color = textColor)) {
+            append(and)
+        }
+        pushStringAnnotation(tag = "PRIVACY", annotation = "privacy")
+        withStyle(SpanStyle(color = linkColor, textDecoration = TextDecoration.Underline)) {
+            append(privacyLabel)
+        }
+        pop()
+    }
+    
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            enabled = enabled
+        )
+        @Suppress("DEPRECATION")
+        ClickableText(
+            text = annotatedString,
+            style = textStyle,
+            modifier = Modifier.weight(1f),
+            onClick = { offset ->
+                annotatedString.getStringAnnotations(tag = "TERMS", start = offset, end = offset)
+                    .firstOrNull()?.let { onTermsClicked() }
+                annotatedString.getStringAnnotations(tag = "PRIVACY", start = offset, end = offset)
+                    .firstOrNull()?.let { onPrivacyClicked() }
+            }
+        )
     }
 }

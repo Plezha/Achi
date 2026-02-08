@@ -345,7 +345,8 @@ Two methods to add achievement packs:
   - Username field
   - Password field
   - Display name field (registration only)
-- Login/Register button
+  - Terms acceptance checkbox with clickable links (registration only) — opens ToS and Privacy Policy dialogs
+- Login/Register button (registration gated on terms acceptance)
 - Toggle between login/register mode
 - Settings gear icon in title bar → navigates to Settings screen
 
@@ -376,6 +377,9 @@ Two methods to add achievement packs:
 
 **Functionality**:
 - "Language" row (disabled, placeholder for future in-app language override)
+- "Contact Us" row — opens email client to plezha.dev@gmail.com (for reporting content, blocking users, or questions)
+- "Terms of Service" row — opens LegalTextDialog with ToS content
+- "Privacy Policy" row — opens LegalTextDialog with Privacy Policy content
 - "Debug Panel" row (only visible in debug builds, gated by `isDebug`) — navigates to `DebugPanelRoute`
 
 ### 11. Debug Panel
@@ -432,6 +436,7 @@ Two methods to add achievement packs:
 - Pack Copying (duplicate a pack with all achievements as a new pack owned by the current user)
 - Progress tracking (simple & incremental, server-synced)
 - User Authentication (login/register/logout)
+- Terms of Service & Privacy Policy (acceptance at registration, viewable from Settings)
 - Profile management
 - Settings screen (gear icon from Profile title bar)
 - Debug Panel (debug builds only: host switching, quick login, via Settings)
