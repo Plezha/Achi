@@ -38,7 +38,10 @@ import com.plezha.achi.shared.ui.common.TitleBar
 @Composable
 fun DebugPanelScreen(
     onBackClicked: () -> Unit,
-    onDebugLogin: () -> Unit
+    onDebugLogin: () -> Unit,
+    onPopulateMockData: () -> Unit = {},
+    onPopulateMockDataRu: () -> Unit = {},
+    isMockDataLoading: Boolean = false
 ) {
     val currentBaseUrl by ApiConfig.baseUrlFlow.collectAsState()
     var selectedUrl by remember(currentBaseUrl) { mutableStateOf(currentBaseUrl) }
@@ -207,6 +210,30 @@ fun DebugPanelScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Quick Login (user1/password1)")
+            }
+
+            OutlinedButton(
+                onClick = onPopulateMockData,
+                enabled = !isMockDataLoading,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (isMockDataLoading) {
+                    Text("Creating mock data...")
+                } else {
+                    Text("Populate Mock Data — EN")
+                }
+            }
+
+            OutlinedButton(
+                onClick = onPopulateMockDataRu,
+                enabled = !isMockDataLoading,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (isMockDataLoading) {
+                    Text("Создаём данные...")
+                } else {
+                    Text("Populate Mock Data — RU")
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
