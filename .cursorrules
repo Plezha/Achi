@@ -137,8 +137,8 @@ data class AchievementPack(id, name, count, achievementIds, previewImageUrl?, co
 // Individual achievement with steps (steps can be empty for stepless achievements)
 data class Achievement(id, title, shortDescription, longDescription?, steps, previewImageUrl?, imageUrl?, isCompleted)
 
-// Step within an achievement
-data class AchievementStep(description, progress: StepProgress)
+// Step within an achievement (id is a stable server-assigned identifier)
+data class AchievementStep(id: String, description, progress: StepProgress)
 
 // Progress tracking
 data class StepProgress(substepsDone: Int = 0, substepsAmount: Int = 1)

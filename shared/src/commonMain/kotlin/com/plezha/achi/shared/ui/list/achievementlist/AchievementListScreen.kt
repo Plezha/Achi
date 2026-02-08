@@ -357,14 +357,20 @@ private fun EnhancedAchievementCard(
                 )
                 Spacer(Modifier.height(4.dp))
                 // Steps progress text
-                Text(
-                    text = stringResource(Res.string.achievement_list_steps_progress, achievement.stepsDone, achievement.steps.size),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (achievement.isDone) 
-                        MaterialTheme.colorScheme.primary 
-                    else 
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                )
+                if (achievement.steps.isNotEmpty()) {
+                    Text(
+                        text = stringResource(
+                            Res.string.achievement_list_steps_progress,
+                            achievement.stepsDone,
+                            achievement.steps.size
+                        ),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (achievement.isDone)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                }
             }
         }
     }

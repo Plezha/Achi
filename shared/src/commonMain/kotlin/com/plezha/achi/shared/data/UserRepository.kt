@@ -44,7 +44,7 @@ interface UserRepository {
     suspend fun getProgress(achievementId: String): UserAchievementProgress?
     
     /** Update step progress and sync to server */
-    suspend fun updateStepProgress(achievementId: String, stepIndex: Int, substepsDone: Int): UserAchievementProgress
+    suspend fun updateStepProgress(achievementId: String, stepId: String, substepsDone: Int): UserAchievementProgress
     
     /** Update achievement completion status (for stepless achievements) */
     suspend fun updateAchievementCompletion(achievementId: String, isCompleted: Boolean): UserAchievementProgress
@@ -136,12 +136,12 @@ class UserRepositoryImpl(
     
     override suspend fun updateStepProgress(
         achievementId: String,
-        stepIndex: Int,
+        stepId: String,
         substepsDone: Int
     ): UserAchievementProgress {
-        val response = userProgressApi.updateStepProgressUserProgressAchievementIdStepsStepIndexPatch(
+        val response = userProgressApi.updateStepProgressUserProgressAchievementIdStepsStepIdPatch(
             achievementId = achievementId,
-            stepIndex = stepIndex,
+            stepId = stepId,
             stepProgressUpdateBody = StepProgressUpdateBody(substepsDone = substepsDone)
         )
         response.check()
@@ -177,11 +177,11 @@ class UserRepositoryImpl(
 }
 
 /**
- * Extension to convert server progress to domain StepProgress list
+ * Extension to convert server progress to domain StepProgress map keyed by step ID
  */
-fun UserAchievementProgress.toStepProgressList(): List<StepProgress> {
-    return steps.map { serverStep ->
-        StepProgress(
+fun UserAchievementProgress.toStepProgressMap(): Map<String, StepProgress> {
+    return steps.associate { serverStep ->
+        serverStep.stepId to StepProgress(
             substepsDone = serverStep.substepsDone ?: 0,
             substepsAmount = serverStep.substepsAmount ?: 1
         )

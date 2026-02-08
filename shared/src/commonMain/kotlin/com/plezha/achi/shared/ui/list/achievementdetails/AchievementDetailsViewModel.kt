@@ -10,7 +10,7 @@ import com.plezha.achi.shared.data.auth.AuthRepository
 import com.plezha.achi.shared.data.model.Achievement
 import com.plezha.achi.shared.data.model.AchievementStep
 import com.plezha.achi.shared.data.model.StepProgress
-import com.plezha.achi.shared.data.toStepProgressList
+import com.plezha.achi.shared.data.toStepProgressMap
 import com.plezha.achi.shared.ui.common.UiText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,7 +43,7 @@ class AchievementDetailsViewModel(
                         val progress = userRepository.getProgress(id)
                         if (progress != null) {
                             // Merge server progress with achievement steps
-                            achievement.withProgress(progress.toStepProgressList(), progress.isCompleted)
+                            achievement.withProgress(progress.toStepProgressMap(), progress.isCompleted)
                         } else {
                             achievement
                         }
@@ -64,12 +64,12 @@ class AchievementDetailsViewModel(
         }
     }
 
-    fun setStepCompleted(completedStep: AchievementStep, completed: Boolean, stepIndex: Int) {
+    fun setStepCompleted(completedStep: AchievementStep, completed: Boolean) {
         val newSubstepsDone = if (completed) completedStep.progress.substepsAmount else 0
-        updateStepProgressInternal(stepIndex, newSubstepsDone) { achievement, idx ->
+        updateStepProgressInternal(completedStep.id, newSubstepsDone) { achievement, stepId ->
             achievement.copy(
-                steps = achievement.steps.mapIndexed { i, step ->
-                    if (i == idx) {
+                steps = achievement.steps.map { step ->
+                    if (step.id == stepId) {
                         if (completed) step.asCompleted() else step.asNotStarted()
                     } else {
                         step
@@ -79,24 +79,24 @@ class AchievementDetailsViewModel(
         }
     }
 
-    fun increaseStepProgress(updatedStep: AchievementStep, stepIndex: Int) {
+    fun increaseStepProgress(updatedStep: AchievementStep) {
         val newSubstepsDone = (updatedStep.progress.substepsDone + 1)
             .coerceAtMost(updatedStep.progress.substepsAmount)
-        updateStepProgressInternal(stepIndex, newSubstepsDone) { achievement, idx ->
+        updateStepProgressInternal(updatedStep.id, newSubstepsDone) { achievement, stepId ->
             achievement.copy(
-                steps = achievement.steps.mapIndexed { i, step ->
-                    if (i == idx) step.withProgressIncreased() else step
+                steps = achievement.steps.map { step ->
+                    if (step.id == stepId) step.withProgressIncreased() else step
                 }
             )
         }
     }
 
-    fun decreaseStepProgress(updatedStep: AchievementStep, stepIndex: Int) {
+    fun decreaseStepProgress(updatedStep: AchievementStep) {
         val newSubstepsDone = (updatedStep.progress.substepsDone - 1).coerceAtLeast(0)
-        updateStepProgressInternal(stepIndex, newSubstepsDone) { achievement, idx ->
+        updateStepProgressInternal(updatedStep.id, newSubstepsDone) { achievement, stepId ->
             achievement.copy(
-                steps = achievement.steps.mapIndexed { i, step ->
-                    if (i == idx) step.withProgressDecreased() else step
+                steps = achievement.steps.map { step ->
+                    if (step.id == stepId) step.withProgressDecreased() else step
                 }
             )
         }
@@ -132,15 +132,15 @@ class AchievementDetailsViewModel(
     }
     
     private fun updateStepProgressInternal(
-        stepIndex: Int,
+        stepId: String,
         newSubstepsDone: Int,
-        localUpdate: (Achievement, Int) -> Achievement
+        localUpdate: (Achievement, String) -> Achievement
     ) {
         // Update UI immediately (optimistic update)
         _uiState.update {
             try {
                 val achievement = it.achievement!!
-                it.copy(achievement = localUpdate(achievement, stepIndex))
+                it.copy(achievement = localUpdate(achievement, stepId))
             } catch (e: Exception) {
                 it.copy(errorMessage = if (e.message != null) UiText.Raw(e.message!!) else UiText.Resource(Res.string.error_unknown))
             }
@@ -155,7 +155,7 @@ class AchievementDetailsViewModel(
                 try {
                     userRepository.updateStepProgress(
                         achievementId = achievementId,
-                        stepIndex = stepIndex,
+                        stepId = stepId,
                         substepsDone = newSubstepsDone
                     )
                 } catch (e: Exception) {
@@ -176,15 +176,15 @@ fun AchievementStep.withProgressDecreased() =
     copy(progress = progress.copy(substepsDone = (progress.substepsDone - 1).coerceAtLeast(0)))
 
 /**
- * Returns a copy of the achievement with the given step progress and completion status applied
+ * Returns a copy of the achievement with the given step progress and completion status applied.
+ * Progress is matched by step ID for stable mapping.
  */
-fun Achievement.withProgress(progressList: List<StepProgress>, isCompleted: Boolean = false): Achievement {
+fun Achievement.withProgress(progressMap: Map<String, StepProgress>, isCompleted: Boolean = false): Achievement {
     return copy(
         isCompleted = isCompleted,
-        steps = if (progressList.size != steps.size) steps else {
-            steps.mapIndexed { index, step ->
-                step.copy(progress = progressList[index])
-            }
+        steps = steps.map { step ->
+            val progress = progressMap[step.id]
+            if (progress != null) step.copy(progress = progress) else step
         }
     )
 }

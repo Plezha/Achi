@@ -400,14 +400,14 @@
         ]
       }
     },
-    "/user/progress/{achievement_id}/steps/{step_index}": {
+    "/user/progress/{achievement_id}/steps/{step_id}": {
       "patch": {
         "tags": [
           "User Progress"
         ],
         "summary": "Update Step Progress",
-        "description": "Update the progress for a specific step in an achievement. Step index is 0-based.",
-        "operationId": "update_step_progress_user_progress__achievement_id__steps__step_index__patch",
+        "description": "Update the progress for a specific step in an achievement, identified by the step's stable ID.",
+        "operationId": "update_step_progress_user_progress__achievement_id__steps__step_id__patch",
         "parameters": [
           {
             "name": "achievement_id",
@@ -419,13 +419,12 @@
             }
           },
           {
-            "name": "step_index",
+            "name": "step_id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "title": "Step Index"
+              "type": "string",
+              "title": "Step Id"
             }
           }
         ],
@@ -1896,6 +1895,18 @@
       },
       "AchievementStepCreate": {
         "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id",
+            "description": "Optional stable step ID. Server generates one if not provided."
+          },
           "description": {
             "type": "string",
             "title": "Description"
@@ -1915,6 +1926,10 @@
       },
       "AchievementStepSchema": {
         "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
           "description": {
             "type": "string",
             "title": "Description"
@@ -1927,12 +1942,17 @@
         },
         "type": "object",
         "required": [
+          "id",
           "description"
         ],
         "title": "AchievementStepSchema"
       },
       "StepProgress": {
         "properties": {
+          "step_id": {
+            "type": "string",
+            "title": "Step Id"
+          },
           "substeps_done": {
             "type": "integer",
             "title": "Substeps Done",
@@ -1945,6 +1965,9 @@
           }
         },
         "type": "object",
+        "required": [
+          "step_id"
+        ],
         "title": "StepProgress"
       },
       "Body_upload_image_upload_image_post": {
