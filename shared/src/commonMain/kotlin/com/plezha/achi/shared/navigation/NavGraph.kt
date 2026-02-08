@@ -29,7 +29,11 @@ import com.plezha.achi.shared.ui.list.achievementlist.AchievementsScreen
 import com.plezha.achi.shared.ui.list.packlist.AchievementPackList
 import com.plezha.achi.shared.ui.list.packlist.AchievementPackListViewModel
 import com.plezha.achi.shared.ui.debug.DebugPanelScreen
+import com.plezha.achi.shared.ui.debug.populateMockData
+import com.plezha.achi.shared.ui.debug.populateMockDataRu
 import com.plezha.achi.shared.ui.common.UiText
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import com.plezha.achi.shared.ui.profile.ProfileScreen
 import com.plezha.achi.shared.ui.profile.ProfileViewModel
 import com.plezha.achi.shared.ui.settings.SettingsScreen
@@ -321,6 +325,8 @@ fun createNavEntryProvider(
         val profileViewModel = remember(appModule) {
             ProfileViewModel(appModule.authRepository)
         }
+        val scope = rememberCoroutineScope()
+        var isMockDataLoading by remember { mutableStateOf(false) }
 
         LaunchedEffect(Unit) {
             profileViewModel.messageFlow.collectLatest { uiText ->
@@ -330,7 +336,34 @@ fun createNavEntryProvider(
 
         DebugPanelScreen(
             onBackClicked = backStack::popBack,
-            onDebugLogin = profileViewModel::onDebugLogin
+            onDebugLogin = profileViewModel::onDebugLogin,
+            onPopulateMockData = {
+                scope.launch {
+                    isMockDataLoading = true
+                    try {
+                        populateMockData(appModule)
+                        snackbarHostState.showSnackbar("Mock data created! Go to Achievements tab.")
+                    } catch (e: Exception) {
+                        snackbarHostState.showSnackbar("Failed: ${e.message}")
+                    } finally {
+                        isMockDataLoading = false
+                    }
+                }
+            },
+            onPopulateMockDataRu = {
+                scope.launch {
+                    isMockDataLoading = true
+                    try {
+                        populateMockDataRu(appModule)
+                        snackbarHostState.showSnackbar("Данные созданы! Перейдите во вкладку «Достижения».")
+                    } catch (e: Exception) {
+                        snackbarHostState.showSnackbar("Ошибка: ${e.message}")
+                    } finally {
+                        isMockDataLoading = false
+                    }
+                }
+            },
+            isMockDataLoading = isMockDataLoading
         )
     }
 }
