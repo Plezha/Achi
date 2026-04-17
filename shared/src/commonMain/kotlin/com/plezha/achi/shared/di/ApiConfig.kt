@@ -1,6 +1,5 @@
 package com.plezha.achi.shared.di
 
-import com.plezha.achi.shared.data.network.infrastructure.ApiClient
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,10 +14,9 @@ import kotlinx.coroutines.flow.asStateFlow
 object ApiConfig {
     const val LOCALHOST_ANDROID_EMULATOR = "http://10.0.2.2:8000"
     const val PROD = "http://31.44.9.104:8000"
-    val DEFAULT: String = ApiClient.BASE_URL
 
     private const val KEY_BASE_URL = "debug_base_url"
-    private val settings: Settings = Settings()
+    private val settings: Settings by lazy { Settings() }
 
     private val _baseUrl = MutableStateFlow(settings.getString(KEY_BASE_URL, PROD))
     val baseUrlFlow: StateFlow<String> = _baseUrl.asStateFlow()
@@ -36,6 +34,5 @@ object ApiConfig {
     val presets: List<Pair<String, String>> = listOf(
         "Production" to PROD,
         "Localhost (Android Emulator)" to LOCALHOST_ANDROID_EMULATOR,
-        "OpenAPI Default" to DEFAULT
     )
 }
