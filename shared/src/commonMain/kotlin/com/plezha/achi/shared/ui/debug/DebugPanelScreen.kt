@@ -108,7 +108,7 @@ fun DebugPanelScreen(
                                 .selectable(
                                     selected = selectedUrl == url && !isCustomSelected,
                                     onClick = {
-                                        selectedUrl = url
+                                        ApiConfig.setBaseUrl(url)
                                         isCustomSelected = false
                                     },
                                     role = Role.RadioButton
