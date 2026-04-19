@@ -15,7 +15,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 data class AuthState(
     val isLoggedIn: Boolean = false,
@@ -71,20 +70,6 @@ class AuthRepository(
                 userId = savedUserId,
                 accessToken = savedToken
             )
-            
-            // Backfill userId if missing (for sessions saved before userId was persisted)
-            if (savedUserId == null) {
-                scope.launch {
-                    try {
-                        val userResponse = usersApi.getCurrentUserUsersMeGet()
-                        if (userResponse.success) {
-                            val userId = userResponse.body().id
-                            settings.putString(KEY_USER_ID, userId)
-                            _authState.value = _authState.value.copy(userId = userId)
-                        }
-                    } catch (_: Exception) { }
-                }
-            }
         }
     }
     
