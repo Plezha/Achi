@@ -9,6 +9,7 @@
 .cxx
 local.properties
 .kotlin/
+/thesis/example/
 
 # Xcode user-specific files
 *.xcuserstate
