@@ -40,6 +40,7 @@
 	\geometry{bottom=20mm}
 	\geometry{left=30mm}
 	\geometry{right=10mm}
+	\setlength{\headheight}{17pt}
 
 \usepackage{setspace} % Интерлиньяж
 	\onehalfspacing % Интерлиньяж 1.5
@@ -74,6 +75,7 @@
  
 % Выделение текста желтым маркером
 \usepackage{color,soul}
+\usepackage[normalem]{ulem} % Для подчеркивания с переносом строк (\uline)
 
 %%% Работа с таблицами
 \usepackage{array,tabularx,tabulary,booktabs} % Дополнительная работа с таблицами
@@ -91,7 +93,7 @@
 	\titleformat{\section}{\normalfont\normalsize\centering\bfseries}{\thesection}{1ex}{\setstretch{0.5}}
 \usepackage[dotinlabels]{titletoc}  % setstrech -- интерлиньяж
 	% Оформление раздела (subsection)
-	\titleformat{\subsection}[block]{\hspace{2.5em}\normalfont\normalsize\justifying\bfseries}{\thesubsection}{1ex}{}
+	\titleformat{\subsection}[block]{\hspace{2.5em}\normalfont\normalsize\raggedright\bfseries}{\thesubsection}{1ex}{}
 %	\titlespacing*{\subsection}{\parindent}{1ex}{1em}
 	% Оформление раздела (subsubsection)
 	\titleformat{\subsubsection}{\normalfont\normalsize\centering\bfseries}{\thesubsubsection}{1ex}{}
@@ -340,6 +342,9 @@ bibstyle=gost-numeric, % Стиль с нумерацией
 \usepackage{collcell}
 \usepackage{pgf}
 % ---------------------------------------------------------------------------
+
+% Настройка отступов в таблицах
+\setlength{\tabcolsep}{2pt}
 
 % Всего страниц
 \usepackage{zref-totpages}

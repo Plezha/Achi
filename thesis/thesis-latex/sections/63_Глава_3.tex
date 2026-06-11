@@ -6,10 +6,191 @@
 
 \begin{document}
 
-\subsection{Параграф 1}
+\subsection{Практическая реализация приложения}
 
-\subsection{Параграф 2}
+В данной главе описывается практическая реализация кроссплатформенного приложения \textit{Achi}~--- клиента для учёта достижений и синхронизации прогресса с сервером. Исходный код размещён в модуле \texttt{shared} и организован по принципу многослойной архитектуры MVVM с паттерном Repository, спроектированной во второй главе. Общий код для Android, iOS и Web (WasmJS) находится в \texttt{commonMain}; платформенные особенности вынесены в \texttt{androidMain}, \texttt{iosMain} и \texttt{wasmJsMain}.
 
-\subsection{Параграф 3}
-	
+\subsubsection{Слой данных и генерация API-клиента}
+
+Слой данных отвечает за взаимодействие с REST API сервера, преобразование сетевых моделей в доменные и кэширование результатов в репозиториях.
+
+\textbf{Генерация API.} Спецификация OpenAPI (\texttt{Achi\_openapi.json}) используется для автоматической генерации типизированных Ktor-клиентов с помощью OpenAPI Generator~7.18.0. Задача \texttt{openApiGenerate} в \texttt{build.gradle.kts} настроена на генерацию Kotlin Multiplatform-кода в каталог \texttt{build/generated/openapi} с пакетом \texttt{com.plezha.achi.shared.data.network}. Сгенерированные классы включают API-интерфейсы (\texttt{AchievementsApi}, \texttt{PacksApi}, \texttt{AuthenticationApi}, \texttt{UsersApi}, \texttt{UploadApi}, \texttt{UserCollectionApi}, \texttt{UserProgressApi}) и схемы данных (\texttt{AchievementSchema}, \texttt{AchievementPackSchema} и~др.). Компиляция модуля зависит от задачи генерации, что гарантирует актуальность клиента при изменении спецификации.
+
+\textbf{Маппинг сетевых моделей.} Файл \texttt{Mappers.kt} содержит функции расширения, преобразующие схемы API в доменные типы. При маппинге относительные URL изображений дополняются базовым адресом сервера из \texttt{ApiConfig.baseUrl}. Пример преобразования достижения:
+
+\begin{lstlisting}[caption={Маппинг сетевой схемы в доменную модель}, label={lst:mapper}, basicstyle=\small\ttfamily, breaklines=true, frame=single, numbers=left]
+fun AchievementSchema.toAchievement() = Achievement(
+    id = id,
+    title = title,
+    shortDescription = shortDescription,
+    longDescription = longDescription,
+    steps = steps.map { it.toAchievementStep() },
+    previewImageUrl = resolveImageUrl(previewImageUrl),
+    imageUrl = resolveImageUrl(imageUrl),
+    creatorId = creatorId
+)
+\end{lstlisting}
+
+\textbf{Репозитории.} Бизнес-операции инкапсулируются в классах репозиториев:
+\begin{itemize}[leftmargin=*]
+	\item \texttt{AuthRepository}~--- аутентификация (логин, регистрация, выход), восстановление сессии из локального хранилища, установка bearer-токена на все API-клиенты;
+	\item \texttt{AchievementRepository} / \texttt{AchievementPackRepository}~--- CRUD-операции над достижениями и пакетами, загрузка изображений;
+	\item \texttt{UserRepository}~--- коллекция пакетов пользователя и синхронизация прогресса по шагам с сервером.
+\end{itemize}
+
+Репозитории скрывают детали HTTP-запросов и обработку ответов (расширение \texttt{check()} для проверки кодов ответа). \texttt{AuthRepository} сохраняет токен, имя пользователя и идентификатор в \texttt{multiplatform-settings}, что обеспечивает сохранение сессии между запусками приложения. Состояние авторизации публикуется через \texttt{StateFlow<AuthState>}.
+
+\subsubsection{Слой предметной области (Domain)}
+
+Доменные модели расположены в пакете \texttt{data.model} и не зависят от UI и сетевого слоя. Основные типы приведены в табл.~\ref{tab:domain-models}.
+
+\aboverulesep=0ex
+\belowrulesep=0ex
+\begin{small}
+\begin{longtable}[t]{
+	|>{\raggedright}p{0.22\linewidth} |
+	>{\raggedright}p{0.35\linewidth} |
+	>{\raggedright\arraybackslash}p{0.28\linewidth}|
+}
+\caption{Доменные модели приложения Achi} \label{tab:domain-models}\\
+\midrule
+Модель & Ключевые поля & Вычисляемые свойства \\
+\midrule
+\endfirsthead
+\caption*{Продолжение табл. \ref{tab:domain-models}\raggedleft}\\\midrule
+Модель & Ключевые поля & Вычисляемые свойства \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\midrule
+\endlastfoot
+\texttt{AchievementPack} & \texttt{id}, \texttt{name}, \texttt{count}, \texttt{achievementIds}, \texttt{code}, \texttt{previewImageUrl} & --- \\
+\midrule
+\texttt{Achievement} & \texttt{id}, \texttt{title}, \texttt{steps}, \texttt{isCompleted}, \texttt{imageUrl} & \texttt{progress}, \texttt{isDone} \\
+\midrule
+\texttt{AchievementStep} & \texttt{id}, \texttt{description}, \texttt{progress} & \texttt{isDone} \\
+\midrule
+\texttt{StepProgress} & \texttt{substepsDone}, \texttt{substepsAmount} & \texttt{progressFloat}, \texttt{isCompleted} \\
+\end{longtable}
+\end{small}
+
+Модель \texttt{Achievement} поддерживает два режима завершения: по шагам (прогресс вычисляется как среднее по шагам) и без шагов (флаг \texttt{isCompleted}). Валидация прогресса выполняется в \texttt{init}-блоке \texttt{StepProgress}: значение \texttt{substepsDone} ограничено диапазоном $[0;\,\texttt{substepsAmount}]$. Вспомогательные функции (\texttt{overallProgress()}, \texttt{completedCount()}) позволяют агрегировать статистику по списку достижений на уровне пакета.
+
+\subsubsection{Слой представления (UI) и ViewModel}
+
+Пользовательский интерфейс реализован на Compose Multiplatform с Material~3. Экраны сгруппированы по функциональным областям: \texttt{ui/list} (списки пакетов и достижений, детали), \texttt{ui/add} (создание и редактирование пакетов), \texttt{ui/profile}, \texttt{ui/settings}, \texttt{ui/debug}.
+
+\textbf{Паттерн ViewModel.} Каждый экран с бизнес-логикой сопровождается ViewModel, получающей зависимости через конструктор. Состояние UI хранится в \texttt{MutableStateFlow} и экспонируется как неизменяемый \texttt{StateFlow}. Одноразовые события (навигация, сообщения) передаются через \texttt{Channel} и преобразуются в \texttt{Flow}.
+
+\textbf{Локализация.} Для поддержки английского и русского языков ViewModel формируют сообщения через абстракцию \texttt{UiText} (сырая строка или ресурс \texttt{StringResource}), а Composable-функции разрешают их в локализованный текст через \texttt{asString()} или \texttt{resolve()}.
+
+\textbf{Оптимистичные обновления.} При изменении прогресса шага или переключении завершения достижения UI обновляется немедленно; синхронизация с сервером выполняется асинхронно в \texttt{viewModelScope}. При ошибке сети пользователю показывается сообщение через Snackbar, локальное состояние при этом сохраняется до следующей успешной синхронизации. Пример из \texttt{AchievementDetailsViewModel}:
+
+\begin{lstlisting}[caption={Оптимистичное обновление прогресса шага}, label={lst:optimistic}, basicstyle=\small\ttfamily, breaklines=true, frame=single, numbers=left]
+// Update UI immediately (optimistic update)
+_uiState.update {
+    val achievement = it.achievement!!
+    it.copy(achievement = localUpdate(achievement, stepId))
+}
+// Sync to server if logged in
+if (isLoggedIn) {
+    viewModelScope.launch {
+        userRepository.updateStepProgress(
+            achievementId, stepId, newSubstepsDone)
+    }
+}
+\end{lstlisting}
+
+\textbf{Загрузка изображений.} В точке входа \texttt{AchiApp} настраивается глобальный \texttt{ImageLoader} библиотеки Coil~3 с Ktor Network Fetcher и поддержкой локальных файлов через FileKit, что обеспечивает единообразную работу с превью и загруженными изображениями на всех платформах.
+
+\subsubsection{Внедрение зависимостей и навигация}
+
+\textbf{Manual DI через AppModule.} Вместо фреймворков Koin или Dagger в проекте используется ручной контейнер зависимостей \texttt{AppModule}. Он создаётся в корневом Composable \texttt{AchiAppNav} с привязкой к текущему \texttt{baseUrl} (для переключения сервера в debug-сборке). Контейнер содержит:
+\begin{itemize}[leftmargin=*]
+	\item семь API-клиентов, инициализируемых с \texttt{HttpClientEngine} платформы (\texttt{expect/actual});
+	\item четыре репозитория, создаваемых лениво (\texttt{by lazy}) для отложенной инициализации.
+\end{itemize}
+
+ViewModel создаются в \texttt{App.kt} или в \texttt{NavGraph.kt} через \texttt{remember} с передачей репозиториев из \texttt{AppModule}. Такой подход минимизирует количество зависимостей, сохраняет прозрачность графа объектов и не требует рефлексии или кодогенерации.
+
+\textbf{Navigation~3.} Для навигации применяется библиотека \texttt{navigation3-ui} (версия 1.0.0-alpha05), а не классический Jetpack Navigation Compose. Маршруты определены как типизированные \texttt{NavKey} с аннотацией \texttt{@Serializable} в файле \texttt{Routes.kt}. Полиморфная сериализация настроена в \texttt{navSavedStateConfig} для сохранения стека при смене конфигурации.
+
+Стек навигации управляется через \texttt{rememberNavBackStack}; отображение экранов~--- через \texttt{NavDisplay} и \texttt{entryProvider}. Функция \texttt{createNavEntryProvider} регистрирует все экраны приложения и связывает их с ViewModel. Нижняя панель (\texttt{BottomNavigationBar}) содержит три вкладки: «Добавить», «Достижения» (стартовый экран), «Профиль». Вложенные маршруты (список достижений, детали, создание пакета, настройки, debug-панель) добавляются в стек поверх соответствующей вкладки.
+
+Схема потока данных и навигации:
+\begin{enumerate}[leftmargin=*]
+	\item Composable считывает \texttt{uiState} из ViewModel через \texttt{collectAsState};
+	\item действие пользователя вызывает метод ViewModel;
+	\item ViewModel обращается к репозиторию, обновляет \texttt{StateFlow};
+	\item при необходимости ViewModel отправляет событие навигации в \texttt{Channel};
+	\item \texttt{LaunchedEffect} в \texttt{NavGraph} обрабатывает событие и изменяет \texttt{NavBackStack}.
+\end{enumerate}
+
+\subsection{Тестирование приложения}
+
+Тестирование проводилось на двух уровнях: автоматизированные модульные тесты и ручное функциональное тестирование на целевых платформах.
+
+\subsubsection{Автоматизированные тесты}
+
+В модуле \texttt{shared} подготовлена инфраструктура для unit-тестов (\texttt{androidHostTest}) и инструментальных тестов Android (\texttt{androidDeviceTest}). На момент написания работы размещены базовые примеры (\texttt{ExampleUnitTest}, \texttt{ExampleInstrumentedTest}), подтверждающие корректность конфигурации тестовых таргетов. Дальнейшее расширение покрытия предполагает тестирование мапперов, логики \texttt{StepProgress} и ViewModel с использованием моков репозиториев.
+
+\subsubsection{Функциональное тестирование}
+
+Функциональное тестирование выполнялось вручную по сценариям, охватывающим основные пользовательские потоки. Результаты сведены в табл.~\ref{tab:func-tests}.
+
+\aboverulesep=0ex
+\belowrulesep=0ex
+\begin{small}
+\begin{longtable}[t]{
+	|>{\raggedright}p{0.06\linewidth} |
+	>{\raggedright}p{0.28\linewidth} |
+	>{\raggedright}p{0.32\linewidth} |
+	>{\raggedright\arraybackslash}p{0.18\linewidth}|
+}
+\caption{Результаты функционального тестирования} \label{tab:func-tests}\\
+\midrule
+№ п/п & Сценарий & Ожидаемый результат & Платформы \\
+\midrule
+\endfirsthead
+\caption*{Продолжение табл. \ref{tab:func-tests}\raggedleft}\\\midrule
+№ п/п & Сценарий & Ожидаемый результат & Платформы \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\midrule
+\endlastfoot
+1 & Регистрация и вход & Сессия сохраняется, отображается имя пользователя & Android, Web, iOS \\
+\midrule
+2 & Просмотр коллекции пакетов & Загружается список пакетов авторизованного пользователя & Android, Web, iOS \\
+\midrule
+3 & Добавление пакета по коду & Пакет появляется в коллекции & Android, Web, iOS \\
+\midrule
+4 & Отметка прогресса шага & UI обновляется мгновенно, данные синхронизируются с сервером & Android, Web, iOS \\
+\midrule
+5 & Создание пакета с изображением & Пакет создаётся, превью отображается корректно & Android, Web, iOS \\
+\midrule
+6 & Редактирование и удаление пакета & Изменения сохраняются на сервере, список обновляется & Android, Web, iOS \\
+\midrule
+7 & Переключение языка системы & Интерфейс отображается на EN или RU & Android, Web, iOS \\
+\midrule
+8 & Debug-панель (debug-сборка) & Переключение хоста API, быстрый вход & Android \\
+\end{longtable}
+\end{small}
+
+\textbf{Кроссплатформенная проверка.} Общий UI-код в \texttt{commonMain} обеспечивает идентичное поведение на Android, Web и iOS. Отличия ограничены платформенными адаптерами: \texttt{HttpClientEngine}, определение флага \texttt{isDebug}, поддержка Material You на Android. Сборка Web-версии выполнялась командой \texttt{./gradlew wasmJsBrowserDevelopmentRun}; Android~--- \texttt{./gradlew installDebug}; iOS~--- через Xcode. Критические сценарии (авторизация, синхронизация прогресса, навигация между экранами) прошли успешно на всех платформах.
+
+\textbf{Нефункциональные аспекты.} Проверялась корректность работы при отсутствии сети (локальное отображение последнего состояния, сообщения об ошибках синхронизации), сохранение сессии после перезапуска приложения и корректность отображения при светлой и тёмной темах Material~3.
+
+\subsection{Выводы по главе}
+
+\begin{enumerate}[leftmargin=*]
+	\item Реализован слой данных с автогенерацией API-клиента из OpenAPI-спецификации, маппингом схем в доменные модели и репозиториями для инкапсуляции сетевого взаимодействия.
+	\item Доменный слой содержит типизированные модели достижений, пакетов и прогресса с валидацией и вычисляемыми свойствами, не зависящими от UI и транспорта.
+	\item Слой представления построен на Compose Multiplatform с ViewModel, \texttt{StateFlow}, локализацией через \texttt{UiText} и оптимистичными обновлениями прогресса.
+	\item Внедрение зависимостей выполнено вручную через \texttt{AppModule}; навигация реализована на Navigation~3 с типизированными маршрутами и единым \texttt{NavGraph}.
+	\item Функциональное тестирование подтвердило работоспособность основных сценариев на Android, Web и iOS; заложена основа для расширения автоматизированного покрытия.
+\end{enumerate}
+
 \end{document}

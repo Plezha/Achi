@@ -12,14 +12,11 @@
 \include{settings/myFunctions}
 
 \begin{document}
+\sloppy
 	% 1. Титульный лист
-    % \include{templates/titlePage}
-	% Титульник
-    % \includepdf[pages=-,  scale=1]{pdfs/01_Титульник.pdf}
-	% Индивидуальный план
-    % \includepdf[pages=-,  scale=1]{pdfs/02_ИП.pdf}
-
-	% 2. Задание на ВКР
+    \include{templates/titlePage}
+	% Задание на ВКР
+    \include{templates/assignment}
 
 	% 3. Реферат
 	\newpage
@@ -29,27 +26,24 @@
 		\setcounter{figure}{0}
 		\setcounter{table}{0}
 		\subfile{sections/30_Реферат}
-%	\newpage
-%		\section*{ABSTRACT}
-%		\setcounter{section}{0} 
-%		\setcounter{subsection}{0}
-%		\setcounter{figure}{0}
-%		\setcounter{table}{0}
-%		\subfile{sections/31_Abstract}
+	\newpage
+		\section*{ABSTRACT}
+		\setcounter{section}{0} 
+		\setcounter{subsection}{0}
+		\setcounter{figure}{0}
+		\setcounter{table}{0}
+		\subfile{sections/31_Abstract}
 	
 	% 4. Содержание
 	\newpage
 	\renewcommand{\contentsname}{\normalfont\centering\bfseries СОДЕРЖАНИЕ}
-	\singlespacing  % Change spacing only for TOC
 	\tableofcontents
-	\onehalfspacing
-	\thispagestyle{empty}
 	
 	
 	% 5. Введение
 	\newpage
 	\section*{ВВЕДЕНИЕ}
-		\addcontentsline{toc}{section}{Введение}
+		\addcontentsline{toc}{section}{ВВЕДЕНИЕ}
 		\addtocontents{toc}{\protect\thispagestyle{empty}}  % To delete page number from toc
 		\setcounter{section}{0} 
 		\setcounter{subsection}{0}
@@ -64,7 +58,7 @@
 	% 7. Заключение
 	\newpage
 	\section*{ЗАКЛЮЧЕНИЕ}
-		\addcontentsline{toc}{section}{Заключение}
+		\addcontentsline{toc}{section}{ЗАКЛЮЧЕНИЕ}
 		\setcounter{section}{0} 
 		\setcounter{subsection}{0}
 		\setcounter{figure}{0}

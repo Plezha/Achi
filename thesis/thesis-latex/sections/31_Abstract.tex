@@ -7,20 +7,24 @@
 \begin{document}
 	\thispagestyle{empty}
 	
+	\noindent
 	## pages, \TotalValue{totalfigures} figures, \TotalValue{totaltables} tables, ## appendices.
 	
-	KEYWORDS: KEYWORD 1, KEYWORD 2, KEYWORD 3, KEYWORD 4, KEYWORD 5, KEYWORD 6.
+	KEYWORDS: CROSS-PLATFORM APPLICATION, KOTLIN MULTIPLATFORM, COMPOSE MULTIPLATFORM, GAMIFICATION, ACHIEVEMENT TRACKING, MVVM, KTOR, OPENAPI GENERATOR.
 	
-	The subject of the graduate qualification work is <<Subject>>. The given work is devoted to ... 
-    The research set the following goals:
+	The subject of the graduate qualification work is <<Development of a cross-platform mobile application for achievement tracking with gamification elements>>. The given work is devoted to the creation of the Achi application, which allows users to structure their goals into achievement packs, track step-by-step progress, and share collections with other users.
+	The research set the following goals:
 	\begin{enumerate}
-		\item Goal 1.
-		\item Goal 2.
-		\item Goal 3.
-		\item Goal 4.
+		\item To analyze existing solutions in the field of achievement tracking and identify their functional and technical shortcomings.
+		\item To formulate functional and non-functional requirements for the application under development.
+		\item To justify the choice of the technology stack (Kotlin Multiplatform, Compose Multiplatform, Ktor, Navigation~3, OpenAPI Generator) and design the architecture based on the MVVM pattern with a Repository layer.
+		\item To implement a cross-platform application supporting hierarchical data structure (packs~$\rightarrow$~achievements~$\rightarrow$~steps), authentication, server progress synchronization, and pack sharing via unique codes.
+		\item To conduct functional and cross-platform testing of the developed solution.
 	\end{enumerate}
 	
-	Based on the results of the work...
+	The development was carried out in Android Studio using Kotlin Multiplatform and Compose Multiplatform. The network layer was generated from an OpenAPI specification, dependency injection was organized through a manual DI container \texttt{AppModule}, and navigation was implemented using Navigation~3. The application is deployed on Android, iOS, and Web (WasmJS) platforms.
+	
+	Based on the results of the work, a cross-platform application was created that meets the formulated requirements: the user can manage a collection of achievement packs, track step completion progress with server synchronization, create their own packs, and add others' packs by code. The resulting solution demonstrates the practical applicability of the modern KMP stack for developing products in the field of personal productivity with gamification elements.
 	
 	\thispagestyle{empty}
 	

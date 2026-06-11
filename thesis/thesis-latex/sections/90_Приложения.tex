@@ -1,9 +1,10 @@
 % !TEX root = main.tex
 
 %\vspace*{40ex}
-%\appendix
-%\section*{ПРИЛОЖЕНИЯ}
-\addcontentsline{toc}{section}{Приложения}
+\appendix
+\newpage
+\section*{ПРИЛОЖЕНИЯ}
+\addcontentsline{toc}{section}{ПРИЛОЖЕНИЯ}
 \renewcommand{\thesubsection}{\Alph{subsection}.}  % Буквы в  subsections
 \renewcommand\thetable{\arabic{subsection}.\arabic{table}} 
 \setcounter{section}{0} 
@@ -16,11 +17,10 @@
 %\setlength{\headsep}{12pt}
 %\fancyhead[L]{\rule{30pt}{2pt}}}
 
+\newpage
 \addcontentsline{toc}{subsection}{Приложение 1. Название приложения}
 \setcounter{subsection}{1}
 \includepdf[pages=-,  scale=1]{pdfs/pdf1.pdf}
-
-\newgeometry{left=20mm, top=20mm, right=20mm, bottom=20mm}
 
 
 

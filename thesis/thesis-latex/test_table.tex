@@ -1,0 +1,57 @@
+\documentclass[a4paper,14pt]{extarticle}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage[russian]{babel}
+\usepackage{geometry}
+\geometry{left=30mm, right=10mm}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{ragged2e}
+\begin{document}
+\noindent
+Text before table to show margins. Text before table to show margins. Text before table to show margins. Text before table to show margins. 
+
+\begingroup
+\setlength{\tabcolsep}{3pt}
+\footnotesize
+\begin{longtable}[t]{
+	|>{\RaggedRight\arraybackslash}p{0.18\linewidth}|
+	>{\centering\arraybackslash}p{0.08\linewidth}|
+	>{\centering\arraybackslash}p{0.08\linewidth}|
+	>{\centering\arraybackslash}p{0.08\linewidth}|
+	>{\centering\arraybackslash}p{0.09\linewidth}|
+	>{\centering\arraybackslash}p{0.09\linewidth}|
+	>{\centering\arraybackslash}p{0.08\linewidth}|
+	>{\centering\arraybackslash}p{0.08\linewidth}|
+	>{\centering\arraybackslash}p{0.07\linewidth}|
+}
+\caption{Сравнительный анализ аналогов} \label{tab:analogs-compare}\\
+\hline
+Критерий & Habitica & Strides & Any.do & Achiev. Box & The Achiev. & Notion & Todoist & Achi \\
+\hline
+\endfirsthead
+\caption*{Продолжение таблицы \ref{tab:analogs-compare}}\\
+\hline
+Критерий & Habitica & Strides & Any.do & Achiev. Box & The Achiev. & Notion & Todoist & Achi \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+Создание своих достижений & Нет & Нет & Нет & Частично & Да & Вручную & Нет & Да \\
+\hline
+Шеринг наборов (паков) & Нет & Нет & Нет & Нет & Да & Шаблоны & Нет & Да \\
+\hline
+Пошаговый прогресс & Нет & Частично & Нет & Нет & Нет & Вручную & Нет & Да \\
+\hline
+Профиль и социальность & Да & Нет & Нет & Нет & Да & Да & Да & Да \\
+\hline
+Стабильность UI/UX & Средняя & Высокая & Высокая & Высокая & Низкая & Средняя & Высокая & --- \\
+\hline
+Кроссплатформенность & Да & Частично & Да & Android & Да & Да & Да & Да \\
+\hline
+Геймификация & Да & Нет & Нет & Да & Нет & Нет & Частично & Частично \\
+\end{longtable}
+\endgroup
+\end{document}

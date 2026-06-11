@@ -1,0 +1,176 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+\preamble{%
+\providecommand\noopsort[1]{}%
+}
+
+
+\refsection{0}
+  \datalist[entry]{nty/global//global/global/global}
+    \entry{achievement-box}{online}{}{}
+      \list{language}{1}{%
+        {english}%
+      }
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Achievement Box. Приложение в Google Play}
+      \field{urlday}{1}
+      \field{urlmonth}{6}
+      \field{urlyear}{2025}
+      \field{year}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://play.google.com/store/apps/details?id=hcody.hesham.achivementBox.achivement_box
+      \endverb
+      \verb{url}
+      \verb https://play.google.com/store/apps/details?id=hcody.hesham.achivementBox.achivement_box
+      \endverb
+    \endentry
+    \entry{anydo}{online}{}{}
+      \list{language}{1}{%
+        {english}%
+      }
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Any.do. Сайт}
+      \field{urlday}{1}
+      \field{urlmonth}{6}
+      \field{urlyear}{2025}
+      \field{year}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.any.do/
+      \endverb
+      \verb{url}
+      \verb https://www.any.do/
+      \endverb
+    \endentry
+    \entry{habitica}{online}{}{}
+      \list{language}{1}{%
+        {english}%
+      }
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Habitica. Сайт}
+      \field{urlday}{1}
+      \field{urlmonth}{6}
+      \field{urlyear}{2025}
+      \field{year}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://habitica.com/
+      \endverb
+      \verb{url}
+      \verb https://habitica.com/
+      \endverb
+    \endentry
+    \entry{notion}{online}{}{}
+      \list{language}{1}{%
+        {english}%
+      }
+      \field{sortinit}{N}
+      \field{sortinithash}{22369a73d5f88983a108b63f07f37084}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Notion. Сайт}
+      \field{urlday}{1}
+      \field{urlmonth}{6}
+      \field{urlyear}{2025}
+      \field{year}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.notion.com/
+      \endverb
+      \verb{url}
+      \verb https://www.notion.com/
+      \endverb
+    \endentry
+    \entry{strides}{online}{}{}
+      \list{language}{1}{%
+        {english}%
+      }
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Strides. Сайт}
+      \field{urlday}{1}
+      \field{urlmonth}{6}
+      \field{urlyear}{2025}
+      \field{year}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.stridesapp.com/
+      \endverb
+      \verb{url}
+      \verb https://www.stridesapp.com/
+      \endverb
+    \endentry
+    \entry{the-achievements}{online}{}{}
+      \list{language}{1}{%
+        {english}%
+      }
+      \field{sortinit}{T}
+      \field{sortinithash}{9af77f0292593c26bde9a56e688eaee9}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{The Achievements. Приложение в Google Play}
+      \field{urlday}{1}
+      \field{urlmonth}{6}
+      \field{urlyear}{2025}
+      \field{year}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://play.google.com/store/apps/details?id=com.mycompany.theachievements
+      \endverb
+      \verb{url}
+      \verb https://play.google.com/store/apps/details?id=com.mycompany.theachievements
+      \endverb
+    \endentry
+    \entry{todoist}{online}{}{}
+      \list{language}{1}{%
+        {english}%
+      }
+      \field{sortinit}{T}
+      \field{sortinithash}{9af77f0292593c26bde9a56e688eaee9}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Todoist. Сайт}
+      \field{urlday}{1}
+      \field{urlmonth}{6}
+      \field{urlyear}{2025}
+      \field{year}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://todoist.com/
+      \endverb
+      \verb{url}
+      \verb https://todoist.com/
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
